@@ -37,10 +37,17 @@ function Profile() {
       {/* Main Content */}
       <div className="lg:col-span-7">
         <Card className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
-          <div className="mt-4 ">
-            <ProfileEdit user={user} />
-            <Button className="w-full sm:w-auto mr-2 mt-2">อัปเดตข้อมูล</Button>
-            <div className="mt-2 w-full">
+          <ProfileEdit user={user} />
+
+          {/* Logout Section */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  ออกจากระบบ
+                </h3>
+                <p className="text-gray-600">ออกจากบัญชีผู้ใช้ปัจจุบัน</p>
+              </div>
               <LogoutButton />
             </div>
           </div>

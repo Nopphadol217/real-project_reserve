@@ -1,6 +1,6 @@
 import useAuthStore from "@/store/useAuthStore";
 import DropdownListMenu from "./DropdownListMenu";
-import { AlignLeft, LogIn, UserIcon } from "lucide-react";
+import { AlignLeft, LogIn, UserIcon, Menu, User } from "lucide-react";
 
 import { useState } from "react";
 import { Link } from "react-router";
@@ -10,45 +10,37 @@ import ProfileButton from "@/pages/user/profile/ProfileButton";
 function DropdownAndUser() {
   const user = useAuthStore((state) => state.user);
 
+  if (!user) {
+    return (
+      <div className="flex items-center border border-gray-300 rounded-full p-1 hover:shadow-md transition-shadow duration-200">
+        <div className="flex items-center space-x-2">
+          <button className="p-2">
+            <Menu className="w-4 h-4 text-gray-700" />
+          </button>
+          <Link
+            to="/auth"
+            className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors"
+          >
+            <User className="w-5 h-5 text-white" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center gap-2">
-      {!user ? (
-        <>
-          {/* ✅ สำหรับจอใหญ่ (md ขึ้นไป) แสดงปุ่มเต็ม */}
-          <div className="hidden md:flex gap-2">
-            <Button>
-              <Link to="/login">Login</Link>
-            </Button>
-            <Button>
-              <Link to="/register">Register</Link>
-            </Button>
-          </div>
+    <div className="flex items-center border border-gray-300 rounded-full p-1 hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-center space-x-2">
+        <button className="p-2">
+          <Menu className="w-4 h-4 text-gray-700" />
+        </button>
 
-          {/* ✅ สำหรับจอเล็ก (sm หรือต่ำกว่า) แสดงเฉพาะไอคอน */}
-          <div className="md:hidden flex gap-2">
-            <Link to="/login">
-              <Button size="icon">
-                <LogIn className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* ✅ แสดงเมนูแบบเต็มบน md ขึ้นไป */}
-          <div className="hidden md:flex">
-            <DropdownListMenu />
-          </div>
-
-          {/* ✅ แสดงไอคอนแทนเมนูบนจอเล็ก */}
-          <div className="md:hidden">
-            <Link to="/user/profile">
-              <ProfileButton/>
-            </Link>
-          </div>
-        </>
-      )}
+        {/* User Avatar */}
+        <div className="relative">
+          <DropdownListMenu />
+        </div>
+      </div>
     </div>
   );
 }
-export default DropdownAndUser
+export default DropdownAndUser;

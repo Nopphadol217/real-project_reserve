@@ -20,7 +20,7 @@ function LayoutAdmin() {
     <SidebarProvider>
       <AppSidebar />
 
-      <div className="container bg">
+      <div className="w-full ">
         <Toaster />
         <HeaderTigger />
         <Outlet />

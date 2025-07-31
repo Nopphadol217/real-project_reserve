@@ -16,7 +16,7 @@ function LogoutButton() {
       toast.message(<p className="text-red-500">{res.data.message}</p>,{
         description: dateTime
       })
-      navigate("/login");
+      navigate("/auth");
     } catch (error) {
       console.log(error);
     }

@@ -1,7 +1,8 @@
 import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 import Navbar from "../navbar/Navbar";
-
+import { MoveRight } from "lucide-react";
+import SearchSection from "./SearchSection";
 function HeroSection1() {
   // zustand
   const user = useAuthStore((state) => state.user);
@@ -19,34 +20,47 @@ function HeroSection1() {
     }
   };
   return (
-    // ปรับ responsive height ให้เหมาะสมกับทุกขนาดหน้าจอ
-    <div className="relative w-full h-[35vh] sm:h-[45vh] md:h-[50vh] lg:h-[45vh] xl:h-[50vh]">
-      {/* Background section */}
-      <section className="absolute inset-0 w-full bg-gradient-to-br from-sky-300 to-sky-400 flex items-center justify-center">
-        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-      </section>
+    <div className=" w-full min-h-[70vh] bg-[url('/background/hero_section.png')] bg-cover bg-center bg-no-repeat">
+      {/* Background decorations */}
 
-      {/* Content overlay */}
-      <div className="relative container  z-10 w-full h-full flex flex-col">
-        {/* Navbar container */}
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <Navbar />
-          </div>
-        </div>
-
-        {/* Hero content */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-[1250px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="text-center md:text-left space-y-2 sm:space-y-4">
-              <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-3xl  text-white drop-shadow-lg">
-                ยินดีต้อนรับสู่ เว็บจองที่พัก
-              </h2>
-              <p className="text-base sm:text-lg md:text-xl text-white/90 drop-shadow-md">
-                คุณ {user?.username || "ผู้ใช้งาน"}
-              </p>
+      {/* Content */}
+      <div className="relative container z-10  min-h-[70vh] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center xl:text-left  mx-auto space-y-6">
+          {/* Welcome Badge */}
+          {user?.username && (
+            <div className="inline-flex items-center px-4 py-2 bg-red-500/95 rounded-lg border border-red-200 text-white text-sm font-medium mb-4">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              สวัสดี, {user.username}
             </div>
+          )}
+
+          {/* Main Title */}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl  font-semibold text-white leading-tight mb-4">
+            ระบบจองที่พัก
+            <span className="block text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-red-500 to-pink-600 bg-clip-text text-transparent mt-2">
+              ค้นหาและจองที่พักได้ง่าย
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-lg sm:text-xl text-white max-w-2xl xl:max-w-3xl mx-auto xl:mx-0 leading-relaxed mb-8">
+            แพลตฟอร์มจองที่พักออนไลน์ที่ใช้งานง่าย สะดวก และปลอดภัย
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center xl:justify-start items-center mb-12">
+            <button className="group  bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center">
+              เริ่มค้นหาที่พัก
+              <MoveRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+
+            <button className="group border-2 border-red-300 hover:border-red-400 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+              ดูรายละเอียดเพิ่มเติม
+            </button>
           </div>
+
+          {/* Search Section */}
+          <SearchSection />
         </div>
       </div>
     </div>

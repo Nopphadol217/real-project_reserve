@@ -9,13 +9,14 @@ export const registerAPI = async (data) => {
 };
 
 export const loginAPI = async (data) => {
-  return await axios.post(`${import.meta.env.VITE_API}/login` , data, {
+  return await axios.post(`${import.meta.env.VITE_API}/login`, data, {
     withCredentials: true,
   });
 };
 
 export const googleLoginAPI = async (payload) => {
-  return await axios.post(`${import.meta.env.VITE_API}/auth/google-login`,
+  return await axios.post(
+    `${import.meta.env.VITE_API}/auth/google-login`,
     payload,
     {
       withCredentials: true,
@@ -24,6 +25,9 @@ export const googleLoginAPI = async (payload) => {
 };
 
 export const logoutAPI = async () => {
-
   return await api.post(`${import.meta.env.VITE_API}/logout`);
+};
+
+export const updateProfileAPI = async (data) => {
+  return await api.put(`${import.meta.env.VITE_API}/profile/edit`, data);
 };

@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import Login from "@/components/authentication/Login";
 import Register from "@/components/authentication/Register";
+import AuthContainer from "@/components/authentication/AuthContainer";
 import Layout from "@/layouts/Layout";
 import LayoutAdmin from "@/layouts/LayoutAdmin";
 import About from "@/pages/About";
@@ -18,23 +19,26 @@ import UserManage from "@/pages/admin/UserManage";
 import CreateListing from "@/pages/admin/EDITFORM/CreateListing";
 import ManageList from "@/pages/admin/ManageList";
 import EditForm from "@/pages/admin/EDITFORM/EditForm";
+import PlaceDetail from "@/pages/user/PlaceDetail";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Authentication */}
-        <Route element={<Layout />}>
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-        </Route>
+        {/* Authentication with animation */}
+        <Route path="auth" element={<AuthContainer />} />
+
+        {/* Separate authentication routes (keep for backward compatibility) */}
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
 
         {/* Public Routes */}
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-        <Route element={<Layout/>}>
           <Route path="about" element={<About />} />
           <Route path="service" element={<Service />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="place/:id" element={<PlaceDetail />} />
         </Route>
 
         <Route path="user" element={<Layout />}>

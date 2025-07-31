@@ -4,10 +4,13 @@
 
 @layer components {
   .container {
-    @apply px-10 mx-auto;
+    @apply px-10 max-w-7xl mx-auto py-16 xl:px-32;
   }
-  .text-nav{
-    @apply text-sm
+  .container-sidebar{
+    @apply px-10 max-w-7xl mx-auto py-16 xl:px-32;
+  }
+  .text-nav {
+    @apply text-sm;
   }
 }
 body {

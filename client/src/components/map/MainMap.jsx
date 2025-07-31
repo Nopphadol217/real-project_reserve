@@ -52,7 +52,7 @@ function MainMap({ register, location, setValue }) {
         crollWheelZoom={true}
       >
         {/* ของ แสดง Detail หน้ารายละเอียด */}
-        {location && <Marker position={[location]}></Marker>}
+        {location && <Marker position={location}></Marker>}
 
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

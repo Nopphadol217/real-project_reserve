@@ -205,7 +205,7 @@ exports.refreshToken = async (req, res, next) => {
       process.env.JWT_SECRET,
       { expiresIn: refreshAge }
     );
-    
+
     // สร้าง access token ใหม่
     res.cookie("token", newAccessToken, {
       httpOnly: true,
@@ -227,4 +227,95 @@ exports.logout = (req, res) => {
   res.clearCookie("token");
   res.clearCookie("refreshToken");
   res.json({ message: "Logged out" });
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { username, password, currentPassword } = req.body;
+    const userId = req.user.id;
+
+    // ค้นหาผู้ใช้ปัจจุบัน
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    // เตรียมข้อมูลที่จะอัปเดต
+    const updateData = {};
+
+    // อัปเดต username (ถ้ามี)
+    if (username && username !== user.username) {
+      // ตรวจสอบว่า username ใหม่ซ้ำกับคนอื่นหรือไม่
+      const existingUser = await prisma.user.findUnique({
+        where: { username },
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ message: "ชื่อผู้ใช้นี้ถูกใช้แล้ว" });
+      }
+
+      updateData.username = username;
+    }
+
+    // อัปเดต password (ถ้ามี)
+    if (password) {
+      // ตรวจสอบว่าเป็น Google User ที่ยังไม่มีรหัสผ่านหรือไม่
+      const isGoogleUserWithoutPassword =
+        user.googleId && (!user.password || user.password === "");
+
+      if (isGoogleUserWithoutPassword) {
+        // สำหรับ Google User ที่ยังไม่มีรหัสผ่าน - สามารถตั้งรหัสผ่านใหม่ได้เลย
+        console.log("Google User กำลังตั้งรหัสผ่านใหม่");
+      } else {
+        // สำหรับ Regular User หรือ Google User ที่มีรหัสผ่านแล้ว ต้องใส่รหัสผ่านเดิม
+        if (!currentPassword) {
+          return res.status(400).json({ message: "กรุณาใส่รหัสผ่านปัจจุบัน" });
+        }
+
+        const isValidPassword = await bcrypt.compare(
+          currentPassword,
+          user.password
+        );
+        if (!isValidPassword) {
+          return res
+            .status(400)
+            .json({ message: "รหัสผ่านปัจจุบันไม่ถูกต้อง" });
+        }
+      }
+
+      // เข้ารหัสรหัสผ่านใหม่
+      const hashedPassword = await bcrypt.hash(password, 12);
+      updateData.password = hashedPassword;
+    }
+
+    // ถ้าไม่มีข้อมูลที่จะอัปเดต
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "ไม่มีข้อมูลที่เปลี่ยนแปลง" });
+    }
+
+    // อัปเดตข้อมูลในฐานข้อมูล
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "อัปเดตข้อมูลสำเร็จ",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    return renderError(500, "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์");
+  }
 };

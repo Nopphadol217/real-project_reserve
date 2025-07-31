@@ -1,175 +1,219 @@
-import * as React from "react"
+import * as React from "react";
 import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react"
+  Home,
+  Search,
+  Heart,
+  Calendar,
+  User,
+  MapPin,
+  Building,
+  Settings,
+  HelpCircle,
+  Phone,
+  Plus,
+  List,
+  Users,
+  Shield,
+  BarChart3,
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "ผู้ดูแลระบบ",
+    email: "admin@example.com",
+    avatar: "/avatars/admin.jpg",
   },
   teams: [
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "แดชบอร์ดผู้ดูแลระบบ",
+      logo: Shield,
+      plan: "Admin Panel",
     },
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "แดชบอร์ดหลัก",
+      url: "/admin/dashboard",
+      icon: BarChart3,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "ภาพรวมระบบ",
+          url: "/admin/dashboard",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "สถิติการใช้งาน",
+          url: "/admin/analytics",
         },
         {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "รายงานประจำวัน",
+          url: "/admin/daily-reports",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      title: "จัดการที่พัก",
+      url: "/admin/manage-list",
+      icon: Building,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "เพิ่มที่พักใหม่",
+          url: "/admin/create-listing",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "รายการที่พักทั้งหมด",
+          url: "/admin/manage-list",
         },
         {
-          title: "Tutorials",
-          url: "#",
+          title: "ที่พักรอการอนุมัติ",
+          url: "/admin/pending-listings",
         },
         {
-          title: "Changelog",
-          url: "#",
+          title: "ที่พักที่ถูกรายงาน",
+          url: "/admin/reported-listings",
         },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
+      title: "จัดการผู้ใช้งาน",
+      url: "/admin/manage-user",
+      icon: Users,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "ผู้ใช้งานทั้งหมด",
+          url: "/admin/manage-user",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "เจ้าของที่พัก",
+          url: "/admin/hosts",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "ผู้ใช้ที่ถูกระงับ",
+          url: "/admin/suspended-users",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "ขออนุมัติเป็นเจ้าของที่พัก",
+          url: "/admin/host-applications",
+        },
+      ],
+    },
+    {
+      title: "การจองและการเงิน",
+      url: "/admin/bookings",
+      icon: Calendar,
+      items: [
+        {
+          title: "การจองทั้งหมด",
+          url: "/admin/bookings",
+        },
+        {
+          title: "การชำระเงิน",
+          url: "/admin/payments",
+        },
+        {
+          title: "การคืนเงิน",
+          url: "/admin/refunds",
+        },
+        {
+          title: "รายงานการเงิน",
+          url: "/admin/financial-reports",
+        },
+      ],
+    },
+    {
+      title: "รายงานและการวิเคราะห์",
+      url: "/admin/reports",
+      icon: BarChart3,
+      items: [
+        {
+          title: "รายงานรายได้",
+          url: "/admin/revenue-reports",
+        },
+        {
+          title: "สถิติการใช้งาน",
+          url: "/admin/usage-stats",
+        },
+        {
+          title: "การวิเคราะห์ผู้ใช้",
+          url: "/admin/user-analytics",
+        },
+        {
+          title: "รายงานประสิทธิภาพ",
+          url: "/admin/performance",
+        },
+      ],
+    },
+    {
+      title: "การตั้งค่าระบบ",
+      url: "/admin/settings",
+      icon: Settings,
+      items: [
+        {
+          title: "การตั้งค่าทั่วไป",
+          url: "/admin/settings/general",
+        },
+        {
+          title: "จัดการหมวดหมู่",
+          url: "/admin/settings/categories",
+        },
+        {
+          title: "การตั้งค่าการเงิน",
+          url: "/admin/settings/payment",
+        },
+        {
+          title: "การตั้งค่าอีเมล",
+          url: "/admin/settings/email",
+        },
+      ],
+    },
+    {
+      title: "เครื่องมือสำหรับผู้ใช้",
+      url: "/",
+      icon: Home,
+      items: [
+        {
+          title: "กลับสู่หน้าหลัก",
+          url: "/",
+        },
+        {
+          title: "ค้นหาที่พัก",
+          url: "/search",
+        },
+        {
+          title: "ติดต่อเรา",
+          url: "/contact",
         },
       ],
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
+};
 
-export function AppSidebar({
-  ...props
-}) {
+export function AppSidebar({ ...props }) {
   return (
-    (<Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
-    </Sidebar>)
+    </Sidebar>
   );
 }

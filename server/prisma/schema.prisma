@@ -38,12 +38,14 @@ model Place {
   lng         Float
   public_id   String
   secure_url  String
+  rooms       Int       @default(1) // จำนวนห้อง
+  amenities   String?   @db.Text // JSON string เก็บ amenities
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   User        User?     @relation(fields: [userId], references: [id])
   userId      Int
-  galleries   Gallery[] 
-  rooms       Room[]
+  galleries   Gallery[]
+  roomDetails Room[]    @relation("PlaceRoomDetails")
 }
 
 model Gallery {
@@ -52,7 +54,7 @@ model Gallery {
   secure_url String // Cloudinary secure_url
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  Place      Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  Place      Place    @relation(fields: [placeId], references: [id])
   placeId    Int // foreign key to Place
 }
 
@@ -63,11 +65,12 @@ model Room {
   status    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Place     Place?   @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  Place     Place?   @relation("PlaceRoomDetails", fields: [placeId], references: [id])
   placeId   Int
 }
 
 enum Role {
   USER
   ADMIN
+  BUSINESS // ผู้ประกอบการ
 }

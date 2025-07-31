@@ -54,11 +54,10 @@ const TableCellWithSeparator = ({ children, className = "" }) => (
 function TabelPlaceList() {
   //Zustand
   const places = usePlaceStore((state) => state.places);
-  
-  
-  const hdlDelete = async (placeId,item) => {
+
+  const hdlDelete = async (placeId, item) => {
     try {
-      const res = await deletePlace(placeId,item);
+      const res = await deletePlace(placeId, item);
       console.log(res);
       toast.message(res.data.message, {
         description: "คุณได้ลบข้อมูลสำเร็จเรียบร้อย",
@@ -94,6 +93,20 @@ function TabelPlaceList() {
               </TableHead>
               <TableHead className="relative w-[75px]">
                 Price (ราคา)
+                <Separator
+                  orientation="vertical"
+                  className="absolute right-0 top-0 h-full"
+                />
+              </TableHead>
+              <TableHead className="relative w-[75px]">
+                Rooms (ห้อง)
+                <Separator
+                  orientation="vertical"
+                  className="absolute right-0 top-0 h-full"
+                />
+              </TableHead>
+              <TableHead className="relative w-[100px]">
+                Amenities (สิ่งอำนวยความสะดวก)
                 <Separator
                   orientation="vertical"
                   className="absolute right-0 top-0 h-full"
@@ -156,6 +169,100 @@ function TabelPlaceList() {
                   <TableCellWithSeparator>
                     {item.price} ฿
                   </TableCellWithSeparator>
+
+                  {/* Rooms Information */}
+                  <TableCellWithSeparator className="text-center">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {item.rooms || item.roomDetails?.length || 0} ห้อง
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>รายละเอียดห้องพัก</DialogTitle>
+                          <DialogDescription>
+                            ข้อมูลห้องพักทั้งหมด
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          {item.roomDetails && item.roomDetails.length > 0 ? (
+                            item.roomDetails.map((room, index) => (
+                              <div
+                                key={index}
+                                className="p-3 border rounded-lg"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <h4 className="font-medium">{room.name}</h4>
+                                    <p className="text-sm text-gray-600">
+                                      สถานะ: {room.status ? "ไม่ว่าง" : "ว่าง"}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-bold text-green-600">
+                                      ฿{room.price?.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      ต่อคืน
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-4 text-gray-500">
+                              ไม่มีข้อมูลห้องพัก
+                            </div>
+                          )}
+                        </div>
+                        <DialogClose asChild>
+                          <Button className="w-full mt-4">ปิด</Button>
+                        </DialogClose>
+                      </DialogContent>
+                    </Dialog>
+                  </TableCellWithSeparator>
+
+                  {/* Amenities Information */}
+                  <TableCellWithSeparator className="text-center">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {item.amenities?.length || 0} รายการ
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>สิ่งอำนวยความสะดวก</DialogTitle>
+                          <DialogDescription>
+                            รายการสิ่งอำนวยความสะดวกทั้งหมด
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid grid-cols-2 gap-2">
+                          {item.amenities && item.amenities.length > 0 ? (
+                            item.amenities.map((amenity, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 p-2 border rounded"
+                              >
+                                <span className="text-sm capitalize">
+                                  {amenity}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="col-span-2 text-center py-4 text-gray-500">
+                              ไม่มีสิ่งอำนวยความสะดวก
+                            </div>
+                          )}
+                        </div>
+                        <DialogClose asChild>
+                          <Button className="w-full mt-4">ปิด</Button>
+                        </DialogClose>
+                      </DialogContent>
+                    </Dialog>
+                  </TableCellWithSeparator>
+
                   <TableCellWithSeparator className="text-center">
                     <Dialog>
                       <DialogTrigger>Open</DialogTrigger>
@@ -266,7 +373,7 @@ function TabelPlaceList() {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>{" "}
                           <AlertDialogAction
                             className="bg-red-500"
-                            onClick={() => hdlDelete(item.id,item)}
+                            onClick={() => hdlDelete(item.id, item)}
                           >
                             ลบข้อมูล
                           </AlertDialogAction>

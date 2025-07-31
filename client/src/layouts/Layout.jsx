@@ -7,7 +7,6 @@ import { Toaster } from "sonner";
 import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import HeaderTigger from "./HeaderTigger";
-import { DayPickerProvider } from "react-day-picker";
 function Layout() {
   const hydrate = useAuthStore((state) => state.hydrate);
   const isHydrated = useAuthStore((state) => state.isHydrated);
@@ -17,16 +16,16 @@ function Layout() {
   }, [isHydrated]);
 
   return (
-      <DayPickerProvider initialProps={{ mode: "single" }}>
+    <div>
+      <Toaster position="bottom-right" />
 
-      <div className="container">
-        <Toaster position="bottom-right" />
-        <Navbar />
+      {/* เพิ่ม padding-top เพื่อไม่ให้เนื้อหาทับกับ navbar 
+          Main navbar (16) + Second navbar (จากการคำนวณประมาณ 20) = 36 = pt-36
+          ปรับให้เหมาะสมกับความสูงจริง */}
 
-        <Outlet />
-      </div>
-      </DayPickerProvider>
-
+      <Navbar />
+      <Outlet />
+    </div>
   );
 }
 export default Layout;

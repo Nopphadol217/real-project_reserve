@@ -8,17 +8,24 @@ import {
 } from "@/components/ui/select";
 import { categories } from "@/utils/categories";
 
-function EditCategorySelect({ register, name, setValue, label, value }) {
+function EditCategorySelect({ register, name, setValue, label, value, error }) {
+  const handleValueChange = (selectedValue) => {
+    if (setValue && typeof setValue === "function") {
+      setValue(name, selectedValue);
+    }
+  };
+
   return (
     <div>
       <div className="my-4">
         <input hidden {...register(name)} />
-        <Label className="capitalize ">{label}</Label>
-        <Select required onValueChange={(value) => setValue(name, value)}>
+        <Label className="capitalize">{label}</Label>
+        <Select required onValueChange={handleValueChange} defaultValue={value}>
           <SelectTrigger className="w-full">
             <SelectValue
-              
-              placeholder={`ประเภท ที่เลือกไว้คือ ${value}`}
+              placeholder={
+                value ? `ประเภท ที่เลือกไว้คือ ${value}` : "เลือกประเภทที่พัก"
+              }
             />
           </SelectTrigger>
           <SelectContent>
@@ -33,6 +40,7 @@ function EditCategorySelect({ register, name, setValue, label, value }) {
             })}
           </SelectContent>
         </Select>
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
     </div>
   );

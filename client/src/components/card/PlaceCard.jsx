@@ -1,90 +1,196 @@
 import { Card } from "../ui/card";
+import { Link } from "react-router";
+import { Bed, Users, Wifi, Car, Coffee } from "lucide-react";
 
 function PlaceCard({ places }) {
-  const { title, price, description, lat, lng, category, secure_url } = places;
-  
+  const {
+    id,
+    title,
+    price,
+    description,
+    lat,
+    lng,
+    category,
+    secure_url,
+    rooms,
+    amenities,
+    roomDetails,
+  } = places;
+
+  // คำนวณราคาเริ่มต้น (ถูกที่สุด)
+  const getMinPrice = () => {
+    if (roomDetails && roomDetails.length > 0) {
+      return Math.min(...roomDetails.map((room) => room.price));
+    }
+    return price || 0;
+  };
+
+  const displayPrice = getMinPrice();
+  const hasMultipleRooms = roomDetails && roomDetails.length > 1;
+
   return (
-    <div className="w-full h-full">
-      <Card className="
+    <div className="w-full h-full max-w-sm mx-auto">
+      <Card
+        className="
         w-full h-full
         flex flex-col
-        rounded-xl overflow-hidden 
-        shadow-md hover:shadow-xl
+        rounded-2xl overflow-hidden 
+        shadow-sm hover:shadow-lg
         transition-all duration-300 
         bg-white
-        border border-gray-200
-        transform hover:-translate-y-1
+        border-0
+        transform hover:-translate-y-2
         hover:scale-[1.02]
-      ">
-        {/* Image Section - Responsive Heights */}
-        <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 overflow-hidden group">
+        group
+      "
+      >
+        {/* Image Section - Compact */}
+        <div className="relative w-full h-40 sm:h-44 overflow-hidden">
           <img
             src={secure_url}
             alt={title || "Place Image"}
             className="w-full h-full object-cover 
-                     transition-transform duration-500 
+                     transition-transform duration-700 
                      group-hover:scale-110"
             loading="lazy"
           />
-          
-          {/* Overlay Effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent 
-                         opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
-          {/* Category Badge */}
+
+          {/* Gradient Overlay */}
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent 
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          />
+
+          {/* Category Badge - Modern */}
           {category && (
-            <div className="absolute top-3 left-3 
-                          bg-blue-600/90 backdrop-blur-sm text-white 
-                          text-xs font-semibold px-3 py-1.5 rounded-full
-                          shadow-lg">
+            <div
+              className="absolute top-2 left-2 
+                          bg-white/90 backdrop-blur-md text-gray-800 
+                          text-xs font-medium px-2.5 py-1 rounded-full
+                          shadow-lg border border-white/20"
+            >
               {category}
             </div>
           )}
-          
-          {/* Price Badge - Mobile Friendly */}
-          <div className="absolute bottom-3 right-3 
-                        bg-white/95 backdrop-blur-sm text-gray-900 
-                        text-sm font-bold px-3 py-1.5 rounded-full
-                        shadow-lg border border-gray-200">
-            ฿{price?.toLocaleString() || 0}
-          </div>
+
+          {/* Heart Icon - Favorite */}
+          <button
+            className="absolute top-2 right-2 
+                        w-8 h-8 bg-white/90 backdrop-blur-md rounded-full
+                        flex items-center justify-center
+                        shadow-lg border border-white/20
+                        hover:bg-red-50 hover:text-red-500
+                        transition-all duration-200"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </button>
         </div>
 
-        {/* Content Section */}
-        <div className="flex flex-col flex-grow p-4 sm:p-5">
-          {/* Title - Responsive Typography */}
-          <h2 className="text-lg sm:text-xl  text-gray-800 mb-2
-                       line-clamp-2 leading-tight">
-            {title || 'ไม่มีชื่อ'}
-          </h2>
-          
-          {/* Description - Responsive */}
-          <p className="text-sm sm:text-base text-gray-600 mb-4
-                       line-clamp-3 leading-relaxed flex-grow">
-            {description || 'ไม่มีคำอธิบาย'}
-          </p>
-          
-          {/* Action Button - Always at Bottom */}
-          <div className="mt-auto">
-            <button className="
-              w-full bg-gradient-to-r from-blue-600 to-sky-500 
-              text-white py-2.5 sm:py-3 rounded-lg 
-              font-semibold text-sm sm:text-base
-              hover:from-blue-700 hover:to-sky-600 
-              active:scale-95
-              transition-all duration-300 ease-in-out
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              disabled:opacity-50 disabled:cursor-not-allowed
-            ">
-              <span className="flex items-center justify-center space-x-2">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span>ดูรายละเอียด</span>
-              </span>
-            </button>
+        {/* Content Section - Compact */}
+        <div className="flex flex-col flex-grow p-3">
+          {/* Title & Price Row */}
+          <div className="flex items-start justify-between mb-2">
+            <h3
+              className="text-sm font-semibold text-gray-900 
+                         line-clamp-2 leading-tight flex-1 mr-2"
+            >
+              {title || "ไม่มีชื่อ"}
+            </h3>
+            <div className="text-right">
+              <div className="text-sm font-bold text-gray-900">
+                ฿{displayPrice?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs text-gray-500">
+                ต่อคืน{hasMultipleRooms ? " เริ่มต้น" : ""}
+              </div>
+            </div>
           </div>
+
+          {/* Description - Minimal */}
+          <p
+            className="text-xs text-gray-600 mb-2
+                       line-clamp-2 leading-relaxed"
+          >
+            {description || "ไม่มีคำอธิบาย"}
+          </p>
+
+          {/* Room and Amenities Info */}
+          <div className="flex items-center justify-between mb-3">
+            {/* Room Info */}
+            <div className="flex items-center space-x-1 text-xs text-gray-500">
+              <Bed className="w-3 h-3" />
+              <span>{rooms || roomDetails?.length || 1} ห้อง</span>
+            </div>
+
+            {/* Top Amenities (show first 3) */}
+            {amenities && amenities.length > 0 && (
+              <div className="flex items-center space-x-1">
+                {amenities.slice(0, 3).map((amenityId) => {
+                  const iconMap = {
+                    wifi: Wifi,
+                    parking: Car,
+                    kitchen: Coffee,
+                  };
+                  const IconComponent = iconMap[amenityId];
+
+                  return IconComponent ? (
+                    <IconComponent
+                      key={amenityId}
+                      className="w-3 h-3 text-gray-400"
+                    />
+                  ) : null;
+                })}
+                {amenities.length > 3 && (
+                  <span className="text-xs text-gray-400">
+                    +{amenities.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Action Button - Compact */}
+          <Link
+            to={`/place/${id}`}
+            className="
+              w-full bg-gray-900 hover:bg-gray-800
+              text-white py-2 rounded-xl 
+              font-medium text-sm
+              transition-all duration-200 ease-in-out
+              focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+              block text-center
+              group
+            "
+          >
+            <span className="flex items-center justify-center space-x-1.5">
+              <span>ดูรายละเอียด</span>
+              <svg
+                className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </span>
+          </Link>
         </div>
       </Card>
     </div>

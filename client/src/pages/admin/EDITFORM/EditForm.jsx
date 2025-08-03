@@ -12,7 +12,7 @@ import EditMap from "./EditMap";
 import { readPlace, updatePlace } from "@/api/createPlaceAPI";
 import EditUploadImage from "./EditUploadImage";
 import EditUploadGallery from "./EditUploadGallery";
-import RoomManageEdit from "@/components/EDITFORM/RoomManageEdit";
+import RoomManageEdit from "@/pages/admin/EDITFORM/RoomManageEdit";
 import AmenitySelector from "@/components/form/AmenitySelector";
 import useAuthStore from "@/store/useAuthStore";
 import { toast } from "sonner";
@@ -73,13 +73,33 @@ function EditForm() {
       setValue("lng", lng || null);
       setValue("galleryImages", galleries || []);
 
-      // อัปเดต amenities และ roomDetails state
-      setSelectedAmenities(amenities || []);
-      setRoomDetails(existingRooms || [{ name: "", price: "" }]);
-      setValue("amenities", amenities || []);
-      setValue("roomDetails", existingRooms || []);
+      // อัปเดต amenities
+      const amenitiesData = amenities || [];
+      setSelectedAmenities(amenitiesData);
+      setValue("amenities", amenitiesData);
+
+      // อัปเดต roomDetails - ให้ใช้ข้อมูลจาก API โดยตรง
+      const roomDetailsData = existingRooms || [];
+      console.log("Setting room details from API:", roomDetailsData);
+      setRoomDetails(roomDetailsData);
+      setValue("roomDetails", roomDetailsData);
     }
-  }, [isPlace]);
+  }, [
+    isPlace,
+    title,
+    price,
+    description,
+    category,
+    rooms,
+    secure_url,
+    public_id,
+    lat,
+    lng,
+    galleries,
+    amenities,
+    existingRooms,
+    setValue,
+  ]);
 
   const fetchReadPlace = async (id) => {
     setIsLoading(true);
@@ -244,7 +264,7 @@ function EditForm() {
                   setValue("roomDetails", rooms);
                   setValue("rooms", rooms.length);
                 }}
-                existingRooms={isPlace.rooms || []} // ส่งข้อมูลห้องที่มีอยู่แล้ว
+                existingRooms={isPlace.roomDetails || []} // ส่งข้อมูลห้องที่มีอยู่แล้ว
                 errors={errors.roomDetails}
               />
             </CardContent>

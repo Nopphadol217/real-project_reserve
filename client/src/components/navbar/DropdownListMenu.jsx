@@ -12,7 +12,6 @@ import { adminLinks, privateLinks } from "@/utils/links";
 import { Link } from "react-router";
 import LogoutButton from "../authentication/LogoutButton";
 import useAuthStore from "@/store/useAuthStore";
-import { Separator } from "../ui/separator";
 
 function DropdownListMenu() {
   const user = useAuthStore((state) => state.user);
@@ -25,41 +24,41 @@ function DropdownListMenu() {
             <ProfileButton />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>เมนูของฉัน</DropdownMenuLabel>
           <DropdownMenuSeparator />
+
+          {/* User Links - การจองและรายการโปรด */}
           {user.role === "ADMIN"
             ? adminLinks.map((item, index) => {
                 return (
-                  <DropdownMenuItem key={index}>
-                    <Link to={item.href}>
-                      <div className="flex">
-                        <span className="text-sm">{item.icon}</span>
-                        <Separator
-                          orientation="vertical"
-                          className="mx-2 h-5"
-                        />
-                        {item.label}
-                      </div>
+                  <DropdownMenuItem key={index} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center cursor-pointer"
+                    >
+                      <span className="text-sm mr-2">{item.icon}</span>
+                      {item.label}
                     </Link>
                   </DropdownMenuItem>
                 );
               })
             : privateLinks.map((item, index) => {
                 return (
-                  <DropdownMenuItem key={index}>
-                    <Link to={item.href}>
-                      <div className="flex items-center">
-                        <span className="text-sm mr-2">{item.icon}</span>
-                        {item.label}
-                      </div>
+                  <DropdownMenuItem key={index} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center cursor-pointer"
+                    >
+                      <span className="text-sm mr-2">{item.icon}</span>
+                      {item.label}
                     </Link>
                   </DropdownMenuItem>
                 );
               })}
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <LogoutButton />
           </DropdownMenuItem>
         </DropdownMenuContent>

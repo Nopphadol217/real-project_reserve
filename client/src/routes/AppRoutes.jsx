@@ -9,6 +9,7 @@ import Manage from "@/pages/admin/ManageList";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
 import SearchPage from "@/pages/SearchPage";
+import Search from "@/pages/Search";
 import MyFavorite from "@/pages/user/MyFavorite";
 import Profile from "@/pages/user/profile/Profile";
 import AdminRoute from "./AdminRoute";
@@ -38,15 +39,16 @@ function AppRoutes() {
         {/* Public Routes */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="search" element={<SearchPage />} />
+          <Route path="search" element={<Search />} />
           <Route path="place/:id" element={<PlaceDetail />} />
         </Route>
 
         <Route path="user" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="search" element={<Search />} />
           <Route path="profile" element={<Profile />} />
           <Route path="mybookings" element={<MyBookings />} />
           <Route path="favorites" element={<Favorites />} />
-          <Route path="myfavorite" element={<MyFavorite />} />
           <Route path="myorder" element={<MyOrder />} />
           <Route path="checkout/:id" element={<Checkout />} />
           <Route path="complete/:session_id" element={<Complete />} />

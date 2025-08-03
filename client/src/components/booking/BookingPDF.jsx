@@ -171,7 +171,7 @@ const BookingInvoice = ({ booking }) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>🏠 ใบยืนยันการจองที่พัก</Text>
+        <Text style={styles.title}> ใบยืนยันการจองที่พัก</Text>
         <Text style={styles.subtitle}>ระบบจองที่พักออนไลน์</Text>
       </View>
 
@@ -183,32 +183,31 @@ const BookingInvoice = ({ booking }) => (
 
       {/* Place Information */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📍 ข้อมูลที่พัก</Text>
+        <Text style={styles.sectionTitle}> ข้อมูลที่พัก</Text>
         <View style={styles.placeInfo}>
           <Text style={styles.placeName}>{booking.Place?.title}</Text>
-          <Text style={styles.placeDetails}>ประเภท: ที่พักและรีสอร์ท</Text>
-          <Text style={styles.placeDetails}>คะแนน: ⭐ 4.8 (124 รีวิว)</Text>
+          <Text style={styles.placeDetails}>{booking.Place?.category}</Text>
         </View>
       </View>
 
       {/* Booking Details */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📅 รายละเอียดการจอง</Text>
+        <Text style={styles.sectionTitle}> รายละเอียดการจอง</Text>
         <View style={styles.infoGrid}>
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>📅 วันเช็คอิน</Text>
+            <Text style={styles.infoLabel}> วันเช็คอิน</Text>
             <Text style={styles.infoValue}>
               {formatDate(booking.checkIn, "th")}
             </Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>📅 วันเช็คเอาท์</Text>
+            <Text style={styles.infoLabel}> วันเช็คเอาท์</Text>
             <Text style={styles.infoValue}>
               {formatDate(booking.checkOut, "th")}
             </Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>🌙 จำนวนคืน</Text>
+            <Text style={styles.infoLabel}> จำนวนคืน</Text>
             <Text style={styles.infoValue}>
               {Math.ceil(
                 (new Date(booking.checkOut) - new Date(booking.checkIn)) /
@@ -218,7 +217,7 @@ const BookingInvoice = ({ booking }) => (
             </Text>
           </View>
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>🏠 ห้องที่จอง</Text>
+            <Text style={styles.infoLabel}> ห้องที่จอง</Text>
             <Text style={styles.infoValue}>
               {booking.Room?.name || "ห้องมาตรฐาน"}
             </Text>
@@ -228,7 +227,7 @@ const BookingInvoice = ({ booking }) => (
 
       {/* Pricing Table */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>💰 สรุปค่าใช้จ่าย</Text>
+        <Text style={styles.sectionTitle}>สรุปค่าใช้จ่าย</Text>
         <View style={styles.table}>
           <View style={[styles.tableRow, styles.tableHeader]}>
             <Text style={styles.tableCellBold}>รายการ</Text>
@@ -272,7 +271,7 @@ const BookingInvoice = ({ booking }) => (
 
       {/* Terms and Conditions */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📋 เงื่อนไขและข้อตกลง</Text>
+        <Text style={styles.sectionTitle}>เงื่อนไขและข้อตกลง</Text>
         <View style={styles.terms}>
           <Text style={styles.termsTitle}>เงื่อนไขการใช้บริการ:</Text>
           <Text style={styles.termsList}>
@@ -288,7 +287,7 @@ const BookingInvoice = ({ booking }) => (
       <View style={styles.footer}>
         <Text>ขอบคุณที่เลือกใช้บริการของเรา</Text>
         <Text>
-          หากมีข้อสงสัยกรุณาติดต่อ: support@booking.com | Tel: 02-xxx-xxxx
+          หากมีข้อสงสัยกรุณาติดต่อ: support@bookylife.com | Tel: 02-xxx-xxxx
         </Text>
       </View>
     </Page>

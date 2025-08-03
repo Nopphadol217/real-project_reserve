@@ -1,4 +1,4 @@
-const prisma = require('../config/prisma');
+const prisma = require("../config/prisma");
 
 // ตรวจสอบห้องว่าง
 const checkRoomAvailability = async (req, res) => {
@@ -8,7 +8,7 @@ const checkRoomAvailability = async (req, res) => {
     if (!placeId || !checkIn || !checkOut) {
       return res.status(400).json({
         success: false,
-        message: 'กรุณาระบุข้อมูลให้ครบถ้วน'
+        message: "กรุณาระบุข้อมูลให้ครบถ้วน",
       });
     }
 
@@ -19,7 +19,7 @@ const checkRoomAvailability = async (req, res) => {
     if (checkInDate >= checkOutDate) {
       return res.status(400).json({
         success: false,
-        message: 'วันที่เช็คอินต้องก่อนวันที่เช็คเอาท์'
+        message: "วันที่เช็คอินต้องก่อนวันที่เช็คเอาท์",
       });
     }
 
@@ -28,52 +28,48 @@ const checkRoomAvailability = async (req, res) => {
       where: {
         placeId: parseInt(placeId),
         status: {
-          in: ['CONFIRMED', 'PENDING'] // เฉพาะการจองที่ยืนยันแล้วหรือรอยืนยัน
+          in: ["confirmed", "pending"], // เปลี่ยนเป็น lowercase
         },
         OR: [
           {
             // การจองที่เริ่มก่อนหรือในช่วงที่ต้องการ และสิ้นสุดหลังวันเช็คอิน
             checkIn: {
-              lte: checkOutDate
+              lte: checkOutDate,
             },
             checkOut: {
-              gt: checkInDate
-            }
-          }
+              gt: checkInDate,
+            },
+          },
         ],
         ...(roomId && {
-          roomDetails: {
-            some: {
-              id: parseInt(roomId)
-            }
-          }
-        })
+          roomId: parseInt(roomId), // เปลี่ยนจาก roomDetails เป็น roomId
+        }),
       },
       include: {
-        roomDetails: true
-      }
+        room: true, // เปลี่ยนจาก roomDetails เป็น room
+      },
     });
 
     // หาห้องทั้งหมดของที่พักนี้
-    const allRooms = await prisma.roomDetail.findMany({
+    const allRooms = await prisma.room.findMany({
+      // เปลี่ยนจาก roomDetail เป็น room
       where: {
         placeId: parseInt(placeId),
-        ...(roomId && { id: parseInt(roomId) })
-      }
+        ...(roomId && { id: parseInt(roomId) }),
+      },
     });
 
-    // คำนวณห้องที่ว่าง
-    const bookedRoomIds = conflictingBookings.flatMap(booking => 
-      booking.roomDetails.map(room => room.id)
-    );
+    // คำนวณห้องที่ว่าง (ต้องดูทั้งการจองและสถานะห้อง)
+    const bookedRoomIds = conflictingBookings.map((booking) => booking.roomId);
 
-    const availableRooms = allRooms.filter(room => 
-      !bookedRoomIds.includes(room.id)
+    const availableRooms = allRooms.filter(
+      (room) => !bookedRoomIds.includes(room.id) && !room.status // ห้องว่าง (status = false)
     );
 
     const isAvailable = availableRooms.length > 0;
     const totalRooms = allRooms.length;
     const bookedRooms = bookedRoomIds.length;
+    const occupiedRooms = allRooms.filter((room) => room.status).length; // ห้องที่ไม่ว่าง
 
     res.json({
       success: true,
@@ -82,17 +78,23 @@ const checkRoomAvailability = async (req, res) => {
         availableRooms,
         totalRooms,
         bookedRooms,
+        occupiedRooms,
         availableCount: availableRooms.length,
-        conflictingBookings: conflictingBookings.length
-      }
+        conflictingBookings: conflictingBookings.length,
+        roomStatus: {
+          total: totalRooms,
+          available: availableRooms.length,
+          booked: bookedRooms,
+          occupied: occupiedRooms,
+        },
+      },
     });
-
   } catch (error) {
-    console.error('Check room availability error:', error);
+    console.error("Check room availability error:", error);
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการตรวจสอบห้องว่าง',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: "เกิดข้อผิดพลาดในการตรวจสอบห้องว่าง",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -105,15 +107,16 @@ const checkMultipleRoomsAvailability = async (req, res) => {
     if (!placeId || !checkIn || !checkOut) {
       return res.status(400).json({
         success: false,
-        message: 'กรุณาระบุข้อมูลให้ครบถ้วน'
+        message: "กรุณาระบุข้อมูลให้ครบถ้วน",
       });
     }
 
     // หาห้องทั้งหมด
-    const allRooms = await prisma.roomDetail.findMany({
+    const allRooms = await prisma.room.findMany({
+      // เปลี่ยนจาก roomDetail เป็น room
       where: {
-        placeId: parseInt(placeId)
-      }
+        placeId: parseInt(placeId),
+      },
     });
 
     // ตรวจสอบแต่ละห้อง
@@ -123,35 +126,35 @@ const checkMultipleRoomsAvailability = async (req, res) => {
           where: {
             placeId: parseInt(placeId),
             status: {
-              in: ['CONFIRMED', 'PENDING']
+              in: ["confirmed", "pending"], // เปลี่ยนเป็น lowercase
             },
-            roomDetails: {
-              some: {
-                id: room.id
-              }
-            },
+            roomId: room.id, // เปลี่ยนจาก roomDetails เป็น roomId
             OR: [
               {
                 checkIn: {
-                  lte: new Date(checkOut)
+                  lte: new Date(checkOut),
                 },
                 checkOut: {
-                  gt: new Date(checkIn)
-                }
-              }
-            ]
-          }
+                  gt: new Date(checkIn),
+                },
+              },
+            ],
+          },
         });
+
+        // ห้องจะว่างได้ต้องไม่มีการจอง และสถานะห้องเป็นว่าง (status = false)
+        const isAvailable = conflictingBookings.length === 0 && !room.status;
 
         return {
           ...room,
-          isAvailable: conflictingBookings.length === 0,
-          conflictingBookings: conflictingBookings.length
+          isAvailable,
+          conflictingBookings: conflictingBookings.length,
+          roomStatus: room.status ? "occupied" : "available",
         };
       })
     );
 
-    const availableRooms = roomAvailability.filter(room => room.isAvailable);
+    const availableRooms = roomAvailability.filter((room) => room.isAvailable);
 
     res.json({
       success: true,
@@ -160,21 +163,20 @@ const checkMultipleRoomsAvailability = async (req, res) => {
         availableRooms,
         totalRooms: allRooms.length,
         availableCount: availableRooms.length,
-        hasAvailableRooms: availableRooms.length > 0
-      }
+        hasAvailableRooms: availableRooms.length > 0,
+      },
     });
-
   } catch (error) {
-    console.error('Check multiple rooms availability error:', error);
+    console.error("Check multiple rooms availability error:", error);
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการตรวจสอบห้องว่าง',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: "เกิดข้อผิดพลาดในการตรวจสอบห้องว่าง",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
 
 module.exports = {
   checkRoomAvailability,
-  checkMultipleRoomsAvailability
+  checkMultipleRoomsAvailability,
 };

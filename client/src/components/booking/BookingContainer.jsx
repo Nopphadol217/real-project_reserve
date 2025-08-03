@@ -13,7 +13,7 @@ function BookingContainer({ placeId, price, bookings }) {
   }, [placeId]);
 
   return (
-    <div className="flex flex-col mb-8">
+    <div className="flex flex-col justify-center items-center mb-8">
       <BookingCalendar />
       <BookingForm />
     </div>

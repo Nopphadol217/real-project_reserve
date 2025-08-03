@@ -29,33 +29,17 @@ export const userLinks = [
     href: "/search",
     label: "ค้นหาที่พัก",
   },
-  {
-    icon: <Star />,
-    href: "/user/favorites",
-    label: "รายการโปรด",
-  },
-  {
-    icon: <Calendar />,
-    href: "/user/mybookings",
-    label: "การจองของฉัน",
-  },
-
 ];
 
 export const privateLinks = [
   {
-    href: "/user/profile",
-    label: "แอคเคาท์ของฉัน",
-    icon: <UserRoundPen />,
-  },
-  {
     href: "/user/mybookings",
-    label: "My Bookings (ที่จองไว้)",
+    label: "การจองของฉัน",
     icon: <Calendar />,
   },
   {
     href: "/user/favorites",
-    label: "Favorites (ที่ถูกใจไว้)",
+    label: "รายการโปรด",
     icon: <Star />,
   },
   {

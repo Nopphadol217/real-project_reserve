@@ -132,53 +132,7 @@ const data = {
           url: "/admin/financial-reports",
         },
       ],
-    },
-    {
-      title: "รายงานและการวิเคราะห์",
-      url: "/admin/reports",
-      icon: BarChart3,
-      items: [
-        {
-          title: "รายงานรายได้",
-          url: "/admin/revenue-reports",
-        },
-        {
-          title: "สถิติการใช้งาน",
-          url: "/admin/usage-stats",
-        },
-        {
-          title: "การวิเคราะห์ผู้ใช้",
-          url: "/admin/user-analytics",
-        },
-        {
-          title: "รายงานประสิทธิภาพ",
-          url: "/admin/performance",
-        },
-      ],
-    },
-    {
-      title: "การตั้งค่าระบบ",
-      url: "/admin/settings",
-      icon: Settings,
-      items: [
-        {
-          title: "การตั้งค่าทั่วไป",
-          url: "/admin/settings/general",
-        },
-        {
-          title: "จัดการหมวดหมู่",
-          url: "/admin/settings/categories",
-        },
-        {
-          title: "การตั้งค่าการเงิน",
-          url: "/admin/settings/payment",
-        },
-        {
-          title: "การตั้งค่าอีเมล",
-          url: "/admin/settings/email",
-        },
-      ],
-    },
+    },   
     {
       title: "เครื่องมือสำหรับผู้ใช้",
       url: "/",

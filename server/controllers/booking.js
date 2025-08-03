@@ -276,3 +276,56 @@ exports.checkOutStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+// Clear all bookings for a specific room
+exports.clearRoomBookings = async (req, res, next) => {
+  try {
+    const { roomId } = req.params;
+
+    if (!roomId) {
+      return renderError(res, 400, "Room ID is required");
+    }
+
+    console.log(`Clearing bookings for room ${roomId}`);
+
+    // Find all confirmed bookings for this room
+    const roomBookings = await prisma.booking.findMany({
+      where: {
+        roomId: parseInt(roomId),
+        status: "confirmed",
+      },
+      include: {
+        Room: true,
+        Place: true,
+      },
+    });
+
+    console.log(`Found ${roomBookings.length} bookings to clear`);
+
+    if (roomBookings.length === 0) {
+      return res.json({
+        message: "No active bookings found for this room",
+        deletedCount: 0,
+      });
+    }
+
+    // Delete all confirmed bookings for this room
+    const deleteResult = await prisma.booking.deleteMany({
+      where: {
+        roomId: parseInt(roomId),
+        status: "confirmed",
+      },
+    });
+
+    console.log(`Deleted ${deleteResult.count} bookings for room ${roomId}`);
+
+    res.json({
+      message: `Successfully cleared ${deleteResult.count} bookings for room`,
+      deletedCount: deleteResult.count,
+      deletedBookings: roomBookings,
+    });
+  } catch (error) {
+    console.error("Clear room bookings error:", error);
+    next(error);
+  }
+};

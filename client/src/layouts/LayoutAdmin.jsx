@@ -21,7 +21,7 @@ function LayoutAdmin() {
       <AppSidebar />
 
       <div className="w-full ">
-        <Toaster />
+      
         <HeaderTigger />
         <Outlet />
       </div>

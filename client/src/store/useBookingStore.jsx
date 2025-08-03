@@ -9,7 +9,7 @@ const useBookingStore = create((set, get) => ({
   place: null,
   selectedRoom: null,
   totalNights: 0,
-  
+
   // Actions
   setPlaceId: (placeId) => set({ placeId }),
   setPrice: (price) => set({ price }),
@@ -25,24 +25,24 @@ const useBookingStore = create((set, get) => ({
   },
   setPlace: (place) => set({ place }),
   setSelectedRoom: (selectedRoom) => set({ selectedRoom }),
-  
+
   // Reset booking data
-  resetBooking: () => set({
-    placeId: "",
-    price: 0,
-    bookings: [],
-    range: undefined,
-    place: null,
-    selectedRoom: null,
-    totalNights: 0
-  }),
-  
+  resetBooking: () =>
+    set({
+      placeId: "",
+      price: 0,
+      bookings: [],
+      range: undefined,
+      place: null,
+      selectedRoom: null,
+      totalNights: 0,
+    }),
+
   // Calculate total price
   getTotalPrice: () => {
     const { price, totalNights, selectedRoom } = get();
     const roomPrice = selectedRoom?.price || price;
     return roomPrice * totalNights;
-  }
+  },
 }));
-export default useBookingStore
-
+export default useBookingStore;

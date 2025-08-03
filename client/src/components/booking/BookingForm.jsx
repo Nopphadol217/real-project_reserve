@@ -26,7 +26,7 @@ function BookingForm() {
   if (!range || !checkIn || !checkOut) return null;
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 ">
       <Card className="p-8">
         <CardTitle>สรุป</CardTitle>
         <p className="flex justify-between mt-2">

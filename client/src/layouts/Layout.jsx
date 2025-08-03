@@ -17,7 +17,7 @@ function Layout() {
 
   return (
     <div>
-      <Toaster position="bottom-right" />
+ 
 
       {/* เพิ่ม padding-top เพื่อไม่ให้เนื้อหาทับกับ navbar 
           Main navbar (16) + Second navbar (จากการคำนวณประมาณ 20) = 36 = pt-36

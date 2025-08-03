@@ -1,21 +1,33 @@
 import { listPlaces } from "@/api/createPlaceAPI";
 import { create } from "zustand";
 
-
-
 const placeStore = (set) => ({
   places: [],
-  actionListPlace: async () =>{
+  loading: false,
+  error: null,
+  
+  listPlaces: async () => {
     try {
-        const res = await listPlaces()
-
-        set({places:res.data.result})
+      set({ loading: true, error: null });
+      const res = await listPlaces();
+      set({ places: res.data.result || res.data || [], loading: false });
     } catch (error) {
-        console.log(error)
+      console.log('Error fetching places:', error);
+      set({ error: 'ไม่สามารถโหลดข้อมูลที่พักได้', loading: false });
+    }
+  },
+  
+  actionListPlace: async () => {
+    try {
+      const res = await listPlaces();
+      set({ places: res.data.result || res.data || [] });
+    } catch (error) {
+      console.log(error);
     }
   }
 });
 
-const usePlaceStore = create(placeStore)
+const usePlaceStore = create(placeStore);
 
-export default usePlaceStore
+export { usePlaceStore };
+export default usePlaceStore;

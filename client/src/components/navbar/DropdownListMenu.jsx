@@ -49,7 +49,10 @@ function DropdownListMenu() {
                 return (
                   <DropdownMenuItem key={index}>
                     <Link to={item.href}>
-                      <p>{item.label}</p>
+                      <div className="flex items-center">
+                        <span className="text-sm mr-2">{item.icon}</span>
+                        {item.label}
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                 );

@@ -1,6 +1,8 @@
 import { Card } from "../ui/card";
 import { Link } from "react-router";
 import { Bed, Users, Wifi, Car, Coffee } from "lucide-react";
+import FavoriteToggleButton from "../places/FavoriteToggleButton";
+import useFavoriteStore from "@/store/useFavoriteStore";
 
 function PlaceCard({ places }) {
   const {
@@ -73,29 +75,14 @@ function PlaceCard({ places }) {
             </div>
           )}
 
-          {/* Heart Icon - Favorite */}
-          <button
-            className="absolute top-2 right-2 
-                        w-8 h-8 bg-white/90 backdrop-blur-md rounded-full
-                        flex items-center justify-center
-                        shadow-lg border border-white/20
-                        hover:bg-red-50 hover:text-red-500
-                        transition-all duration-200"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-          </button>
+          {/* Favorite Button */}
+          <div className="absolute top-2 right-2 z-10">
+            {/* <FavoriteToggleButton
+              placeId={id}
+              isFavorite={isPlaceFavorite}
+              name={title}
+            /> */}
+          </div>
         </div>
 
         {/* Content Section - Compact */}

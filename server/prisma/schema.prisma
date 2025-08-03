@@ -13,39 +13,43 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  googleId   String?  @unique
-  facebookId String?  @unique
-  username   String   @unique
+  id         Int        @id @default(autoincrement())
+  googleId   String?    @unique
+  facebookId String?    @unique
+  username   String     @unique
   firstname  String?
   lastname   String?
-  email      String   @unique
+  email      String     @unique
   password   String
   picture    String?
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  role       Role       @default(USER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   places     Place[]
+  bookings   Booking[]
+  favorites  Favorite[]
 }
 
 model Place {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
-  description String    @db.VarChar(1000)
+  description String     @db.VarChar(1000)
   price       Int
   category    String
   lat         Float
   lng         Float
   public_id   String
   secure_url  String
-  rooms       Int       @default(1) // จำนวนห้อง
-  amenities   String?   @db.Text // JSON string เก็บ amenities
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  User        User?     @relation(fields: [userId], references: [id])
+  rooms       Int        @default(1) // จำนวนห้อง
+  amenities   String?    @db.Text // JSON string เก็บ amenities
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  User        User?      @relation(fields: [userId], references: [id])
   userId      Int
   galleries   Gallery[]
-  roomDetails Room[]    @relation("PlaceRoomDetails")
+  roomDetails Room[]     @relation("PlaceRoomDetails")
+  bookings    Booking[]
+  favorites   Favorite[]
 }
 
 model Gallery {
@@ -59,14 +63,42 @@ model Gallery {
 }
 
 model Room {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   price     Int
-  status    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Place     Place?   @relation("PlaceRoomDetails", fields: [placeId], references: [id])
+  status    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Place     Place?    @relation("PlaceRoomDetails", fields: [placeId], references: [id])
   placeId   Int
+  bookings  Booking[]
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  placeId    Int
+  roomId     Int
+  userId     Int
+  checkIn    DateTime
+  checkOut   DateTime
+  totalPrice Int
+  status     String   @default("pending") // pending, confirmed, cancelled
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  User       User     @relation(fields: [userId], references: [id])
+  Place      Place    @relation(fields: [placeId], references: [id])
+  Room       Room     @relation(fields: [roomId], references: [id])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  placeId   Int
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, placeId]) // ป้องกันการเพิ่มรายการโปรดซ้ำ
 }
 
 enum Role {

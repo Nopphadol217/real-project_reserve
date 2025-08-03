@@ -146,7 +146,14 @@ const PlaceImageContainer = ({ place }) => {
                 <h2 className="text-xl font-semibold text-gray-900">
                   ภาพทั้งหมด ({allImages.length} รูป)
                 </h2>
-            
+             <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-gray-100 text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
 
               {/* Grid Gallery with ScrollArea */}

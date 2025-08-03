@@ -7,28 +7,42 @@ import {
   Send,
   UserCog,
   UserRoundPen,
+  Calendar,
+  Star,
 } from "lucide-react";
-import EditRoadOutlinedIcon from '@mui/icons-material/EditRoadOutlined';
 export const publicLinks = [
   {
-    icon: Home ,
+    icon: <Home />,
     href: "/",
-    label: "ที่พักของฉัน",
+    label: "หน้าหลัก",
   },
   {
-    icon: Search ,
-    href: "/about",
+    icon: <Search />,
+    href: "/search",
+    label: "ค้นหาที่พัก",
+  },
+];
+
+export const userLinks = [
+  {
+    icon: <Search />,
+    href: "/search",
     label: "ค้นหาที่พัก",
   },
   {
-    icon: EditRoadOutlinedIcon ,
-    href: "/service",
-    label: "ทริป",
+    icon: <Star />,
+    href: "/user/favorites",
+    label: "รายการโปรด",
   },
   {
-    icon: Heart ,
-    href: "/contact",
-    label: "รายการโปรด",
+    icon: <Calendar />,
+    href: "/user/mybookings",
+    label: "การจองของฉัน",
+  },
+  {
+    icon: <UserRoundPen />,
+    href: "/user/profile",
+    label: "โปรไฟล์",
   },
 ];
 
@@ -36,10 +50,22 @@ export const privateLinks = [
   {
     href: "/user/profile",
     label: "แอคเคาท์ของฉัน",
+    icon: <UserRoundPen />,
   },
   {
-    href: "/user/myfavorite",
-    label: "ตัวเลือกถูกใจ",
+    href: "/user/mybookings",
+    label: "My Bookings (ที่จองไว้)",
+    icon: <Calendar />,
+  },
+  {
+    href: "/user/favorites",
+    label: "Favorites (ที่ถูกใจไว้)",
+    icon: <Star />,
+  },
+  {
+    href: "/user/myorder",
+    label: "ประวัติการจอง",
+    icon: <Heart />,
   },
 ];
 

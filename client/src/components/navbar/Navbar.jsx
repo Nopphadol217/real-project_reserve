@@ -1,4 +1,4 @@
-import { publicLinks } from "@/utils/links";
+import { userLinks } from "@/utils/links";
 import Login from "../authentication/Login";
 import Register from "../authentication/register";
 import Logo from "./Logo";
@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import MenuList from "./MenuList";
 import useAuthStore from "@/store/useAuthStore";
 import DropdownAndUser from "./DropdownAndUser";
-import { Search, Globe, Menu, User } from "lucide-react";
+import { Search, Globe, Menu, User, Home } from "lucide-react";
 import { Link } from "react-router";
 
 function Navbar() {
@@ -43,46 +43,37 @@ function Navbar() {
 
             {/* Center - Navigation Menu */}
             <div className="hidden lg:flex items-center justify-center flex-1">
-              <nav className="flex items-center space-x-8">
+              <nav className="flex items-center space-x-6">
+                {/* Home Link - Always visible */}
                 <Link
                   to="/"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
                 >
+                  <Home className="w-4 h-4" />
                   หน้าหลัก
                 </Link>
-                <Link
-                  to="/about"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
-                >
-                  เกี่ยวกับเรา
-                </Link>
-                <Link
-                  to="/service"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
-                >
-                  บริการ
-                </Link>
-                <Link
-                  to="/contact"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
-                >
-                  ติดต่อเรา
-                </Link>
-                {user && (
-                  <>
+
+                {/* User Links - Show when logged in */}
+                {user ? (
+                  userLinks.map((link, index) => (
                     <Link
-                      to="/user/myfavorite"
-                      className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
+                      key={`user-${index}`}
+                      to={link.href}
+                      className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
                     >
-                      รายการโปรด
+                      <span className="w-4 h-4">{link.icon}</span>
+                      {link.label}
                     </Link>
-                    <Link
-                      to="/user/profile"
-                      className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
-                    >
-                      โปรไฟล์
-                    </Link>
-                  </>
+                  ))
+                ) : (
+                  // Public Links for non-logged in users
+                  <Link
+                    to="/search"
+                    className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
+                  >
+                    <Search className="w-4 h-4" />
+                    ค้นหาที่พัก
+                  </Link>
                 )}
               </nav>
             </div>

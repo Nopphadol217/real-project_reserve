@@ -116,7 +116,6 @@ function FormUploadGallery({ setValue, error }) {
 
         {/* Modern File Upload */}
         <div className="relative mb-4">
-          <FileUpload onChange={handleFileUpload} />
           {isLoading && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
               <div className="flex items-center space-x-2">

@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import useBookingStore from "@/store/useBookingStore";
 import useAuthStore from "@/store/useAuthStore";
+import usePlaceStore from "@/store/usePlaceStore";
+import { createBooking } from "@/api/bookingAPI";
 
 const BookingConfirm = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const userId = user.id;
+  const placeId = useBookingStore((state) => state.placeId);
   const { range, place, totalNights } = useBookingStore();
-
+  const { id } = useParams();
   const { register, handleSubmit, setValue, formState } = useForm();
   const { isSubmitting } = formState;
 
   const checkIn = range?.from;
   const checkOut = range?.to;
-  const placeId = place?.id;
 
   useEffect(() => {
     if (placeId) setValue("placeId", placeId);
@@ -25,21 +28,16 @@ const BookingConfirm = () => {
   }, [range, place, setValue]);
 
   const handleBooking = async (value) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     try {
-      // Simulate booking creation API call
-      // const res = await createBooking(token, value);
-      // const bookingId = res.data.result;
-
-      // For now, simulate with random ID
-      const bookingId = Date.now();
-      console.log("Booking created:", value);
-
-      // Navigate to checkout page
-      navigate(`/user/checkout/${bookingId}`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await createBooking(id,userId,value);
+      console.log("Booking created:", res);
+      // นำทางไปหน้า checkout พร้อมส่ง bookingId
+      navigate(`/user/checkout/${res.result}`, {
+        state: { bookingId: res.result },
+      });
     } catch (error) {
-      console.log(error);
+      console.log("Booking error:", error);
     }
   };
 

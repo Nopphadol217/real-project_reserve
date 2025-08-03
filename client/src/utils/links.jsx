@@ -39,11 +39,7 @@ export const userLinks = [
     href: "/user/mybookings",
     label: "การจองของฉัน",
   },
-  {
-    icon: <UserRoundPen />,
-    href: "/user/profile",
-    label: "โปรไฟล์",
-  },
+
 ];
 
 export const privateLinks = [

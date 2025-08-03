@@ -1,8 +1,6 @@
 import { Card } from "../ui/card";
 import { Link } from "react-router";
 import { Bed, Users, Wifi, Car, Coffee } from "lucide-react";
-import FavoriteToggleButton from "../places/FavoriteToggleButton";
-import useFavoriteStore from "@/store/useFavoriteStore";
 
 function PlaceCard({ places }) {
   const {
@@ -18,7 +16,7 @@ function PlaceCard({ places }) {
     amenities,
     roomDetails,
   } = places;
-
+  
   // คำนวณราคาเริ่มต้น (ถูกที่สุด)
   const getMinPrice = () => {
     if (roomDetails && roomDetails.length > 0) {
@@ -75,14 +73,6 @@ function PlaceCard({ places }) {
             </div>
           )}
 
-          {/* Favorite Button */}
-          <div className="absolute top-2 right-2 z-10">
-            {/* <FavoriteToggleButton
-              placeId={id}
-              isFavorite={isPlaceFavorite}
-              name={title}
-            /> */}
-          </div>
         </div>
 
         {/* Content Section - Compact */}

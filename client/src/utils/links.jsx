@@ -38,11 +38,6 @@ export const privateLinks = [
     icon: <Calendar />,
   },
   {
-    href: "/user/favorites",
-    label: "รายการโปรด",
-    icon: <Star />,
-  },
-  {
     href: "/user/myorder",
     label: "ประวัติการจอง",
     icon: <Heart />,

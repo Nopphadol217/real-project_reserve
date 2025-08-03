@@ -2,12 +2,11 @@ import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 import Navbar from "../navbar/Navbar";
 import { MoveRight } from "lucide-react";
-import { useNavigate } from "react-router";
+import SearchSection from "./SearchSection";
 function HeroSection1() {
   // zustand
   const user = useAuthStore((state) => state.user);
   const hydrate = useAuthStore((state) => state.hydrate);
-  const navigate = useNavigate();
 
   useEffect(() => {
     myProfile();
@@ -50,23 +49,18 @@ function HeroSection1() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center xl:justify-start items-center mb-12">
-            <button 
-              onClick={() => navigate('/search')}
-              className="group bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center"
-            >
+            <button className="group  bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center">
               เริ่มค้นหาที่พัก
               <MoveRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
             </button>
 
-            <button 
-              onClick={() => navigate('/about')}
-              className="group border-2 border-red-300 hover:border-red-400 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105"
-            >
+            <button className="group border-2 border-red-300 hover:border-red-400 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
               ดูรายละเอียดเพิ่มเติม
             </button>
           </div>
 
-        
+          {/* Search Section */}
+          <SearchSection />
         </div>
       </div>
     </div>

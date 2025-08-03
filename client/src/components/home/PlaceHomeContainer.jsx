@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Grid3X3, List } from "lucide-react";
+import useAuthStore from "@/store/useAuthStore";
 
 const PlaceHomeContainer = () => {
   const actionPlaces = usePlaceStore((state) => state.actionListPlace);
@@ -301,23 +302,6 @@ const PlaceHomeContainer = () => {
             </Button>
           </div>
         )}
-      </div>
-
-      {/* Map Section */}
-      <div className="bg-gray-50 py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              แผนที่ที่พัก
-            </h2>
-            <p className="text-gray-600">
-              สำรวจที่พักในแต่ละพื้นที่ผ่านแผนที่
-            </p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <MapHome places={filteredPlaces} />
-          </div>
-        </div>
       </div>
     </>
   );

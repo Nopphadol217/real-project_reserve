@@ -142,10 +142,6 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => navigate("/user/myfavorite")}>
-                <Sparkles />
-                รายการโปรด
-              </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
                 การแจ้งเตือน

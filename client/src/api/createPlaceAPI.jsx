@@ -11,8 +11,10 @@ export const readPlace = async (id) => {
   return await axios.get(`${import.meta.env.VITE_API}/place/${id}`)
 };
 
-export const listPlaces = async()=>{
-  return await axios.get(`${import.meta.env.VITE_API}/places`)
+export const listPlaces = async(userId)=>{
+  return await axios.get(`${import.meta.env.VITE_API}/places`, {
+    userId: userId
+  });
 }
   
 

@@ -3,7 +3,7 @@ const renderError = require("../utils/renderError");
 
 exports.authCheck = async (req, res, next) => {
   const token = req.cookies.token;
-  
+ 
 
   try {
 

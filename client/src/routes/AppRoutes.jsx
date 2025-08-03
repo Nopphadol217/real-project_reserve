@@ -9,8 +9,6 @@ import Manage from "@/pages/admin/ManageList";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
 import SearchPage from "@/pages/SearchPage";
-import Search from "@/pages/Search";
-import MyFavorite from "@/pages/user/MyFavorite";
 import Profile from "@/pages/user/profile/Profile";
 import AdminRoute from "./AdminRoute";
 import UserManage from "@/pages/admin/UserManage";
@@ -23,7 +21,6 @@ import Checkout from "@/pages/user/Checkout";
 import Complete from "@/pages/user/Complete";
 import MyOrder from "@/pages/user/MyOrder";
 import MyBookings from "@/pages/user/MyBookings";
-import Favorites from "@/pages/user/Favorites";
 
 function AppRoutes() {
   return (
@@ -39,16 +36,14 @@ function AppRoutes() {
         {/* Public Routes */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="search" element={<Search />} />
+          <Route path="search" element={<SearchPage />} />
           <Route path="place/:id" element={<PlaceDetail />} />
         </Route>
 
         <Route path="user" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="search" element={<Search />} />
           <Route path="profile" element={<Profile />} />
           <Route path="mybookings" element={<MyBookings />} />
-          <Route path="favorites" element={<Favorites />} />
           <Route path="myorder" element={<MyOrder />} />
           <Route path="checkout/:id" element={<Checkout />} />
           <Route path="complete/:session_id" element={<Complete />} />

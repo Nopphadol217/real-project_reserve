@@ -26,33 +26,12 @@ const PlaceHomeContainer = () => {
 
   // Filter places based on search and category
   useEffect(() => {
-    let filtered = places;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (place) =>
-          place.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          place.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    // ตรวจสอบว่า places เป็น array หรือไม่
+    if (!Array.isArray(places)) {
+      setFilteredPlaces([]);
+      return;
     }
 
-    // Filter by category
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (place) => place.category === selectedCategory
-      );
-    }
-
-    setFilteredPlaces(filtered);
-  }, [places, searchTerm, selectedCategory]);
-
-  useEffect(() => {
-    actionPlaces();
-  }, []);
-
-  // Filter places based on search and category
-  useEffect(() => {
     let filtered = places;
 
     // Filter by search term
@@ -75,8 +54,8 @@ const PlaceHomeContainer = () => {
   }, [places, searchTerm, selectedCategory]);
 
   // Bento Grid Layout Component
-  const BentoGrid = ({ places }) => {
-    if (places.length === 0) {
+  const BentoGrid = ({ places = [] }) => {
+    if (!Array.isArray(places) || places.length === 0) {
       return (
         <div className="text-center py-12">
           <p className="text-gray-500">ไม่มีที่พักที่ตรงตามเงื่อนไขการค้นหา</p>
@@ -265,22 +244,22 @@ const PlaceHomeContainer = () => {
               : `ที่พักประเภท ${selectedCategory}`}
           </h2>
           <p className="text-gray-600">
-            พบ {filteredPlaces.length} ที่พัก
+            พบ {filteredPlaces?.length || 0} ที่พัก
             {searchTerm && ` สำหรับคำค้นหา "${searchTerm}"`}
           </p>
         </div>
 
         {viewMode === "bento" ? (
-          <BentoGrid places={filteredPlaces} />
+          <BentoGrid places={filteredPlaces || []} />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-            {filteredPlaces.map((place) => (
+            {(filteredPlaces || []).map((place) => (
               <PlaceCard key={place.id} places={place} />
             ))}
           </div>
         )}
 
-        {filteredPlaces.length === 0 && (
+        {(!filteredPlaces || filteredPlaces.length === 0) && (
           <div className="text-center py-12">
             <div className="mb-4">
               <Search className="w-16 h-16 text-gray-300 mx-auto" />

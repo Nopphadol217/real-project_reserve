@@ -3,8 +3,9 @@ import useAuthStore from "@/store/useAuthStore";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { forwardRef } from "react";
 
-function LogoutButton() {
+const LogoutButton = forwardRef((props, ref) => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
   
@@ -23,12 +24,17 @@ function LogoutButton() {
   };
   return (
     <Button
+   
       className="w-full sm:w-auto mr-2"
       onClick={handleLogout}
       variant="destructive"
+     
     >
       ออกจากระบบ
     </Button>
   );
-}
+});
+
+LogoutButton.displayName = "LogoutButton";
+
 export default LogoutButton;

@@ -51,12 +51,11 @@ function Dashboard() {
   }, [actionListPlace, actionReadUser]);
 
   // Calculate statistics
-  const totalPlaces = places.length;
+  const totalPlaces = Array.isArray(places) ? places.length : 0;
   const totalUsers = Array.isArray(users) ? users.length : 0;
-  const totalRevenue = places.reduce(
-    (sum, place) => sum + (place.price || 0),
-    0
-  );
+  const totalRevenue = Array.isArray(places)
+    ? places.reduce((sum, place) => sum + (place.price || 0), 0)
+    : 0;
   const averagePrice =
     totalPlaces > 0 ? Math.round(totalRevenue / totalPlaces) : 0;
 
@@ -174,7 +173,7 @@ function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {places.slice(0, 5).map((place) => (
+                  {(places || []).slice(0, 5).map((place) => (
                     <TableRow key={place.id} className="hover:bg-gray-50">
                       <TableCell>
                         <div className="space-y-1">
@@ -216,7 +215,7 @@ function Dashboard() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {places.length === 0 && (
+                  {(!Array.isArray(places) || places.length === 0) && (
                     <TableRow>
                       <TableCell
                         colSpan={4}

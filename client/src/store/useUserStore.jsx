@@ -7,9 +7,13 @@ const userStore = (set) => ({
     actionReadUser: async () =>{
         try {
             const res = await readUserAPI()
-            set({users:res.data.user})
+            // ตรวจสอบว่า response มีข้อมูลที่ถูกต้องหรือไม่
+            const users = Array.isArray(res.data.user) ? res.data.user : [];
+            set({users})
         } catch (error) {
             console.log(error)
+            // ถ้าเกิด error ให้ set เป็น array ว่าง
+            set({users: []})
         }
     }
 })

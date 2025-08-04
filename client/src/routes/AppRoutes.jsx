@@ -21,6 +21,7 @@ import Checkout from "@/pages/user/Checkout";
 import Complete from "@/pages/user/Complete";
 import MyOrder from "@/pages/user/MyOrder";
 import MyBookings from "@/pages/user/MyBookings";
+import PaymentManagement from "@/pages/admin/PaymentManagement";
 
 function AppRoutes() {
   return (
@@ -65,6 +66,7 @@ function AppRoutes() {
           <Route path="manage-list" element={<ManageList />} />
           <Route path="manage-list/:id" element={<EditForm />} />
           <Route path="manage-user" element={<UserManage />} />
+          <Route path="payments" element={<PaymentManagement />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

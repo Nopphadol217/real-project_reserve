@@ -50,6 +50,7 @@ model Place {
   roomDetails Room[]     @relation("PlaceRoomDetails")
   bookings    Booking[]
   favorites   Favorite[]
+  payment     Payment? // ข้อมูลการชำระเงินของ place
 }
 
 model Gallery {
@@ -75,19 +76,34 @@ model Room {
 }
 
 model Booking {
-  id         Int      @id @default(autoincrement())
-  placeId    Int
-  roomId     Int
-  userId     Int
-  checkIn    DateTime
-  checkOut   DateTime
-  totalPrice Int
-  status     String   @default("pending") // pending, confirmed, cancelled
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  User       User     @relation(fields: [userId], references: [id])
-  Place      Place    @relation(fields: [placeId], references: [id])
-  Room       Room     @relation(fields: [roomId], references: [id])
+  id            Int      @id @default(autoincrement())
+  placeId       Int
+  roomId        Int
+  userId        Int
+  checkIn       DateTime
+  checkOut      DateTime
+  totalPrice    Int
+  status        String   @default("pending") // pending, confirmed, cancelled
+  paymentStatus String   @default("unpaid") // unpaid, paid, refunded
+  paymentSlip   String? // URL ของสลิปการโอนเงิน
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  User          User     @relation(fields: [userId], references: [id])
+  Place         Place    @relation(fields: [placeId], references: [id])
+  Room          Room     @relation(fields: [roomId], references: [id])
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  placeId       Int      @unique
+  accountName   String // ชื่อบัญชี
+  bankName      String // ชื่อธนาคาร
+  accountNumber String // เลขบัญชี
+  qrCodeUrl     String // URL ของ QR Code PromptPay
+  qrPublicId    String // Cloudinary public_id ของ QR Code
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  Place         Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
 }
 
 model Favorite {

@@ -15,6 +15,7 @@ import {
   Users,
   Shield,
   BarChart3,
+  CreditCard,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -122,6 +123,7 @@ const data = {
         {
           title: "การชำระเงิน",
           url: "/admin/payments",
+          icon: CreditCard,
         },
         {
           title: "การคืนเงิน",
@@ -132,7 +134,7 @@ const data = {
           url: "/admin/financial-reports",
         },
       ],
-    },   
+    },
     {
       title: "เครื่องมือสำหรับผู้ใช้",
       url: "/",

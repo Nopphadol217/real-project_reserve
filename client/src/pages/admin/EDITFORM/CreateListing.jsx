@@ -21,6 +21,7 @@ import FormUploadImage from "@/components/form/FormUploadImage";
 import FormUploadGallery from "@/components/form/FormUploadGallery";
 import RoomManager from "@/components/form/RoomManager";
 import AmenitySelector from "@/components/form/AmenitySelector";
+import UploadPaymentInfo from "@/components/form/UploadPaymentInfo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { placeSchema } from "@/utils/schemas";
 import { useEffect, useState } from "react";
@@ -55,6 +56,7 @@ const CreateListing = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [roomDetails, setRoomDetails] = useState([{ name: "", price: "" }]);
+  const [paymentInfo, setPaymentInfo] = useState(null);
 
   const {
     register,
@@ -276,6 +278,12 @@ const CreateListing = () => {
               lngError={errors.lng?.message}
             />
           </Card>
+
+          {/* Payment Info Section */}
+          <UploadPaymentInfo
+            onPaymentInfoChange={setPaymentInfo}
+            initialData={null}
+          />
 
           {/* Submit Button */}
           <Card className="p-6">

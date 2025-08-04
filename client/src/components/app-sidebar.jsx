@@ -55,14 +55,8 @@ const data = {
           title: "ภาพรวมระบบ",
           url: "/admin/dashboard",
         },
-        {
-          title: "สถิติการใช้งาน",
-          url: "/admin/analytics",
-        },
-        {
-          title: "รายงานประจำวัน",
-          url: "/admin/daily-reports",
-        },
+    
+    
       ],
     },
     {
@@ -125,10 +119,7 @@ const data = {
           url: "/admin/payments",
           icon: CreditCard,
         },
-        {
-          title: "การคืนเงิน",
-          url: "/admin/refunds",
-        },
+      
         {
           title: "รายงานการเงิน",
           url: "/admin/financial-reports",
@@ -149,8 +140,8 @@ const data = {
           url: "/search",
         },
         {
-          title: "ติดต่อเรา",
-          url: "/contact",
+          title: "การจองของฉัน",
+          url: "/user/mybookings",
         },
       ],
     },

@@ -6,6 +6,8 @@ import {
   User,
   Download,
   FileText,
+  CreditCard,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,10 +20,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { listBookings } from "@/api/bookingAPI";
+import { listBookings, checkout, cancelBooking } from "@/api/bookingAPI";
 import { formatDate } from "@/utils/formatDate";
 import { pdf } from "@react-pdf/renderer";
 import BookingPDF from "@/components/booking/BookingPDF";
+import { toast } from "sonner";
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -37,7 +40,13 @@ const MyBookings = () => {
       setLoading(true);
       const response = await listBookings();
       if (response.success) {
-        setBookings(response.bookings);
+        // Filter to show only pending bookings (unpaid)
+        const pendingBookings = response.bookings.filter(
+          (booking) =>
+            booking.paymentStatus === "pending" ||
+            booking.paymentStatus === "unpaid"
+        );
+        setBookings(pendingBookings);
       }
     } catch (err) {
       console.error("Error fetching bookings:", err);
@@ -63,17 +72,93 @@ const MyBookings = () => {
     );
   };
 
-  const downloadPDF = async (booking) => {
+  const getPaymentStatusBadge = (paymentStatus) => {
+    const statusConfig = {
+      pending: { label: "รอการชำระ", variant: "destructive" },
+      confirmed: { label: "ชำระแล้ว", variant: "success" },
+      failed: { label: "ชำระไม่สำเร็จ", variant: "destructive" },
+    };
+
+    const config = statusConfig[paymentStatus] || statusConfig.pending;
+    return (
+      <Badge variant={config.variant} className="font-medium">
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const getPaymentMethodBadge = (booking) => {
+    // ถ้ามี paymentSlip แสดงว่าเป็นการชำระผ่านธนาคาร
+    if (booking.paymentSlip) {
+      return (
+        <Badge variant="outline" className="font-medium">
+          ธนาคาร
+        </Badge>
+      );
+    }
+    // ถ้าไม่มี paymentSlip แต่ status เป็น paid แสดงว่าเป็น Stripe
+    else if (booking.status === "confirmed") {
+      return (
+        <Badge variant="outline" className="font-medium text-blue-600">
+          Stripe
+        </Badge>
+      );
+    }
+    // ถ้าไม่มี paymentSlip และ status เป็น pending อาจเป็น Stripe ที่ยังไม่ได้ชำระ
+    else if (booking.status === "pending") {
+      return (
+        <Badge variant="outline" className="font-medium text-orange-600">
+          Stripe (รอชำระ)
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="font-medium">
+        -
+      </Badge>
+    );
+  };
+
+  const handleContinuePayment = async (booking) => {
     try {
-      const blob = await pdf(<BookingPDF booking={booking} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `booking-${booking.id}-invoice.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
+      toast.loading("กำลังเตรียมหน้าชำระเงิน...");
+      const response = await checkout(booking.id);
+      toast.dismiss();
+
+      if (response.success && response.url) {
+        // Redirect to Stripe checkout
+        window.location.href = response.url;
+      } else {
+        console.error("Failed to create checkout session:", response);
+        toast.error("ไม่สามารถเตรียมหน้าชำระเงินได้");
+        // Fallback: redirect to checkout page
+        window.location.href = `/user/checkout/${booking.id}`;
+      }
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error creating checkout session:", error);
+      toast.dismiss();
+      toast.error("เกิดข้อผิดพลาดในการเตรียมหน้าชำระเงิน");
+      // Fallback: redirect to checkout page
+      window.location.href = `/user/checkout/${booking.id}`;
+    }
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      toast.loading("กำลังยกเลิกการจอง...");
+      const response = await cancelBooking(bookingId);
+      toast.dismiss();
+
+      if (response.data.success) {
+        toast.success("ยกเลิกการจองสำเร็จ");
+        fetchBookings(); // Refresh the list
+      } else {
+        toast.error("ไม่สามารถยกเลิกการจองได้");
+      }
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast.dismiss();
+      toast.error("เกิดข้อผิดพลาดในการยกเลิกการจอง");
     }
   };
 
@@ -121,8 +206,10 @@ const MyBookings = () => {
           <div className="flex items-center gap-3">
             <Calendar className="w-8 h-8 text-blue-600" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">My Bookings</h1>
-              <p className="text-gray-600">ที่จองไว้ทั้งหมด</p>
+              <h1 className="text-2xl font-bold text-gray-800">
+                การจองที่รอชำระเงิน
+              </h1>
+              <p className="text-gray-600">รายการจองที่ยังไม่ได้ชำระเงิน</p>
             </div>
           </div>
         </div>
@@ -135,9 +222,11 @@ const MyBookings = () => {
             <CardContent>
               <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                ไม่มีการจองขณะนี้
+                ไม่มีการจองที่รอชำระเงิน
               </h2>
-              <p className="text-gray-600 mb-6">คุณยังไม่มีการจองที่พักใดๆ</p>
+              <p className="text-gray-600 mb-6">
+                คุณไม่มีการจองที่รอการชำระเงิน
+              </p>
               <Button onClick={() => (window.location.href = "/")}>
                 เริ่มค้นหาที่พัก
               </Button>
@@ -227,7 +316,9 @@ const MyBookings = () => {
                         <TableHead>วันที่ออก</TableHead>
                         <TableHead>จำนวนคืน</TableHead>
                         <TableHead>ยอดรวม</TableHead>
-                        <TableHead>สถานะ</TableHead>
+                        <TableHead>สถานะการจอง</TableHead>
+                        <TableHead>สถานะการชำระ</TableHead>
+                        <TableHead>วิธีการชำระ</TableHead>
                         <TableHead>การดำเนินการ</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -274,15 +365,42 @@ const MyBookings = () => {
                             {getStatusBadge(booking.status)}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => downloadPDF(booking)}
-                              className="flex items-center gap-2"
-                            >
-                              <Download className="w-4 h-4" />
-                              PDF
-                            </Button>
+                            {getPaymentStatusBadge(booking.paymentStatus)}
+                          </TableCell>
+                          <TableCell>
+                            {getPaymentMethodBadge(booking)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <BookingPDF booking={booking} />
+                              {booking.status === "pending" &&
+                                !booking.paymentSlip && (
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleContinuePayment(booking)
+                                    }
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    <CreditCard className="w-4 h-4 mr-1" />
+                                    ชำระเงิน
+                                  </Button>
+                                )}
+                              {(booking.paymentStatus === "pending" ||
+                                booking.paymentStatus === "unpaid") && (
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleCancelBooking(booking.id)
+                                  }
+                                >
+                                  <X className="w-4 h-4 mr-1" />
+                                  ยกเลิก
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

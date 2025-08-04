@@ -56,7 +56,7 @@ const Complete = () => {
   };
 
   const handleViewBookings = () => {
-    navigate("/user/myorder");
+    navigate("/user/myorders");
   };
 
   if (status === "loading") {
@@ -211,7 +211,7 @@ const Complete = () => {
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
                 size="lg"
               >
-                ดูการจองของฉัน
+                ดูการจองที่ชำระแล้ว
               </Button>
               <Button
                 onClick={handleBackToHome}

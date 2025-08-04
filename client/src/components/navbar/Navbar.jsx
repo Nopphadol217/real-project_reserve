@@ -59,10 +59,10 @@ function Navbar() {
                     <Link
                       key={`user-${index}`}
                       to={link.href}
-                      className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
+                      className="text-sm  font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex justify-center  items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-50"
                     >
                       <span className="w-4 h-4">{link.icon}</span>
-                      {link.label}
+                      <span>{link.label}</span>
                     </Link>
                   ))
                 ) : (

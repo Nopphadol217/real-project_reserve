@@ -9,6 +9,8 @@ import {
   Sparkles,
   User,
   Settings,
+  Receipt,
+  Calendar,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -138,6 +140,17 @@ export function NavUser() {
               <DropdownMenuItem onClick={() => navigate("/user/settings")}>
                 <Settings />
                 การตั้งค่า
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => navigate("/user/mybookings")}>
+                <Calendar />
+                การจองที่รอดำเนินการ
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/user/myorders")}>
+                <Receipt />
+                การจองที่ชำระแล้ว
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

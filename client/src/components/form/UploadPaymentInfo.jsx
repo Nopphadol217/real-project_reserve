@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Upload, CreditCard, QrCode, Trash2 } from "lucide-react";
+import { Upload, CreditCard, QrCode, Trash2, RotateCw } from "lucide-react";
 import { toast } from "sonner";
+import { uploadQRCodeAPI, deleteQRCodeAPI } from "@/api/paymentAPI";
+import { resizeFile } from "@/utils/resizeFile";
 
 const UploadPaymentInfo = ({ onPaymentInfoChange, initialData = null }) => {
   const [paymentInfo, setPaymentInfo] = useState({
@@ -40,7 +42,7 @@ const UploadPaymentInfo = ({ onPaymentInfoChange, initialData = null }) => {
     onPaymentInfoChange?.(newPaymentInfo);
   };
 
-  const handleQrCodeUpload = (event) => {
+  const handleQrCodeUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -55,27 +57,74 @@ const UploadPaymentInfo = ({ onPaymentInfoChange, initialData = null }) => {
       return;
     }
 
-    // สร้าง preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setQrPreview(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      setIsUploading(true);
 
-    const newPaymentInfo = { ...paymentInfo, qrCodeFile: file };
-    setPaymentInfo(newPaymentInfo);
-    onPaymentInfoChange?.(newPaymentInfo);
+      // สร้าง preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setQrPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+
+      // อัปโหลดไปยัง Cloudinary
+      const formData = new FormData();
+      formData.append("qrCode", file);
+
+      const response = await uploadQRCodeAPI(formData);
+
+      if (response.data.success) {
+        const uploadedData = response.data.result;
+
+        const newPaymentInfo = {
+          ...paymentInfo,
+          qrCodeFile: file,
+          qrCodeUrl: uploadedData.secure_url,
+          qrCodePublicId: uploadedData.public_id,
+        };
+
+        setPaymentInfo(newPaymentInfo);
+        onPaymentInfoChange?.(newPaymentInfo);
+
+        toast.success("อัปโหลด QR Code สำเร็จ");
+      }
+    } catch (error) {
+      console.error("Error uploading QR Code:", error);
+      toast.error("เกิดข้อผิดพลาดในการอัปโหลด QR Code");
+
+      // รีเซ็ต preview หากอัปโหลดไม่สำเร็จ
+      setQrPreview(null);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const removeQrCode = () => {
-    setQrPreview(null);
-    const newPaymentInfo = { ...paymentInfo, qrCodeFile: null, qrCodeUrl: "" };
-    setPaymentInfo(newPaymentInfo);
-    onPaymentInfoChange?.(newPaymentInfo);
+  const removeQrCode = async () => {
+    try {
+      // ลบจาก Cloudinary ถ้ามี public_id
+      if (paymentInfo.qrCodePublicId) {
+        await deleteQRCodeAPI(paymentInfo.qrCodePublicId);
+      }
 
-    // Reset input file
-    const fileInput = document.getElementById("qr-code-upload");
-    if (fileInput) fileInput.value = "";
+      setQrPreview(null);
+      const newPaymentInfo = {
+        ...paymentInfo,
+        qrCodeFile: null,
+        qrCodeUrl: "",
+        qrCodePublicId: "",
+      };
+      setPaymentInfo(newPaymentInfo);
+      onPaymentInfoChange?.(newPaymentInfo);
+
+      // Reset input file
+      const fileInput = document.getElementById("qr-code-upload");
+      if (fileInput) fileInput.value = "";
+
+      toast.success("ลบ QR Code สำเร็จ");
+    } catch (error) {
+      console.error("Error deleting QR Code:", error);
+      toast.error("เกิดข้อผิดพลาดในการลบ QR Code");
+    }
   };
 
   const validateForm = () => {
@@ -83,7 +132,7 @@ const UploadPaymentInfo = ({ onPaymentInfoChange, initialData = null }) => {
       paymentInfo.accountName.trim() &&
       paymentInfo.bankName &&
       paymentInfo.accountNumber.trim() &&
-      (paymentInfo.qrCodeFile || paymentInfo.qrCodeUrl)
+      (paymentInfo.qrCodeUrl || paymentInfo.qrCodeFile)
     );
   };
 
@@ -163,16 +212,27 @@ const UploadPaymentInfo = ({ onPaymentInfoChange, initialData = null }) => {
             {!qrPreview ? (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
                 <div className="text-center">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  {isUploading ? (
+                    <RotateCw className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  )}
                   <h4 className="text-lg font-medium text-gray-900 mb-2">
-                    อัปโหลด QR Code PromptPay
+                    {isUploading
+                      ? "กำลังอัปโหลด..."
+                      : "อัปโหลด QR Code PromptPay"}
                   </h4>
                   <p className="text-sm text-gray-600 mb-4">
                     รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB
                   </p>
-                  <Button variant="outline" asChild>
-                    <label htmlFor="qr-code-upload" className="cursor-pointer">
-                      เลือกไฟล์
+                  <Button variant="outline" asChild disabled={isUploading}>
+                    <label
+                      htmlFor="qr-code-upload"
+                      className={`cursor-pointer ${
+                        isUploading ? "cursor-not-allowed opacity-50" : ""
+                      }`}
+                    >
+                      {isUploading ? "กำลังอัปโหลด..." : "เลือกไฟล์"}
                     </label>
                   </Button>
                   <input
@@ -181,6 +241,7 @@ const UploadPaymentInfo = ({ onPaymentInfoChange, initialData = null }) => {
                     accept="image/*"
                     onChange={handleQrCodeUpload}
                     className="hidden"
+                    disabled={isUploading}
                   />
                 </div>
               </div>

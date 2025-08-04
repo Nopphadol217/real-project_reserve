@@ -15,6 +15,7 @@ exports.createPlace = async (req, res, next) => {
       rooms, // จำนวนห้อง
       amenities, // สิ่งอำนวยความสะดวก
       roomDetails, // รายละเอียดห้องแต่ละห้อง
+      paymentInfo, // ข้อมูลการชำระเงิน
     } = req.body;
     console.log("req.body", req.body);
 
@@ -51,7 +52,27 @@ exports.createPlace = async (req, res, next) => {
       });
     }
 
-    // 3️⃣ สร้างรายละเอียดห้องแต่ละห้อง
+    // 3️⃣ สร้างข้อมูลการชำระเงิน (ถ้ามี)
+    if (
+      paymentInfo &&
+      paymentInfo.accountName &&
+      paymentInfo.bankName &&
+      paymentInfo.accountNumber
+    ) {
+      await prisma.payment.create({
+        data: {
+          accountName: paymentInfo.accountName,
+          bankName: paymentInfo.bankName,
+          accountNumber: paymentInfo.accountNumber,
+          qrCodeUrl: paymentInfo.qrCodeUrl || null,
+          qrCodePublicId: paymentInfo.qrCodePublicId || null,
+          userId: userId,
+          placeId: place.id,
+        },
+      });
+    }
+
+    // 4️⃣ สร้างรายละเอียดห้องแต่ละห้อง
     if (roomDetails && roomDetails.length > 0) {
       const roomData = roomDetails.map((room) => ({
         name: room.name,

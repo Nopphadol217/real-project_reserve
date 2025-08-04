@@ -25,9 +25,12 @@ import {
   XCircle,
   Clock,
   Eye,
+  Check,
+  X,
   CreditCard,
   AlertCircle,
   Download,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -96,15 +99,81 @@ const PaymentManagement = () => {
     }
   };
 
+  const handleConfirmBookingAndPayment = async (bookingId) => {
+    try {
+      // For Stripe payments that are paid but booking status is still pending
+      await confirmPaymentAPI(bookingId);
+      toast.success("ยืนยันการจองและการชำระเงินสำเร็จ");
+      fetchData(); // รีเฟรชข้อมูล
+    } catch (error) {
+      console.error("Error confirming booking and payment:", error);
+      toast.error("เกิดข้อผิดพลาดในการยืนยันการจองและการชำระเงิน");
+    }
+  };
+
   const getPaymentStatusBadge = (status) => {
     const statusConfig = {
       unpaid: { label: "ยังไม่ชำระ", variant: "secondary", icon: Clock },
       pending: { label: "รอตรวจสอบ", variant: "warning", icon: AlertCircle },
       paid: { label: "ชำระแล้ว", variant: "success", icon: CheckCircle },
+      confirmed: { label: "ชำระแล้ว", variant: "success", icon: CheckCircle },
       rejected: { label: "ปฏิเสธ", variant: "destructive", icon: XCircle },
     };
 
     const config = statusConfig[status] || statusConfig.unpaid;
+    const Icon = config.icon;
+
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const getPaymentMethodBadge = (booking) => {
+    // ถ้ามี paymentSlip แสดงว่าชำระผ่าน Bank Transfer
+    if (booking.paymentSlip) {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <Building2 className="w-3 h-3" />
+          โอนธนาคาร
+        </Badge>
+      );
+    }
+    // ถ้าไม่มี paymentSlip แต่มี paymentStatus = paid หรือ confirmed แสดงว่าชำระผ่าน Stripe
+    else if (
+      booking.paymentStatus === "paid" ||
+      booking.paymentStatus === "confirmed"
+    ) {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <CreditCard className="w-3 h-3" />
+          Stripe
+        </Badge>
+      );
+    }
+    // ถ้าสถานะ pending และไม่มี slip แสดงว่าเป็น Stripe ที่ยังไม่ได้ชำระ
+    else if (booking.paymentStatus === "pending") {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          Stripe (รอชำระ)
+        </Badge>
+      );
+    }
+    return null;
+  };
+
+  const getBookingStatusBadge = (status) => {
+    const statusConfig = {
+      pending: { label: "รอยืนยัน", variant: "warning", icon: Clock },
+      confirmed: { label: "ยืนยันแล้ว", variant: "success", icon: CheckCircle },
+      cancelled: { label: "ยกเลิก", variant: "destructive", icon: XCircle },
+      completed: { label: "เสร็จสิ้น", variant: "default", icon: CheckCircle },
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
     const Icon = config.icon;
 
     return (
@@ -144,7 +213,7 @@ const PaymentManagement = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mx-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -181,7 +250,13 @@ const PaymentManagement = () => {
               <div>
                 <p className="text-sm text-gray-600">ชำระแล้ว</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {allBookings.filter((b) => b.paymentStatus === "paid").length}
+                  {
+                    allBookings.filter(
+                      (b) =>
+                        b.paymentStatus === "paid" ||
+                        b.paymentStatus === "confirmed"
+                    ).length
+                  }
                 </p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
@@ -257,6 +332,8 @@ const PaymentManagement = () => {
                       <TableHead>การจอง</TableHead>
                       <TableHead>ลูกค้า</TableHead>
                       <TableHead>ยอดเงิน</TableHead>
+                      <TableHead>วิธีการชำระ</TableHead>
+                      <TableHead>สถานะการจอง</TableHead>
                       <TableHead>วันที่จอง</TableHead>
                       <TableHead>สลิป</TableHead>
                       <TableHead>การจัดการ</TableHead>
@@ -291,45 +368,75 @@ const PaymentManagement = () => {
                             {formatCurrency(booking.totalPrice)}
                           </p>
                         </TableCell>
+                        <TableCell>{getPaymentMethodBadge(booking)}</TableCell>
+                        <TableCell>
+                          {getBookingStatusBadge(booking.status)}
+                        </TableCell>
                         <TableCell>
                           <p className="text-sm">
                             {formatDate(booking.createdAt)}
                           </p>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedBooking(booking);
-                              setShowSlipDialog(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            ดูสลิป
-                          </Button>
+                          {booking.paymentSlip ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setShowSlipDialog(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              ดูสลิป
+                            </Button>
+                          ) : (
+                            <span className="text-sm text-gray-500">
+                              ไม่มีสลิป
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleConfirmPayment(booking.id)}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              ยืนยัน
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                setSelectedBooking(booking);
-                                setShowRejectDialog(true);
-                              }}
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              ปฏิเสธ
-                            </Button>
+                            {booking.paymentSlip ? (
+                              // Bank Transfer Payment - รอตรวจสอบสลิป
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleConfirmPayment(booking.id)
+                                  }
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  อนุมัติสลิป
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    setSelectedBooking(booking);
+                                    setShowRejectDialog(true);
+                                  }}
+                                >
+                                  <XCircle className="w-4 h-4 mr-1" />
+                                  ปฏิเสธสลิป
+                                </Button>
+                              </>
+                            ) : (
+                              // Stripe Payment - รอการชำระเงิน
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setShowRejectDialog(true);
+                                }}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                ยกเลิกการจอง
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -354,6 +461,8 @@ const PaymentManagement = () => {
                     <TableHead>ลูกค้า</TableHead>
                     <TableHead>ยอดเงิน</TableHead>
                     <TableHead>สถานะการชำระ</TableHead>
+                    <TableHead>วิธีการชำระ</TableHead>
+                    <TableHead>สถานะการจอง</TableHead>
                     <TableHead>วันที่จอง</TableHead>
                     <TableHead>การจัดการ</TableHead>
                   </TableRow>
@@ -388,25 +497,90 @@ const PaymentManagement = () => {
                       <TableCell>
                         {getPaymentStatusBadge(booking.paymentStatus)}
                       </TableCell>
+                      <TableCell>{getPaymentMethodBadge(booking)}</TableCell>
+                      <TableCell>
+                        {getBookingStatusBadge(booking.status)}
+                      </TableCell>
                       <TableCell>
                         <p className="text-sm">
                           {formatDate(booking.createdAt)}
                         </p>
                       </TableCell>
                       <TableCell>
-                        {booking.paymentSlip && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedBooking(booking);
-                              setShowSlipDialog(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            ดูสลิป
-                          </Button>
-                        )}
+                        <div className="flex space-x-2">
+                          {booking.paymentSlip && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setShowSlipDialog(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              ดูสลิป
+                            </Button>
+                          )}
+                          {/* Bank Transfer - ปุ่มสำหรับสลิปที่รอตรวจสอบ */}
+                          {booking.paymentSlip &&
+                            booking.paymentStatus === "pending" && (
+                              <>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleConfirmPayment(booking.id)
+                                  }
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Check className="w-4 h-4 mr-1" />
+                                  อนุมัติสลิป
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedBooking(booking);
+                                    setShowRejectDialog(true);
+                                  }}
+                                >
+                                  <X className="w-4 h-4 mr-1" />
+                                  ปฏิเสธสลิป
+                                </Button>
+                              </>
+                            )}
+                          {/* Stripe - ปุ่มสำหรับการจองที่ชำระผ่าน Stripe แล้วแต่ยังไม่ได้ยืนยันการจอง */}
+                          {!booking.paymentSlip &&
+                            booking.paymentStatus === "paid" &&
+                            booking.status === "pending" && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() =>
+                                  handleConfirmBookingAndPayment(booking.id)
+                                }
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Check className="w-4 h-4 mr-1" />
+                                ยืนยันการจอง
+                              </Button>
+                            )}
+                          {/* Cancel - ปุ่มสำหรับยกเลิกการจองที่ยังไม่ได้ชำระ */}
+                          {booking.paymentStatus === "pending" &&
+                            !booking.paymentSlip && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setShowRejectDialog(true);
+                                }}
+                              >
+                                <X className="w-4 h-4 mr-1" />
+                                ยกเลิกการจอง
+                              </Button>
+                            )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -452,17 +626,27 @@ const PaymentManagement = () => {
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>ปฏิเสธการชำระเงิน</DialogTitle>
+            <DialogTitle>
+              {selectedBooking?.paymentSlip
+                ? "ปฏิเสธสลิปการโอนเงิน"
+                : "ยกเลิกการจอง"}
+            </DialogTitle>
             <DialogDescription>
               การจอง #{selectedBooking?.id} - {selectedBooking?.Place?.title}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              กรุณาระบุเหตุผลในการปฏิเสธการชำระเงิน
+              {selectedBooking?.paymentSlip
+                ? "กรุณาระบุเหตุผลในการปฏิเสธสลิปการโอนเงิน"
+                : "กรุณาระบุเหตุผลในการยกเลิกการจอง"}
             </p>
             <Textarea
-              placeholder="เช่น สลิปการโอนเงินไม่ชัดเจน, ยอดเงินไม่ตรง, etc."
+              placeholder={
+                selectedBooking?.paymentSlip
+                  ? "เช่น สลิปการโอนเงินไม่ชัดเจน, ยอดเงินไม่ตรง, etc."
+                  : "เช่น ลูกค้าไม่ชำระเงินตามกำหนด, ยกเลิกตามคำร้องขอ, etc."
+              }
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
@@ -483,7 +667,7 @@ const PaymentManagement = () => {
               onClick={handleRejectPayment}
               disabled={!rejectReason.trim()}
             >
-              ปฏิเสธการชำระเงิน
+              {selectedBooking?.paymentSlip ? "ปฏิเสธสลิป" : "ยกเลิกการจอง"}
             </Button>
           </DialogFooter>
         </DialogContent>

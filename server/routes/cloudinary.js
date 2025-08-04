@@ -6,6 +6,8 @@ const {
   deleteGallery,
   deleteTempMainImage,
   deleteTempGallery,
+  uploadQRCode,
+  deleteQRCode,
 } = require("../controllers/cloudinary");
 const router = express.Router();
 
@@ -17,6 +19,9 @@ router.post("/upload-main-image", createImage);
 // route.post("/upload-gallery")
 router.post("/upload-gallery", createGallery);
 
+//@ENDPOINT METHOD POST
+//UPLOAD QR CODE [http://localhost:5000/api/upload-qr-code]
+router.post("/upload-qr-code", uploadQRCode);
 
 //@ENDPOINT METHOD DELETE
 //Delete Gallery [http://localhost:5000/api/delete-gallery-image]
@@ -25,6 +30,10 @@ router.delete("/delete-gallery-image", deleteGallery);
 //@ENDPOINT METHOD DELETE
 //Delete main Image [http://localhost:5000/api/upload-main-image]
 router.delete("/delete-main-image", deleteImage);
+
+//@ENDPOINT METHOD DELETE
+//Delete QR Code [http://localhost:5000/api/delete-qr-code]
+router.delete("/delete-qr-code", deleteQRCode);
 
 //@ENDPOINT METHOD DELETE
 // route.delete("http://localhost:5000/api/delete-temp-main-image")

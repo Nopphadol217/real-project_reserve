@@ -20,6 +20,7 @@ import PlaceDetail from "@/pages/user/PlaceDetail";
 import Checkout from "@/pages/user/Checkout";
 import Complete from "@/pages/user/Complete";
 import MyOrder from "@/pages/user/MyOrder";
+import MyOrders from "@/pages/user/MyOrders";
 import MyBookings from "@/pages/user/MyBookings";
 import PaymentManagement from "@/pages/admin/PaymentManagement";
 
@@ -46,6 +47,7 @@ function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="mybookings" element={<MyBookings />} />
           <Route path="myorder" element={<MyOrder />} />
+          <Route path="myorders" element={<MyOrders />} />
           <Route path="checkout/:id" element={<Checkout />} />
           <Route path="complete/:session_id" element={<Complete />} />
         </Route>

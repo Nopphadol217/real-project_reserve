@@ -1,43 +1,30 @@
 const express = require("express");
-const {
-  uploadPaymentInfo,
-  getPaymentInfo,
-  updatePaymentInfo,
-  deletePaymentInfo,
-  uploadPaymentSlip,
-  confirmPayment,
-  rejectPayment,
-  getPendingPayments,
-} = require("../controllers/payment");
-const { getAllBookingsWithPayment } = require("../controllers/booking");
+const multer = require("multer");
 const { authCheck } = require("../middleware/authCheck");
-const { upload, handleMulterError } = require("../middleware/upload");
-
+const prisma = require("../config/prisma");
+const cloudinary = require("cloudinary").v2;
 const router = express.Router();
 
-// Routes สำหรับผู้ประกอบการ (เดิม - per place)
-router.post(
-  "/upload-info",
-  authCheck,
-  upload.single("qrCode"),
-  uploadPaymentInfo
-);
-router.get("/info/:placeId", authCheck, getPaymentInfo);
-// Route สำหรับ public access (ไม่ต้องใช้ auth) - สำหรับลูกค้าที่จะจอง
-router.get("/payment/info/:placeId", getPaymentInfo);
-router.put(
-  "/update/:placeId",
-  authCheck,
-  upload.single("qrCode"),
-  updatePaymentInfo
-);
-router.delete("/delete/:placeId", authCheck, deletePaymentInfo);
+// Multer configuration สำหรับอัปโหลดไฟล์
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
 
-// Routes สำหรับผู้ประกอบการ (ใหม่ - per user)
+// ดึงข้อมูลการชำระเงินของผู้ประกอบการ
 router.get("/business/info", authCheck, async (req, res) => {
   try {
     const userId = req.user.id;
-    const prisma = require("../config/prisma");
 
     const paymentInfo = await prisma.payment.findFirst({
       where: {
@@ -66,6 +53,7 @@ router.get("/business/info", authCheck, async (req, res) => {
   }
 });
 
+// สร้างข้อมูลการชำระเงินใหม่
 router.post(
   "/business/info",
   authCheck,
@@ -75,12 +63,12 @@ router.post(
       const userId = req.user.id;
       const { accountName, accountNumber, bankName, promptPayId, notes } =
         req.body;
-      const prisma = require("../config/prisma");
-      const cloudinary = require("cloudinary").v2;
 
       // ตรวจสอบว่ามีข้อมูลอยู่แล้วหรือไม่
       const existingPayment = await prisma.payment.findFirst({
-        where: { userId: userId },
+        where: {
+          userId: userId,
+        },
       });
 
       if (existingPayment) {
@@ -142,6 +130,7 @@ router.post(
   }
 );
 
+// อัปเดตข้อมูลการชำระเงิน
 router.put(
   "/business/info",
   authCheck,
@@ -151,12 +140,12 @@ router.put(
       const userId = req.user.id;
       const { accountName, accountNumber, bankName, promptPayId, notes } =
         req.body;
-      const prisma = require("../config/prisma");
-      const cloudinary = require("cloudinary").v2;
 
       // ค้นหาข้อมูลเดิม
       const existingPayment = await prisma.payment.findFirst({
-        where: { userId: userId },
+        where: {
+          userId: userId,
+        },
       });
 
       if (!existingPayment) {
@@ -205,7 +194,9 @@ router.put(
 
       // อัปเดตข้อมูล
       const updatedPayment = await prisma.payment.update({
-        where: { id: existingPayment.id },
+        where: {
+          id: existingPayment.id,
+        },
         data: {
           accountName,
           accountNumber,
@@ -233,16 +224,56 @@ router.put(
   }
 );
 
-// Routes สำหรับลูกค้า
-router.post("/payment/upload-slip/:bookingId", authCheck, uploadPaymentSlip);
+// ลบข้อมูลการชำระเงิน
+router.delete("/business/info", authCheck, async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-// Routes สำหรับ admin
-router.put("/confirm/:bookingId", authCheck, confirmPayment);
-router.put("/reject/:bookingId", authCheck, rejectPayment);
-router.get("/payment/pending", authCheck, getPendingPayments);
-router.get("/payment/bookings", authCheck, getAllBookingsWithPayment);
+    const existingPayment = await prisma.payment.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
 
-// Error handler for multer
-router.use(handleMulterError);
+    if (!existingPayment) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบข้อมูลการชำระเงิน",
+      });
+    }
+
+    // ลบ QR Code จาก Cloudinary ถ้ามี
+    if (existingPayment.qrCodeUrl) {
+      try {
+        const publicId = existingPayment.qrCodeUrl
+          .split("/")
+          .pop()
+          .split(".")[0];
+        await cloudinary.uploader.destroy(`payment_qr_codes/${publicId}`);
+      } catch (deleteError) {
+        console.log("Error deleting QR code:", deleteError);
+      }
+    }
+
+    // ลับข้อมูลจากฐานข้อมูล
+    await prisma.payment.delete({
+      where: {
+        id: existingPayment.id,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "ลบข้อมูลการชำระเงินสำเร็จ",
+    });
+  } catch (error) {
+    console.error("Error deleting payment info:", error);
+    res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการลบข้อมูล",
+      error: error.message,
+    });
+  }
+});
 
 module.exports = router;

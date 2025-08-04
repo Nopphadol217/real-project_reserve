@@ -9,6 +9,43 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET, // Click 'View API Keys' above to copy your API secret
 });
 
+// อัปโหลด QR Code สำหรับ createListing
+exports.uploadQRCode = async (req, res, next) => {
+  try {
+    const { qrCode } = req.body;
+
+    const result = await cloudinary.uploader.upload(qrCode, {
+      public_id: `qr_${Date.now()}`,
+      resource_type: "auto",
+      folder: `payment/qr_codes`,
+    });
+
+    res.json({ success: true, result: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ลบ QR Code
+exports.deleteQRCode = async (req, res, next) => {
+  try {
+    const { public_id } = req.body;
+
+    if (!public_id) {
+      return res.status(400).json({ message: "Missing public_id" });
+    }
+
+    // ลบจาก Cloudinary
+    await cloudinary.uploader.destroy(public_id);
+
+    res
+      .status(200)
+      .json({ success: true, message: "QR Code deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.createImage = async (req, res, next) => {
   try {
     const { image } = req.body;
@@ -55,7 +92,7 @@ exports.deleteImage = async (req, res, next) => {
 exports.createGallery = async (req, res, next) => {
   try {
     const { image } = req.body; // แก้ placesId → placeId
-    console.log(image)
+    console.log(image);
     const result = await cloudinary.uploader.upload(image, {
       public_id: `${Date.now()}`,
       resource_type: "auto",
@@ -83,7 +120,9 @@ exports.deleteGallery = async (req, res, next) => {
     });
 
     if (!targetImage) {
-      return res.status(404).json({ message: "Image not found for this place" });
+      return res
+        .status(404)
+        .json({ message: "Image not found for this place" });
     }
 
     // ✅ ลบจากฐานข้อมูล
@@ -108,11 +147,13 @@ exports.deleteTempMainImage = async (req, res, next) => {
 
     // ลบจาก Cloudinary เท่านั้น (ไม่ต้องลบจาก DB เพราะยังไม่ได้บันทึก)
     const result = await cloudinary.uploader.destroy(public_id);
-    
-    if (result.result === 'ok') {
+
+    if (result.result === "ok") {
       res.status(200).json({ message: "Temp image deleted successfully" });
     } else {
-      res.status(400).json({ message: "Failed to delete image from Cloudinary" });
+      res
+        .status(400)
+        .json({ message: "Failed to delete image from Cloudinary" });
     }
   } catch (error) {
     next(error);
@@ -130,13 +171,100 @@ exports.deleteTempGallery = async (req, res, next) => {
 
     // ลบจาก Cloudinary เท่านั้น (ไม่ต้องลบจาก DB เพราะยังไม่ได้บันทึก)
     const result = await cloudinary.uploader.destroy(public_id);
-    
-    if (result.result === 'ok') {
-      res.status(200).json({ message: "Temp gallery image deleted successfully" });
+
+    if (result.result === "ok") {
+      res
+        .status(200)
+        .json({ message: "Temp gallery image deleted successfully" });
     } else {
-      res.status(400).json({ message: "Failed to delete image from Cloudinary" });
+      res
+        .status(400)
+        .json({ message: "Failed to delete image from Cloudinary" });
     }
   } catch (error) {
+    next(error);
+  }
+};
+
+// อัปโหลด QR Code สำหรับการชำระเงิน
+exports.uploadQRCode = async (req, res, next) => {
+  try {
+    // Check if file was uploaded via multer
+    if (req.file) {
+      // Convert buffer to base64 for Cloudinary
+      const fileStr = `data:${
+        req.file.mimetype
+      };base64,${req.file.buffer.toString("base64")}`;
+
+      const result = await cloudinary.uploader.upload(fileStr, {
+        public_id: `qr-${Date.now()}`,
+        resource_type: "auto",
+        folder: `payment/qr_codes`,
+      });
+
+      res.json({
+        success: true,
+        result: {
+          public_id: result.public_id,
+          secure_url: result.secure_url,
+        },
+      });
+    } else if (req.body.qrCode) {
+      // Fallback to body data (base64)
+      const result = await cloudinary.uploader.upload(req.body.qrCode, {
+        public_id: `qr-${Date.now()}`,
+        resource_type: "auto",
+        folder: `payment/qr_codes`,
+      });
+
+      res.json({
+        success: true,
+        result: {
+          public_id: result.public_id,
+          secure_url: result.secure_url,
+        },
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Missing QR Code image",
+      });
+    }
+  } catch (error) {
+    console.error("QR Code upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload QR Code",
+      error: error.message,
+    });
+  }
+};
+
+// ลบ QR Code
+exports.deleteQRCode = async (req, res, next) => {
+  try {
+    const { public_id } = req.body;
+
+    if (!public_id) {
+      return res.status(400).json({ message: "Missing public_id" });
+    }
+
+    // ลบจาก Cloudinary
+    const result = await cloudinary.uploader.destroy(public_id);
+
+    if (result.result === "ok") {
+      res.status(200).json({
+        success: true,
+        message: "QR Code deleted successfully",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Failed to delete QR Code from Cloudinary",
+      });
+    }
+  } catch (error) {
+    console.error("QR Code delete error:", error);
     next(error);
   }
 };

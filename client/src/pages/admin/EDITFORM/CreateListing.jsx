@@ -101,6 +101,7 @@ const CreateListing = () => {
         ...data,
         userId: user.id,
         roomDetails: roomDetails.filter((room) => room.name && room.price), // กรองห้องที่มีข้อมูลครบ
+        paymentInfo: paymentInfo, // เพิ่มข้อมูลการชำระเงิน
       };
       console.log(payload);
 

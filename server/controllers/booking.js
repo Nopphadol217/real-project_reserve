@@ -5,14 +5,13 @@ const { calTotal } = require("../utils/booking");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.listBookings = async (req, res, next) => {
-  //แสดง list ที่ จองไว้ แสดงสถานะจ่ายแล้ว
+  //แสดง list ที่ จองไว้ แสดงสถานะทั้งหมด
   try {
     const { id } = req.user;
 
     const bookings = await prisma.booking.findMany({
       where: {
         userId: id,
-        status: "confirmed",
       },
       include: {
         Place: {
@@ -31,11 +30,15 @@ exports.listBookings = async (req, res, next) => {
         },
       },
       orderBy: {
-        checkIn: "asc",
+        createdAt: "desc",
       },
     });
 
-    res.json({ result: bookings, message: "Your bookings" });
+    res.json({
+      success: true,
+      bookings: bookings,
+      message: "Your bookings",
+    });
   } catch (error) {
     next(error);
   }
@@ -113,6 +116,156 @@ exports.createBooking = async (req, res, next) => {
     res.json({ message: "Booking Successfully", result: bookingId });
   } catch (error) {
     console.error("Create booking error:", error);
+    next(error);
+  }
+};
+
+// Create booking for bank transfer payment
+exports.createBankTransferBooking = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { placeId, checkIn, checkOut, totalPrice, roomId } = req.body;
+
+    console.log("Create bank transfer booking:", req.body);
+
+    // ตรวจสอบว่า place มีอยู่จริง
+    const place = await prisma.place.findUnique({
+      where: { id: parseInt(placeId) },
+      include: {
+        roomDetails: true,
+      },
+    });
+
+    if (!place) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบที่พักที่เลือก",
+      });
+    }
+
+    // ตรวจสอบความถูกต้องของวันที่
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: "ไม่สามารถจองย้อนหลังได้",
+      });
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return res.status(400).json({
+        success: false,
+        message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก",
+      });
+    }
+
+    // ตรวจสอบการจองที่ซ้ำซ้อน
+    const conflictBookings = await prisma.booking.findMany({
+      where: {
+        placeId: parseInt(placeId),
+        AND: [
+          {
+            checkIn: {
+              lt: checkOutDate,
+            },
+          },
+          {
+            checkOut: {
+              gt: checkInDate,
+            },
+          },
+        ],
+        status: {
+          in: ["pending", "confirmed"],
+        },
+      },
+    });
+
+    console.log("Conflict bookings found:", conflictBookings.length);
+    console.log("Checking dates:", {
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      conflictBookings: conflictBookings.map((b) => ({
+        id: b.id,
+        checkIn: b.checkIn,
+        checkOut: b.checkOut,
+        status: b.status,
+      })),
+    });
+
+    if (conflictBookings.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "วันที่เลือกถูกจองแล้ว",
+        conflictBookings: conflictBookings.map((b) => ({
+          checkIn: b.checkIn,
+          checkOut: b.checkOut,
+          status: b.status,
+        })),
+      });
+    }
+
+    // หาห้องที่เหมาะสม
+    let finalRoomId = null;
+    if (roomId) {
+      const selectedRoom = place.roomDetails.find(
+        (room) => room.id === parseInt(roomId)
+      );
+      if (selectedRoom) {
+        finalRoomId = parseInt(roomId);
+      }
+    } else if (place.roomDetails.length > 0) {
+      finalRoomId = place.roomDetails[0].id;
+    }
+
+    if (!finalRoomId && place.roomDetails.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "ไม่พบห้องที่เลือก",
+      });
+    }
+
+    // สร้าง booking ใหม่
+    const booking = await prisma.booking.create({
+      data: {
+        userId: parseInt(userId),
+        placeId: parseInt(placeId),
+        roomId: finalRoomId,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        totalPrice: parseInt(totalPrice),
+        status: "pending",
+        paymentStatus: "unpaid",
+      },
+      include: {
+        Place: {
+          select: {
+            id: true,
+            title: true,
+            secure_url: true,
+          },
+        },
+        Room: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+          },
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "สร้างการจองสำเร็จ",
+      data: booking,
+    });
+  } catch (error) {
+    console.error("Create bank transfer booking error:", error);
     next(error);
   }
 };
@@ -237,13 +390,14 @@ exports.checkOutStatus = async (req, res, next) => {
 
     // Update DB Status with transaction
     const result = await prisma.$transaction(async (prisma) => {
-      // Update booking status
+      // Update booking status and payment status
       const updatedBooking = await prisma.booking.update({
         where: {
           id: parseInt(bookingId),
         },
         data: {
           status: "confirmed",
+          paymentStatus: "paid", // Update payment status to paid for Stripe payments
         },
         include: {
           Room: true,
@@ -326,6 +480,119 @@ exports.clearRoomBookings = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Clear room bookings error:", error);
+    next(error);
+  }
+};
+
+exports.cancelBooking = async (req, res, next) => {
+  try {
+    const { bookingId } = req.params;
+    const userId = req.user.id;
+
+    // Find the booking
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id: parseInt(bookingId),
+        userId: userId,
+      },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบการจองที่ต้องการยกเลิก",
+      });
+    }
+
+    // Check if booking can be cancelled (only pending/unpaid bookings)
+    if (
+      booking.paymentStatus !== "pending" &&
+      booking.paymentStatus !== "unpaid"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "ไม่สามารถยกเลิกการจองที่ชำระเงินแล้ว",
+      });
+    }
+
+    // Update booking status to cancelled
+    const updatedBooking = await prisma.booking.update({
+      where: {
+        id: parseInt(bookingId),
+      },
+      data: {
+        status: "cancelled",
+        paymentStatus: "cancelled",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "ยกเลิกการจองสำเร็จ",
+      booking: updatedBooking,
+    });
+  } catch (error) {
+    console.error("Cancel booking error:", error);
+    next(error);
+  }
+};
+
+// Get all bookings with payment status for MyOrders page
+exports.getAllBookingsWithPayment = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId: id,
+        paymentStatus: "paid",
+      },
+      include: {
+        Place: {
+          select: {
+            id: true,
+            title: true,
+            secure_url: true,
+          },
+        },
+        Room: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Calculate total statistics
+    const totalOrders = bookings.length;
+    const totalNights = bookings.reduce((sum, booking) => {
+      const checkIn = new Date(booking.checkIn);
+      const checkOut = new Date(booking.checkOut);
+      const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+      return sum + nights;
+    }, 0);
+    const totalAmount = bookings.reduce(
+      (sum, booking) => sum + booking.totalPrice,
+      0
+    );
+
+    res.json({
+      success: true,
+      bookings,
+      statistics: {
+        totalOrders,
+        totalNights,
+        totalAmount,
+      },
+      message: "Paid bookings retrieved successfully",
+    });
+  } catch (error) {
+    console.error("Get paid bookings error:", error);
     next(error);
   }
 };

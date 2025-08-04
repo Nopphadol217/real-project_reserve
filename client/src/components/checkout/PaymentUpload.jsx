@@ -16,9 +16,11 @@ import {
   AlertCircle,
   CreditCard,
   QrCode,
+  RotateCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { uploadPaymentSlipAPI } from "@/api/paymentAPI";
+import { resizeFile } from "@/utils/resizeFile";
 
 const PaymentUpload = ({ booking, paymentInfo, onPaymentUploaded }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -71,21 +73,27 @@ const PaymentUpload = ({ booking, paymentInfo, onPaymentUploaded }) => {
       return;
     }
 
-    // สร้าง preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setSlipPreview(e.target.result);
-    };
-    reader.readAsDataURL(file);
-
     try {
       setIsUploading(true);
-      await uploadPaymentSlipAPI(booking.id, file);
+
+      // สร้าง preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSlipPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Resize รูปภาพก่อนอัปโหลด
+      const resizedImage = await resizeFile(file);
+
+      await uploadPaymentSlipAPI(booking.id, resizedImage);
       toast.success("อัปโหลดสลิปการโอนเงินสำเร็จ");
       onPaymentUploaded?.();
     } catch (error) {
       console.error("Error uploading slip:", error);
-      toast.error("เกิดข้อผิดพลาดในการอัปโหลดสลิป");
+      toast.error(
+        error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปโหลดสลิป"
+      );
       setSlipPreview(null);
     } finally {
       setIsUploading(false);
@@ -237,15 +245,24 @@ const PaymentUpload = ({ booking, paymentInfo, onPaymentUploaded }) => {
             {!slipPreview && !booking.paymentSlip ? (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
                 <div className="text-center">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  {isUploading ? (
+                    <RotateCw className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  )}
                   <h4 className="text-lg font-medium text-gray-900 mb-2">
-                    อัปโหลดสลิปการโอนเงิน
+                    {isUploading ? "กำลังอัปโหลด..." : "อัปโหลดสลิปการโอนเงิน"}
                   </h4>
                   <p className="text-sm text-gray-600 mb-4">
                     รองรับไฟล์ JPG, PNG ขนาดไม่เกิน 5MB
                   </p>
                   <Button variant="outline" disabled={isUploading} asChild>
-                    <label htmlFor="slip-upload" className="cursor-pointer">
+                    <label
+                      htmlFor="slip-upload"
+                      className={`cursor-pointer ${
+                        isUploading ? "cursor-not-allowed opacity-50" : ""
+                      }`}
+                    >
                       {isUploading ? "กำลังอัปโหลด..." : "เลือกไฟล์"}
                     </label>
                   </Button>

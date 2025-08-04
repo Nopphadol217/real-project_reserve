@@ -9,6 +9,7 @@ const useBookingStore = create((set, get) => ({
   place: null,
   selectedRoom: null,
   totalNights: 0,
+  nights: 0, // เพิ่มสำหรับ compatibility
 
   // Actions
   setPlaceId: (placeId) => set({ placeId }),
@@ -21,7 +22,7 @@ const useBookingStore = create((set, get) => ({
       const timeDiff = range.to.getTime() - range.from.getTime();
       totalNights = Math.ceil(timeDiff / (1000 * 3600 * 24));
     }
-    set({ range, totalNights });
+    set({ range, totalNights, nights: totalNights });
   },
   setPlace: (place) => set({ place }),
   setSelectedRoom: (selectedRoom) => set({ selectedRoom }),

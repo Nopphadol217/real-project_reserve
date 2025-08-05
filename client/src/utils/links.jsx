@@ -11,6 +11,7 @@ import {
   Star,
   CreditCard,
   CalendarCheck,
+  BarChart3,
 } from "lucide-react";
 import { GoSearch } from "react-icons/go";
 export const publicLinks = [
@@ -41,9 +42,9 @@ export const privateLinks = [
     icon: <Calendar />,
   },
   {
-    href: "/user/myorder",
+    href: "/user/my-orders",
     label: "ประวัติการจอง",
-    icon: <Heart />,
+    icon: <Star />,
   },
 ];
 
@@ -72,6 +73,11 @@ export const adminLinks = [
     href: "/admin/manage-user",
     label: "Manage Users (จัดการผู้ใช้)",
     icon: <UserCog />,
+  },
+  {
+    href: "/admin/analytics",
+    label: "Analytics (สถิติและการวิเคราะห์)",
+    icon: <BarChart3 />,
   },
   {
     href: "/admin/payments",

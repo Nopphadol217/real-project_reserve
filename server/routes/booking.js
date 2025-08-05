@@ -3,11 +3,13 @@ const {
   createBooking,
   createBankTransferBooking,
   cancelBooking,
+  checkout,
+  checkOutStatus,
+  listBookings,
+  clearRoomBookings,
+  processAutomaticCheckout,
+  manualCheckout,
 } = require("../controllers/booking");
-const { checkout } = require("../controllers/booking");
-const { checkOutStatus } = require("../controllers/booking");
-const { listBookings } = require("../controllers/booking");
-const { clearRoomBookings } = require("../controllers/booking");
 const { authCheck } = require("../middleware/authCheck");
 const router = express.Router();
 
@@ -35,5 +37,13 @@ router.delete("/booking/clear-room/:roomId", authCheck, clearRoomBookings);
 // @CANCEL BOOKING
 // @ENDPOINT http://localhost:5000/api/booking/cancel/:bookingId
 router.put("/booking/cancel/:bookingId", authCheck, cancelBooking);
+
+// @PROCESS AUTOMATIC CHECKOUT (Admin only)
+// @ENDPOINT http://localhost:5000/api/booking/process-checkout
+router.post("/booking/process-checkout", authCheck, processAutomaticCheckout);
+
+// @MANUAL CHECKOUT (Admin only)
+// @ENDPOINT http://localhost:5000/api/booking/checkout/:bookingId
+router.put("/booking/checkout/:bookingId", authCheck, manualCheckout);
 
 module.exports = router;

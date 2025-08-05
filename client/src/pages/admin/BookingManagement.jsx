@@ -34,6 +34,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAllBookingsWithPaymentAPI } from "@/api/paymentAPI";
+import {
+  processAutomaticCheckoutAPI,
+  manualCheckoutAPI,
+} from "@/api/checkoutAPI";
 
 const BookingManagement = () => {
   const [allBookings, setAllBookings] = useState([]);
@@ -71,6 +75,30 @@ const BookingManagement = () => {
       setAllBookings([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProcessAutomaticCheckout = async () => {
+    try {
+      const response = await processAutomaticCheckoutAPI();
+      toast.success(
+        `ประมวลผล checkout สำเร็จ ${response.data.processedCount} รายการ`
+      );
+      fetchBookings(); // รีเฟรชข้อมูล
+    } catch (error) {
+      console.error("Error processing automatic checkout:", error);
+      toast.error("เกิดข้อผิดพลาดในการประมวลผล checkout");
+    }
+  };
+
+  const handleManualCheckout = async (bookingId) => {
+    try {
+      await manualCheckoutAPI(bookingId);
+      toast.success("Checkout สำเร็จ");
+      fetchBookings(); // รีเฟรชข้อมูล
+    } catch (error) {
+      console.error("Error manual checkout:", error);
+      toast.error("เกิดข้อผิดพลาดในการ checkout");
     }
   };
 
@@ -229,9 +257,18 @@ const BookingManagement = () => {
             ตรวจสอบและจัดการการจองทั้งหมดในระบบ
           </p>
         </div>
-        <Button onClick={fetchBookings} variant="outline">
-          รีเฟรชข้อมูล
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={fetchBookings} variant="outline">
+            รีเฟรชข้อมูล
+          </Button>
+          <Button
+            onClick={handleProcessAutomaticCheckout}
+            variant="default"
+            className="bg-green-600 hover:bg-green-700"
+          >
+            ประมวลผล Checkout
+          </Button>
+        </div>
       </div>
 
       {/* สถิติการจอง */}
@@ -405,17 +442,34 @@ const BookingManagement = () => {
                           </p>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedBooking(booking);
-                              setShowDetailDialog(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            ดูรายละเอียด
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setShowDetailDialog(true);
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              ดูรายละเอียด
+                            </Button>
+                            {/* แสดงปุ่ม Checkout สำหรับการจองที่ confirmed และยังไม่ completed */}
+                            {booking.status === "confirmed" &&
+                              new Date(booking.checkOut) <= new Date() && (
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleManualCheckout(booking.id)
+                                  }
+                                  className="bg-orange-600 hover:bg-orange-700"
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Checkout
+                                </Button>
+                              )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

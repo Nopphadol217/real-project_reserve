@@ -596,3 +596,145 @@ exports.getAllBookingsWithPayment = async (req, res, next) => {
     next(error);
   }
 };
+
+// Process automatic checkout for bookings that have passed checkout date
+exports.processAutomaticCheckout = async (req, res, next) => {
+  try {
+    const today = new Date();
+    today.setHours(12, 0, 0, 0); // เช็คเวลา 12:00 น.
+
+    // หา bookings ที่ checkout date ผ่านไปแล้วแต่ยังเป็น confirmed
+    const expiredBookings = await prisma.booking.findMany({
+      where: {
+        status: "confirmed",
+        checkOut: {
+          lt: today,
+        },
+      },
+      include: {
+        Room: true,
+        Place: true,
+      },
+    });
+
+    if (expiredBookings.length === 0) {
+      return res.json({
+        success: true,
+        message: "ไม่มีการจองที่ต้อง checkout",
+        processedCount: 0,
+      });
+    }
+
+    // Process each expired booking
+    const results = await Promise.all(
+      expiredBookings.map(async (booking) => {
+        try {
+          // อัปเดตสถานะการจองเป็น completed
+          const updatedBooking = await prisma.booking.update({
+            where: { id: booking.id },
+            data: { status: "completed" },
+          });
+
+          // อัปเดตสถานะห้องให้ว่างสำหรับวันที่ checkout แล้ว
+          await prisma.availability.updateMany({
+            where: {
+              roomId: booking.roomId,
+              date: {
+                gte: booking.checkIn,
+                lt: booking.checkOut,
+              },
+            },
+            data: {
+              isAvailable: true, // ห้องว่างแล้ว
+            },
+          });
+
+          return {
+            bookingId: booking.id,
+            success: true,
+            message: "Checkout completed",
+          };
+        } catch (error) {
+          console.error(`Error processing booking ${booking.id}:`, error);
+          return {
+            bookingId: booking.id,
+            success: false,
+            message: error.message,
+          };
+        }
+      })
+    );
+
+    res.json({
+      success: true,
+      message: `ประมวลผล checkout สำเร็จ ${
+        results.filter((r) => r.success).length
+      } รายการ`,
+      processedCount: results.filter((r) => r.success).length,
+      results,
+    });
+  } catch (error) {
+    console.error("Process automatic checkout error:", error);
+    next(error);
+  }
+};
+
+// Manual checkout function for admin
+exports.manualCheckout = async (req, res, next) => {
+  try {
+    const { bookingId } = req.params;
+
+    const booking = await prisma.booking.findFirst({
+      where: { id: parseInt(bookingId) },
+      include: { Room: true, Place: true },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบการจอง",
+      });
+    }
+
+    if (booking.status !== "confirmed") {
+      return res.status(400).json({
+        success: false,
+        message: "การจองนี้ไม่สามารถ checkout ได้",
+      });
+    }
+
+    // อัปเดตสถานะการจองเป็น completed
+    const updatedBooking = await prisma.booking.update({
+      where: { id: parseInt(bookingId) },
+      data: { status: "completed" },
+      include: {
+        Room: true,
+        Place: true,
+        User: true,
+      },
+    });
+
+    // อัปเดตสถานะห้องให้ว่าง
+    await prisma.availability.updateMany({
+      where: {
+        roomId: booking.roomId,
+        date: {
+          gte: booking.checkIn,
+          lt: booking.checkOut,
+        },
+      },
+      data: {
+        isAvailable: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Checkout สำเร็จ",
+      data: updatedBooking,
+    });
+  } catch (error) {
+    console.error("Manual checkout error:", error);
+    next(error);
+  }
+};

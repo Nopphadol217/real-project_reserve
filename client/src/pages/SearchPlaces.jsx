@@ -48,20 +48,7 @@ const SearchPlaces = () => {
     category: "all",
     minPrice: "",
     maxPrice: "",
-    amenities: [],
   });
-
-  const amenitiesList = [
-    { id: "wifi", label: "Wi-Fi" },
-    { id: "pool", label: "สระว่ายน้ำ" },
-    { id: "gym", label: "ฟิตเนส" },
-    { id: "parking", label: "ที่จอดรถ" },
-    { id: "kitchen", label: "ครัว" },
-    { id: "spa", label: "สปา" },
-    { id: "restaurant", label: "ร้านอาหาร" },
-    { id: "beach", label: "ริมชายหาด" },
-    { id: "garden", label: "สวน" },
-  ];
 
   const categories = [
     { value: "apartment", label: "อพาร์ทเมนต์" },
@@ -69,6 +56,9 @@ const SearchPlaces = () => {
     { value: "hotel", label: "โรงแรม" },
     { value: "resort", label: "รีสอร์ท" },
     { value: "villa", label: "วิลลา" },
+    { value: "hostel", label: "โฮสเทล" },
+    { value: "condo", label: "คอนโด" },
+    { value: "studio", label: "สตูดิโอ" },
   ];
 
   // Load places on component mount
@@ -141,15 +131,6 @@ const SearchPlaces = () => {
     }));
   };
 
-  const handleAmenityChange = (amenityId, checked) => {
-    setSearchFilters((prev) => ({
-      ...prev,
-      amenities: checked
-        ? [...prev.amenities, amenityId]
-        : prev.amenities.filter((id) => id !== amenityId),
-    }));
-  };
-
   const handleSearch = () => {
     console.log("Search filters:", searchFilters);
     console.log("Filtered places:", filteredPlaces);
@@ -168,7 +149,6 @@ const SearchPlaces = () => {
       category: "all",
       minPrice: "",
       maxPrice: "",
-      amenities: [],
     });
     setSelectedPlace(null);
   };
@@ -326,29 +306,24 @@ const SearchPlaces = () => {
                   </div>
                 </div>
 
-                {/* Amenities */}
+                {/* Category Filters */}
                 <div>
-                  <Label className="text-sm font-medium">
-                    สิ่งอำนวยความสะดวก
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {amenitiesList.map((amenity) => (
+                  <Label className="text-sm font-medium">ประเภทที่พัก</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {categories.map((category) => (
                       <div
-                        key={amenity.id}
-                        className="flex items-center space-x-2"
+                        key={category.value}
+                        className={`p-2 border rounded-lg cursor-pointer transition-colors ${
+                          searchFilters.category === category.value
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                        onClick={() =>
+                          handleSearchChange("category", category.value)
+                        }
                       >
-                        <Checkbox
-                          id={amenity.id}
-                          checked={searchFilters.amenities.includes(amenity.id)}
-                          onCheckedChange={(checked) =>
-                            handleAmenityChange(amenity.id, checked)
-                          }
-                        />
-                        <Label
-                          htmlFor={amenity.id}
-                          className="text-xs cursor-pointer"
-                        >
-                          {amenity.label}
+                        <Label className="text-xs cursor-pointer">
+                          {category.label}
                         </Label>
                       </div>
                     ))}

@@ -25,6 +25,7 @@ import Complete from "@/pages/user/Complete";
 import MyBookings from "@/pages/user/MyBookings";
 import PaymentManagement from "@/pages/admin/PaymentManagement";
 import BookingManagement from "@/pages/admin/BookingManagement";
+import Analytics from "@/pages/admin/Analytics";
 import MyOrders from "@/pages/user/MyOrders";
 
 function AppRoutes() {
@@ -72,6 +73,7 @@ function AppRoutes() {
           <Route path="manage-list/:id" element={<EditForm />} />
           <Route path="payment-info/:id" element={<EditPaymentInfo />} />
           <Route path="manage-user" element={<UserManage />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="bookings" element={<BookingManagement />} />
         </Route>

@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma");
 const cloudinary = require("cloudinary").v2;
-const { handleError } = require("../middleware/handleError");
+const handleError = require("../middleware/handleError");
 
 // Helper function to upload buffer to Cloudinary
 const uploadToCloudinary = (buffer, options) => {
@@ -481,14 +481,31 @@ const confirmPayment = async (req, res) => {
       },
     });
 
+    // อัปเดตสถานะความว่างของห้องเมื่อมีการยืนยันการจอง
+    await prisma.availability.updateMany({
+      where: {
+        roomId: updatedBooking.roomId,
+        date: {
+          gte: updatedBooking.checkIn,
+          lt: updatedBooking.checkOut,
+        },
+      },
+      data: {
+        isAvailable: false,
+      },
+    });
+
     res.json({
       success: true,
-      message: "ยืนยันการชำระเงินสำเร็จ",
+      message: "ยืนยันการชำระเงินสำเร็จและอัปเดตสถานะห้องแล้ว",
       data: updatedBooking,
     });
   } catch (error) {
     console.error("Confirm payment error:", error);
-    handleError(res, error);
+    res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการยืนยันการชำระเงิน",
+    });
   }
 };
 

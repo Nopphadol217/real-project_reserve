@@ -9,6 +9,7 @@ const {
   uploadQRCode,
   deleteQRCode,
 } = require("../controllers/cloudinary");
+const { upload, handleMulterError } = require("../middleware/upload");
 const router = express.Router();
 
 //@ENDPOINT METHOD POST
@@ -21,7 +22,12 @@ router.post("/upload-gallery", createGallery);
 
 //@ENDPOINT METHOD POST
 //UPLOAD QR CODE [http://localhost:5000/api/upload-qr-code]
-router.post("/upload-qr-code", uploadQRCode);
+router.post(
+  "/upload-qr-code",
+  upload.single("qrCode"),
+  handleMulterError,
+  uploadQRCode
+);
 
 //@ENDPOINT METHOD DELETE
 //Delete Gallery [http://localhost:5000/api/delete-gallery-image]

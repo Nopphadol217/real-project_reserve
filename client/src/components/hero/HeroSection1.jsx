@@ -2,7 +2,7 @@ import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 import Navbar from "../navbar/Navbar";
 import { MoveRight } from "lucide-react";
-import SearchSection from "./SearchSection";
+
 function HeroSection1() {
   // zustand
   const user = useAuthStore((state) => state.user);
@@ -58,9 +58,6 @@ function HeroSection1() {
               ดูรายละเอียดเพิ่มเติม
             </button>
           </div>
-
-          {/* Search Section */}
-          <SearchSection />
         </div>
       </div>
     </div>

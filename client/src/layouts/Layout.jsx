@@ -5,7 +5,7 @@ import useAuthStore from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+
 import HeaderTigger from "./HeaderTigger";
 function Layout() {
   const hydrate = useAuthStore((state) => state.hydrate);

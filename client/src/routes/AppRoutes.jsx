@@ -8,7 +8,8 @@ import Dashboard from "@/pages/admin/Dashboard";
 import Manage from "@/pages/admin/ManageList";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
-import SearchPage from "@/pages/SearchPage";
+import SearchPage from "@/pages/SearchPage_new";
+import SearchPlaces from "@/pages/SearchPlaces";
 import Profile from "@/pages/user/profile/Profile";
 import AdminRoute from "./AdminRoute";
 import UserManage from "@/pages/admin/UserManage";
@@ -16,13 +17,15 @@ import UserManage from "@/pages/admin/UserManage";
 import CreateListing from "@/pages/admin/EDITFORM/CreateListing";
 import ManageList from "@/pages/admin/ManageList";
 import EditForm from "@/pages/admin/EDITFORM/EditForm";
+import EditPaymentInfo from "@/pages/admin/EDITFORM/EditPaymentInfo";
 import PlaceDetail from "@/pages/user/PlaceDetail";
 import Checkout from "@/pages/user/Checkout";
 import Complete from "@/pages/user/Complete";
-import MyOrder from "@/pages/user/MyOrder";
-import MyOrders from "@/pages/user/MyOrders";
+
 import MyBookings from "@/pages/user/MyBookings";
 import PaymentManagement from "@/pages/admin/PaymentManagement";
+import BookingManagement from "@/pages/admin/BookingManagement";
+import MyOrders from "@/pages/user/MyOrders";
 
 function AppRoutes() {
   return (
@@ -38,7 +41,8 @@ function AppRoutes() {
         {/* Public Routes */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="search" element={<SearchPage />} />
+
+          <Route path="search-places" element={<SearchPlaces />} />
           <Route path="place/:id" element={<PlaceDetail />} />
         </Route>
 
@@ -46,8 +50,7 @@ function AppRoutes() {
           <Route index element={<Home />} />
           <Route path="profile" element={<Profile />} />
           <Route path="mybookings" element={<MyBookings />} />
-          <Route path="myorder" element={<MyOrder />} />
-          <Route path="myorders" element={<MyOrders />} />
+          <Route path="my-orders" element={<MyOrders />} />
           <Route path="checkout/:id" element={<Checkout />} />
           <Route path="complete/:session_id" element={<Complete />} />
         </Route>
@@ -67,8 +70,10 @@ function AppRoutes() {
           <Route path="create-listing" element={<CreateListing />} />
           <Route path="manage-list" element={<ManageList />} />
           <Route path="manage-list/:id" element={<EditForm />} />
+          <Route path="payment-info/:id" element={<EditPaymentInfo />} />
           <Route path="manage-user" element={<UserManage />} />
           <Route path="payments" element={<PaymentManagement />} />
+          <Route path="bookings" element={<BookingManagement />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

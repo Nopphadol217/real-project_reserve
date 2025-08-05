@@ -16,6 +16,10 @@ import {
   Shield,
   BarChart3,
   CreditCard,
+  FileText,
+  Bell,
+  MessageSquare,
+  TrendingUp,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -39,14 +43,14 @@ const data = {
   },
   teams: [
     {
-      name: "แดชบอร์ดผู้ดูแลระบบ",
+      name: "แดชบอร์ดผู้จัดการ",
       logo: Shield,
-      plan: "Admin Panel",
+      plan: "Management Panel",
     },
   ],
   navMain: [
     {
-      title: "แดชบอร์ดหลัก",
+      title: "แดชบอร์ด",
       url: "/admin/dashboard",
       icon: BarChart3,
       isActive: true,
@@ -55,8 +59,10 @@ const data = {
           title: "ภาพรวมระบบ",
           url: "/admin/dashboard",
         },
-    
-    
+        {
+          title: "สถิติการใช้งาน",
+          url: "/admin/analytics",
+        },
       ],
     },
     {
@@ -65,20 +71,54 @@ const data = {
       icon: Building,
       items: [
         {
-          title: "เพิ่มที่พักใหม่",
-          url: "/admin/create-listing",
-        },
-        {
           title: "รายการที่พักทั้งหมด",
           url: "/admin/manage-list",
+        },
+        {
+          title: "เพิ่มที่พักใหม่",
+          url: "/admin/create-listing",
         },
         {
           title: "ที่พักรอการอนุมัติ",
           url: "/admin/pending-listings",
         },
+      ],
+    },
+    {
+      title: "จัดการการจอง",
+      url: "/admin/bookings",
+      icon: Calendar,
+      items: [
         {
-          title: "ที่พักที่ถูกรายงาน",
-          url: "/admin/reported-listings",
+          title: "การจองทั้งหมด",
+          url: "/admin/bookings",
+        },
+        {
+          title: "รอการยืนยัน",
+          url: "/admin/pending-bookings",
+        },
+        {
+          title: "การจองวันนี้",
+          url: "/admin/today-bookings",
+        },
+      ],
+    },
+    {
+      title: "จัดการการชำระเงิน",
+      url: "/admin/payments",
+      icon: CreditCard,
+      items: [
+        {
+          title: "รายการชำระเงิน",
+          url: "/admin/payments",
+        },
+        {
+          title: "รอการตรวจสอบ",
+          url: "/admin/pending-payments",
+        },
+        {
+          title: "ประวัติการชำระ",
+          url: "/admin/payment-history",
         },
       ],
     },
@@ -96,54 +136,37 @@ const data = {
           url: "/admin/hosts",
         },
         {
-          title: "ผู้ใช้ที่ถูกระงับ",
-          url: "/admin/suspended-users",
-        },
-        {
-          title: "ขออนุมัติเป็นเจ้าของที่พัก",
-          url: "/admin/host-applications",
+          title: "ลูกค้า",
+          url: "/admin/customers",
         },
       ],
     },
+  ],
+  projects: [
     {
-      title: "การจองและการเงิน",
-      url: "/admin/bookings",
-      icon: Calendar,
-      items: [
-        {
-          title: "การจองทั้งหมด",
-          url: "/admin/bookings",
-        },
-        {
-          title: "การชำระเงิน",
-          url: "/admin/payments",
-          icon: CreditCard,
-        },
-      
-        {
-          title: "รายงานการเงิน",
-          url: "/admin/financial-reports",
-        },
-      ],
-    },
-    {
-      title: "เครื่องมือสำหรับผู้ใช้",
+      name: "หน้าหลัก",
       url: "/",
       icon: Home,
-      items: [
-        {
-          title: "กลับสู่หน้าหลัก",
-          url: "/",
-        },
-        {
-          title: "ค้นหาที่พัก",
-          url: "/search",
-        },
-        {
-          title: "การจองของฉัน",
-          url: "/user/mybookings",
-        },
-      ],
+    },
+    {
+      name: "ค้นหาที่พัก",
+      url: "/search",
+      icon: Search,
+    },
+    {
+      name: "รายการโปรด",
+      url: "/favorites",
+      icon: Heart,
+    },
+    {
+      name: "การจองของฉัน",
+      url: "/user/my-orders",
+      icon: Calendar,
+    },
+    {
+      name: "โปรไฟล์",
+      url: "/profile",
+      icon: User,
     },
   ],
 };
@@ -156,9 +179,10 @@ export function AppSidebar({ ...props }) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -160,7 +160,7 @@ const PaymentMethodSelector = ({
 
   const handlePaymentUploaded = () => {
     toast.success("อัปโหลดสลิปสำเร็จ รอการตรวจสอบจากเจ้าหน้าที่");
-    navigate("/user/bookings");
+    navigate("/user/mybookings");
   };
 
   // ถ้าสร้าง booking แล้วและเลือก bank transfer ให้แสดงหน้าอัปโหลดสลิป

@@ -9,43 +9,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET, // Click 'View API Keys' above to copy your API secret
 });
 
-// อัปโหลด QR Code สำหรับ createListing
-exports.uploadQRCode = async (req, res, next) => {
-  try {
-    const { qrCode } = req.body;
-
-    const result = await cloudinary.uploader.upload(qrCode, {
-      public_id: `qr_${Date.now()}`,
-      resource_type: "auto",
-      folder: `payment/qr_codes`,
-    });
-
-    res.json({ success: true, result: result });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// ลบ QR Code
-exports.deleteQRCode = async (req, res, next) => {
-  try {
-    const { public_id } = req.body;
-
-    if (!public_id) {
-      return res.status(400).json({ message: "Missing public_id" });
-    }
-
-    // ลบจาก Cloudinary
-    await cloudinary.uploader.destroy(public_id);
-
-    res
-      .status(200)
-      .json({ success: true, message: "QR Code deleted successfully" });
-  } catch (error) {
-    next(error);
-  }
-};
-
 exports.createImage = async (req, res, next) => {
   try {
     const { image } = req.body;

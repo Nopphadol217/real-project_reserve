@@ -61,7 +61,9 @@ function Navbar() {
                       to={link.href}
                       className="text-sm  font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex justify-center  items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-50"
                     >
-                      <span className="w-4 h-4">{link.icon}</span>
+                      <span className="w-5 h-5 flex justify-center items-center">
+                        {link.icon}
+                      </span>
                       <span>{link.label}</span>
                     </Link>
                   ))

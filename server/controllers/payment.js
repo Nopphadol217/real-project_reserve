@@ -49,31 +49,52 @@ const uploadPaymentInfo = async (req, res) => {
       public_id: `qr_${placeId}_${Date.now()}`,
     });
 
-    // บันทึกข้อมูลลงฐานข้อมูล
-    const paymentInfo = await prisma.payment.upsert({
+    // ตรวจสอบว่ามีข้อมูลการชำระเงินอยู่แล้วหรือไม่
+    const existingPayment = await prisma.payment.findFirst({
       where: {
-        userId_placeId: {
-          userId: userId,
-          placeId: parseInt(placeId),
-        },
-      },
-      update: {
-        accountName,
-        bankName,
-        accountNumber,
-        qrCodeUrl: qrCodeResult.secure_url,
-        qrCodePublicId: qrCodeResult.public_id,
-      },
-      create: {
         userId: userId,
         placeId: parseInt(placeId),
-        accountName,
-        bankName,
-        accountNumber,
-        qrCodeUrl: qrCodeResult.secure_url,
-        qrCodePublicId: qrCodeResult.public_id,
       },
     });
+
+    // หากมี QR Code เดิม ให้ลบออกจาก Cloudinary ก่อน
+    if (existingPayment && existingPayment.qrCodePublicId) {
+      try {
+        await cloudinary.uploader.destroy(existingPayment.qrCodePublicId);
+      } catch (error) {
+        console.error("Error deleting old QR code:", error);
+      }
+    }
+
+    let paymentInfo;
+    if (existingPayment) {
+      // อัปเดตข้อมูลที่มีอยู่
+      paymentInfo = await prisma.payment.update({
+        where: {
+          id: existingPayment.id,
+        },
+        data: {
+          accountName,
+          bankName,
+          accountNumber,
+          qrCodeUrl: qrCodeResult.secure_url,
+          qrCodePublicId: qrCodeResult.public_id,
+        },
+      });
+    } else {
+      // สร้างข้อมูลใหม่
+      paymentInfo = await prisma.payment.create({
+        data: {
+          userId: userId,
+          placeId: parseInt(placeId),
+          accountName,
+          bankName,
+          accountNumber,
+          qrCodeUrl: qrCodeResult.secure_url,
+          qrCodePublicId: qrCodeResult.public_id,
+        },
+      });
+    }
 
     res.json({
       success: true,
@@ -82,6 +103,113 @@ const uploadPaymentInfo = async (req, res) => {
     });
   } catch (error) {
     console.error("Upload payment info error:", error);
+    handleError(res, error);
+  }
+};
+
+// อัปโหลดข้อมูลการชำระเงินระดับ User (ไม่เชื่อมกับ place)
+const uploadUserPaymentInfo = async (req, res) => {
+  try {
+    const { accountName, bankName, accountNumber } = req.body;
+    const userId = req.user.id;
+
+    // ตรวจสอบว่ามี QR Code หรือไม่
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "กรุณาอัปโหลด QR Code",
+      });
+    }
+
+    // อัปโหลด QR Code ไป Cloudinary
+    const qrCodeResult = await uploadToCloudinary(req.file.buffer, {
+      folder: "payment/user_qr_codes", // ใช้ folder เฉพาะสำหรับ user-level QR codes
+      public_id: `user_qr_${userId}_${Date.now()}`,
+    });
+
+    // ตรวจสอบว่ามีข้อมูลการชำระเงินอยู่แล้วหรือไม่
+    const existingPayment = await prisma.payment.findFirst({
+      where: {
+        userId: userId,
+        placeId: null, // user-level payment info
+      },
+    });
+
+    // หากมี QR Code เดิม ให้ลบออกจาก Cloudinary ก่อน
+    if (existingPayment && existingPayment.qrCodePublicId) {
+      try {
+        await cloudinary.uploader.destroy(existingPayment.qrCodePublicId);
+      } catch (error) {
+        console.error("Error deleting old user QR code:", error);
+      }
+    }
+
+    let paymentInfo;
+    if (existingPayment) {
+      // อัปเดตข้อมูลที่มีอยู่
+      paymentInfo = await prisma.payment.update({
+        where: {
+          id: existingPayment.id,
+        },
+        data: {
+          accountName,
+          bankName,
+          accountNumber,
+          qrCodeUrl: qrCodeResult.secure_url,
+          qrCodePublicId: qrCodeResult.public_id,
+        },
+      });
+    } else {
+      // สร้างข้อมูลใหม่
+      paymentInfo = await prisma.payment.create({
+        data: {
+          userId: userId,
+          placeId: null, // user-level payment info
+          accountName,
+          bankName,
+          accountNumber,
+          qrCodeUrl: qrCodeResult.secure_url,
+          qrCodePublicId: qrCodeResult.public_id,
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "บันทึกข้อมูลการชำระเงินสำเร็จ",
+      data: paymentInfo,
+    });
+  } catch (error) {
+    console.error("Upload user payment info error:", error);
+    handleError(res, error);
+  }
+};
+
+// ดึงข้อมูลการชำระเงินระดับ User
+const getUserPaymentInfo = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const paymentInfo = await prisma.payment.findFirst({
+      where: {
+        userId: userId,
+        placeId: null, // user-level payment info
+      },
+    });
+
+    if (!paymentInfo) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบข้อมูลการชำระเงิน",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: paymentInfo,
+    });
+  } catch (error) {
+    console.error("Get user payment info error:", error);
     handleError(res, error);
   }
 };
@@ -303,13 +431,37 @@ const uploadPaymentSlip = async (req, res) => {
   }
 };
 
-// ยืนยันการชำระเงิน (สำหรับ admin)
+// ยืนยันการชำระเงิน (สำหรับ admin และ business owner)
 const confirmPayment = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const userRole = req.user.role;
+    const userId = req.user.id;
 
-    if (userRole !== "ADMIN") {
+    // ตรวจสอบสิทธิ์
+    if (userRole === "ADMIN") {
+      // Admin สามารถยืนยันได้ทุกการจอง
+    } else if (userRole === "BUSINESS") {
+      // Business owner สามารถยืนยันได้เฉพาะการจองที่พักของตัวเอง
+      const booking = await prisma.booking.findFirst({
+        where: {
+          id: parseInt(bookingId),
+          Place: {
+            userId: userId,
+          },
+        },
+        include: {
+          Place: true,
+        },
+      });
+
+      if (!booking) {
+        return res.status(403).json({
+          success: false,
+          message: "คุณไม่มีสิทธิ์ยืนยันการชำระเงินนี้",
+        });
+      }
+    } else {
       return res.status(403).json({
         success: false,
         message: "คุณไม่มีสิทธิ์ดำเนินการนี้",
@@ -340,14 +492,38 @@ const confirmPayment = async (req, res) => {
   }
 };
 
-// ปฏิเสธการชำระเงิน (สำหรับ admin)
+// ปฏิเสธการชำระเงิน (สำหรับ admin และ business owner)
 const rejectPayment = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const { reason } = req.body;
     const userRole = req.user.role;
+    const userId = req.user.id;
 
-    if (userRole !== "ADMIN") {
+    // ตรวจสอบสิทธิ์
+    if (userRole === "ADMIN") {
+      // Admin สามารถปฏิเสธได้ทุกการจอง
+    } else if (userRole === "BUSINESS") {
+      // Business owner สามารถปฏิเสธได้เฉพาะการจองที่พักของตัวเอง
+      const booking = await prisma.booking.findFirst({
+        where: {
+          id: parseInt(bookingId),
+          Place: {
+            userId: userId,
+          },
+        },
+        include: {
+          Place: true,
+        },
+      });
+
+      if (!booking) {
+        return res.status(403).json({
+          success: false,
+          message: "คุณไม่มีสิทธิ์ปฏิเสธการชำระเงินนี้",
+        });
+      }
+    } else {
       return res.status(403).json({
         success: false,
         message: "คุณไม่มีสิทธิ์ดำเนินการนี้",
@@ -382,22 +558,30 @@ const rejectPayment = async (req, res) => {
 // ดึงรายการการจองที่รอการยืนยันการชำระเงิน
 const getPendingPayments = async (req, res) => {
   try {
-    // ปิดการตรวจสอบ role ชั่วคราวเพื่อทดสอบ
-    // const userRole = req.user.role;
-    // if (userRole !== "ADMIN" && userRole !== "BUSINESS") {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้",
-    //   });
-    // }
+    const userRole = req.user.role;
+    const userId = req.user.id;
+
+    let whereCondition = {
+      paymentStatus: "pending",
+      paymentSlip: {
+        not: null,
+      },
+    };
+
+    // ถ้าเป็น BUSINESS ให้แสดงเฉพาะการจองของที่พักตัวเอง
+    if (userRole === "BUSINESS") {
+      whereCondition.Place = {
+        userId: userId,
+      };
+    } else if (userRole !== "ADMIN") {
+      return res.status(403).json({
+        success: false,
+        message: "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้",
+      });
+    }
 
     const pendingBookings = await prisma.booking.findMany({
-      where: {
-        paymentStatus: "pending",
-        paymentSlip: {
-          not: null,
-        },
-      },
+      where: whereCondition,
       include: {
         User: {
           select: {
@@ -501,4 +685,6 @@ module.exports = {
   rejectPayment,
   getPendingPayments,
   getAllBookingsWithPayment,
+  uploadUserPaymentInfo,
+  getUserPaymentInfo,
 };

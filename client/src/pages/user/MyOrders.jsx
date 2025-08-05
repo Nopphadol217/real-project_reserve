@@ -11,6 +11,8 @@ import {
   Star,
   Receipt,
   CreditCard,
+  QrCode,
+  Building,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { listBookings } from "@/api/bookingAPI";
+import { getPaymentInfoAPI } from "@/api/paymentAPI";
 import { formatDate } from "@/utils/formatDate";
 import { pdf } from "@react-pdf/renderer";
 import BookingPDF from "@/components/booking/BookingPDF";
@@ -41,6 +44,7 @@ const MyOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [paymentInfo, setPaymentInfo] = useState({});
 
   useEffect(() => {
     fetchOrders();
@@ -59,6 +63,27 @@ const MyOrders = () => {
             booking.status === "confirmed"
         );
         setOrders(paidOrders);
+
+        // Fetch payment info for each unique place
+        const uniquePlaceIds = [
+          ...new Set(paidOrders.map((order) => order.placeId)),
+        ];
+        const paymentInfoPromises = uniquePlaceIds.map(async (placeId) => {
+          try {
+            const paymentResponse = await getPaymentInfoAPI(placeId);
+            return { placeId, data: paymentResponse.data.data };
+          } catch (error) {
+            console.log(`No payment info for place ${placeId}`);
+            return { placeId, data: null };
+          }
+        });
+
+        const paymentResults = await Promise.all(paymentInfoPromises);
+        const paymentInfoMap = {};
+        paymentResults.forEach(({ placeId, data }) => {
+          paymentInfoMap[placeId] = data;
+        });
+        setPaymentInfo(paymentInfoMap);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -94,6 +119,45 @@ const MyOrders = () => {
     const end = new Date(checkOut);
     const timeDiff = end.getTime() - start.getTime();
     return Math.ceil(timeDiff / (1000 * 3600 * 24));
+  };
+
+  const getPaymentMethodBadge = (order) => {
+    // ถ้ามี paymentSlip แสดงว่าชำระผ่าน Bank Transfer
+    if (order.paymentSlip) {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <Building className="w-3 h-3" />
+          โอนธนาคาร
+        </Badge>
+      );
+    }
+    // ถ้าไม่มี paymentSlip แต่มี paymentStatus = paid หรือ confirmed แสดงว่าชำระผ่าน Stripe
+    else if (
+      order.paymentStatus === "paid" ||
+      order.paymentStatus === "confirmed"
+    ) {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <CreditCard className="w-3 h-3" />
+          Stripe
+        </Badge>
+      );
+    }
+    // ถ้าสถานะ unpaid
+    else if (order.paymentStatus === "unpaid") {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          ยังไม่ชำระ
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="flex items-center gap-1">
+        <QrCode className="w-3 h-3" />
+        ไม่ระบุ
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -248,6 +312,7 @@ const MyOrders = () => {
                         <TableHead>วันที่ออก</TableHead>
                         <TableHead>จำนวนคืน</TableHead>
                         <TableHead>ยอดรวม</TableHead>
+                        <TableHead>วิธีการชำระ</TableHead>
                         <TableHead>สถานะ</TableHead>
                         <TableHead>จัดการ</TableHead>
                       </TableRow>
@@ -302,6 +367,7 @@ const MyOrders = () => {
                           <TableCell className="font-semibold text-green-600">
                             ฿{order.totalPrice?.toLocaleString() || "0"}
                           </TableCell>
+                          <TableCell>{getPaymentMethodBadge(order)}</TableCell>
                           <TableCell>
                             {getStatusBadge(order.status, order.paymentStatus)}
                           </TableCell>

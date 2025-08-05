@@ -8,8 +8,9 @@ const {
   confirmPayment,
   rejectPayment,
   getPendingPayments,
+  getAllBookingsWithPayment,
+  createPaymentInfo,
 } = require("../controllers/payment");
-const { getAllBookingsWithPayment } = require("../controllers/booking");
 const { authCheck } = require("../middleware/authCheck");
 const { upload, handleMulterError } = require("../middleware/upload");
 
@@ -25,6 +26,7 @@ router.post(
 router.get("/info/:placeId", authCheck, getPaymentInfo);
 // Route สำหรับ public access (ไม่ต้องใช้ auth) - สำหรับลูกค้าที่จะจอง
 router.get("/payment/info/:placeId", getPaymentInfo);
+
 router.put(
   "/update/:placeId",
   authCheck,
@@ -237,8 +239,8 @@ router.put(
 router.post("/payment/upload-slip/:bookingId", authCheck, uploadPaymentSlip);
 
 // Routes สำหรับ admin
-router.put("/confirm/:bookingId", authCheck, confirmPayment);
-router.put("/reject/:bookingId", authCheck, rejectPayment);
+router.put("/payment/confirm/:bookingId", authCheck, confirmPayment);
+router.put("/payment/reject/:bookingId", authCheck, rejectPayment);
 router.get("/payment/pending", authCheck, getPendingPayments);
 router.get("/payment/bookings", authCheck, getAllBookingsWithPayment);
 

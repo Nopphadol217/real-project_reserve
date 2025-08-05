@@ -9,7 +9,10 @@ import {
   UserRoundPen,
   Calendar,
   Star,
+  CreditCard,
+  CalendarCheck,
 } from "lucide-react";
+import { GoSearch } from "react-icons/go";
 export const publicLinks = [
   {
     icon: <Home />,
@@ -17,16 +20,16 @@ export const publicLinks = [
     label: "หน้าหลัก",
   },
   {
-    icon: <Search />,
-    href: "/search",
+    icon: <GoSearch />,
+    href: "/search-places",
     label: "ค้นหาที่พัก",
   },
 ];
 
 export const userLinks = [
   {
-    icon: <Search />,
-    href: "/search",
+    icon: <GoSearch />,
+    href: "/search-places",
     label: "ค้นหาที่พัก",
   },
 ];
@@ -69,5 +72,15 @@ export const adminLinks = [
     href: "/admin/manage-user",
     label: "Manage Users (จัดการผู้ใช้)",
     icon: <UserCog />,
+  },
+  {
+    href: "/admin/payments",
+    label: "Payment Management (จัดการการชำระเงิน)",
+    icon: <CreditCard />,
+  },
+  {
+    href: "/admin/bookings",
+    label: "Booking Management (จัดการการจองทั้งหมด)",
+    icon: <CalendarCheck />,
   },
 ];

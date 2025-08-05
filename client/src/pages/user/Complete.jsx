@@ -56,7 +56,7 @@ const Complete = () => {
   };
 
   const handleViewBookings = () => {
-    navigate("/user/myorders");
+    navigate("/user/my-orders");
   };
 
   if (status === "loading") {

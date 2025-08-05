@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +50,15 @@ const PaymentManagement = () => {
   const [rejectReason, setRejectReason] = useState("");
   const [activeTab, setActiveTab] = useState("pending");
 
+  // Helper function to safely display user info
+  const formatUserInfo = (user) => {
+    if (!user) return { name: "N/A", email: "N/A" };
+    return {
+      name: `${user.firstname || "N/A"} ${user.lastname || ""}`.trim(),
+      email: user.email || "N/A",
+    };
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -62,8 +71,20 @@ const PaymentManagement = () => {
         getAllBookingsWithPaymentAPI(),
       ]);
 
-      setPendingPayments(pendingRes.data.data || []);
-      setAllBookings(bookingsRes.data.data || []);
+      console.log("PaymentManagement - Pending Response:", pendingRes);
+      console.log("PaymentManagement - Bookings Response:", bookingsRes);
+
+      // ปรับให้รองรับทั้งสองรูปแบบ response
+      const pendingData =
+        pendingRes.data?.data || pendingRes.data?.bookings || [];
+      const bookingsData =
+        bookingsRes.data?.data || bookingsRes.data?.bookings || [];
+
+      setPendingPayments(pendingData);
+      setAllBookings(bookingsData);
+
+      console.log("PaymentManagement - Set pending:", pendingData);
+      console.log("PaymentManagement - Set bookings:", bookingsData);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("เกิดข้อผิดพลาดในการโหลดข้อมูล");
@@ -298,10 +319,26 @@ const PaymentManagement = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending" className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             รอตรวจสอบ ({pendingPayments.length})
+          </TabsTrigger>
+          <TabsTrigger value="paid" className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            ชำระแล้ว (
+            {
+              allBookings.filter(
+                (b) =>
+                  b.paymentStatus === "paid" || b.paymentStatus === "confirmed"
+              ).length
+            }
+            )
+          </TabsTrigger>
+          <TabsTrigger value="unpaid" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            ยังไม่ชำระ (
+            {allBookings.filter((b) => b.paymentStatus === "unpaid").length})
           </TabsTrigger>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
@@ -356,10 +393,10 @@ const PaymentManagement = () => {
                         <TableCell>
                           <div className="space-y-1">
                             <p className="font-medium">
-                              {booking.User.firstname} {booking.User.lastname}
+                              {formatUserInfo(booking.User).name}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {booking.User.email}
+                              {formatUserInfo(booking.User).email}
                             </p>
                           </div>
                         </TableCell>
@@ -448,6 +485,233 @@ const PaymentManagement = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="paid">
+          <Card>
+            <CardHeader>
+              <CardTitle>การจองที่ชำระเงินแล้ว</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {allBookings.filter(
+                (b) =>
+                  b.paymentStatus === "paid" || b.paymentStatus === "confirmed"
+              ).length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    ยังไม่มีการจองที่ชำระเงินแล้ว
+                  </h3>
+                  <p className="text-gray-600">
+                    เมื่อลูกค้าชำระเงินแล้วจะแสดงที่นี่
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>การจอง</TableHead>
+                      <TableHead>ลูกค้า</TableHead>
+                      <TableHead>ยอดเงิน</TableHead>
+                      <TableHead>สถานะการชำระ</TableHead>
+                      <TableHead>วิธีการชำระ</TableHead>
+                      <TableHead>สถานะการจอง</TableHead>
+                      <TableHead>วันที่จอง</TableHead>
+                      <TableHead>การจัดการ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allBookings
+                      .filter(
+                        (b) =>
+                          b.paymentStatus === "paid" ||
+                          b.paymentStatus === "confirmed"
+                      )
+                      .map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <p className="font-medium">
+                                {booking.Place.title}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                ห้อง: {booking.Room.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                #{booking.id}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <p className="font-medium">
+                                {formatUserInfo(booking.User).name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {formatUserInfo(booking.User).email}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-bold text-green-600">
+                              {formatCurrency(booking.totalPrice)}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            {getPaymentStatusBadge(booking.paymentStatus)}
+                          </TableCell>
+                          <TableCell>
+                            {getPaymentMethodBadge(booking)}
+                          </TableCell>
+                          <TableCell>
+                            {getBookingStatusBadge(booking.status)}
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm">
+                              {formatDate(booking.createdAt)}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              {booking.paymentSlip && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedBooking(booking);
+                                    setShowSlipDialog(true);
+                                  }}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  ดูสลิป
+                                </Button>
+                              )}
+                              {!booking.paymentSlip &&
+                                booking.paymentStatus === "paid" &&
+                                booking.status === "pending" && (
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleConfirmBookingAndPayment(booking.id)
+                                    }
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    <Check className="w-4 h-4 mr-1" />
+                                    ยืนยันการจอง
+                                  </Button>
+                                )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="unpaid">
+          <Card>
+            <CardHeader>
+              <CardTitle>การจองที่ยังไม่ชำระเงิน</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {allBookings.filter((b) => b.paymentStatus === "unpaid")
+                .length === 0 ? (
+                <div className="text-center py-8">
+                  <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    ไม่มีการจองที่ยังไม่ชำระเงิน
+                  </h3>
+                  <p className="text-gray-600">
+                    การจองทั้งหมดได้รับการชำระเงินแล้ว
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>การจอง</TableHead>
+                      <TableHead>ลูกค้า</TableHead>
+                      <TableHead>ยอดเงิน</TableHead>
+                      <TableHead>สถานะการชำระ</TableHead>
+                      <TableHead>วิธีการชำระ</TableHead>
+                      <TableHead>สถานะการจอง</TableHead>
+                      <TableHead>วันที่จอง</TableHead>
+                      <TableHead>การจัดการ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allBookings
+                      .filter((b) => b.paymentStatus === "unpaid")
+                      .map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <p className="font-medium">
+                                {booking.Place.title}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                ห้อง: {booking.Room.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                #{booking.id}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <p className="font-medium">
+                                {formatUserInfo(booking.User).name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {formatUserInfo(booking.User).email}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-bold text-orange-600">
+                              {formatCurrency(booking.totalPrice)}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            {getPaymentStatusBadge(booking.paymentStatus)}
+                          </TableCell>
+                          <TableCell>
+                            {getPaymentMethodBadge(booking)}
+                          </TableCell>
+                          <TableCell>
+                            {getBookingStatusBadge(booking.status)}
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm">
+                              {formatDate(booking.createdAt)}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setShowRejectDialog(true);
+                                }}
+                              >
+                                <X className="w-4 h-4 mr-1" />
+                                ยกเลิกการจอง
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="all">
           <Card>
             <CardHeader>
@@ -482,10 +746,10 @@ const PaymentManagement = () => {
                       <TableCell>
                         <div className="space-y-1">
                           <p className="font-medium">
-                            {booking.User.firstname} {booking.User.lastname}
+                            {formatUserInfo(booking.User).name}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {booking.User.email}
+                            {formatUserInfo(booking.User).email}
                           </p>
                         </div>
                       </TableCell>

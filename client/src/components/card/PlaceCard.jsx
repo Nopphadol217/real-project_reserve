@@ -16,7 +16,7 @@ function PlaceCard({ places }) {
     amenities,
     roomDetails,
   } = places;
-  
+
   // คำนวณราคาเริ่มต้น (ถูกที่สุด)
   const getMinPrice = () => {
     if (roomDetails && roomDetails.length > 0) {
@@ -32,7 +32,7 @@ function PlaceCard({ places }) {
     <div className="w-full h-full max-w-sm mx-auto">
       <Card
         className="
-        w-full h-full
+        w-full h-[400px]
         flex flex-col
         rounded-2xl overflow-hidden 
         shadow-sm hover:shadow-lg
@@ -44,8 +44,8 @@ function PlaceCard({ places }) {
         group
       "
       >
-        {/* Image Section - Compact */}
-        <div className="relative w-full h-40 sm:h-44 overflow-hidden">
+        {/* Image Section - Fixed Height */}
+        <div className="relative w-full h-48 overflow-hidden flex-shrink-0">
           <img
             src={secure_url}
             alt={title || "Place Image"}
@@ -72,11 +72,10 @@ function PlaceCard({ places }) {
               {category}
             </div>
           )}
-
         </div>
 
-        {/* Content Section - Compact */}
-        <div className="flex flex-col flex-grow p-3">
+        {/* Content Section - Fixed Height with Flex Layout */}
+        <div className="flex flex-col justify-between p-3 h-52">
           {/* Title & Price Row */}
           <div className="flex items-start justify-between mb-2">
             <h3
@@ -85,7 +84,7 @@ function PlaceCard({ places }) {
             >
               {title || "ไม่มีชื่อ"}
             </h3>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className="text-sm font-bold text-gray-900">
                 ฿{displayPrice?.toLocaleString() || 0}
               </div>
@@ -95,10 +94,10 @@ function PlaceCard({ places }) {
             </div>
           </div>
 
-          {/* Description - Minimal */}
+          {/* Description - Fixed Height */}
           <p
             className="text-xs text-gray-600 mb-2
-                       line-clamp-2 leading-relaxed"
+                       line-clamp-2 leading-relaxed h-8"
           >
             {description || "ไม่มีคำอธิบาย"}
           </p>
@@ -138,7 +137,7 @@ function PlaceCard({ places }) {
             )}
           </div>
 
-          {/* Action Button - Compact */}
+          {/* Action Button - Always at Bottom */}
           <Link
             to={`/place/${id}`}
             className="
@@ -148,7 +147,7 @@ function PlaceCard({ places }) {
               transition-all duration-200 ease-in-out
               focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
               block text-center
-              group
+              group mt-auto
             "
           >
             <span className="flex items-center justify-center space-x-1.5">

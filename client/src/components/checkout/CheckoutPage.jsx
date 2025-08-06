@@ -12,6 +12,7 @@ import {
   DollarSign,
   Shield,
   Clock,
+  Banknote,
 } from "lucide-react";
 
 const CheckoutPage = () => {
@@ -49,6 +50,21 @@ const CheckoutPage = () => {
     setIsProcessing(true);
 
     try {
+      // Different handling for different payment methods
+      if (paymentMethod === "cash") {
+        // For cash payment, just confirm the reservation
+        console.log(
+          "Cash payment selected - booking confirmed for on-site payment"
+        );
+        // In real app, you would update the booking status to "confirmed" with payment method "cash"
+      } else if (paymentMethod === "bank-transfer") {
+        // For bank transfer, redirect to payment upload page
+        console.log("Bank transfer selected - redirect to payment upload");
+      } else {
+        // For credit card, process payment
+        console.log("Credit card payment processing");
+      }
+
       // Simulate payment processing
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -209,6 +225,30 @@ const CheckoutPage = () => {
                   </div>
                   <p className="text-sm text-gray-600 ml-8 mt-1">
                     โอนภายใน 24 ชั่วโมง
+                  </p>
+                </div>
+
+                {/* Cash Payment */}
+                <div
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    paymentMethod === "cash"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setPaymentMethod("cash")}
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      checked={paymentMethod === "cash"}
+                      onChange={() => setPaymentMethod("cash")}
+                      className="text-blue-600"
+                    />
+                    <Banknote className="w-5 h-5" />
+                    <span className="font-medium">ชำระเงินสด</span>
+                  </div>
+                  <p className="text-sm text-gray-600 ml-8 mt-1">
+                    ชำระเงินสดหน้าที่พัก เมื่อเช็คอิน
                   </p>
                 </div>
               </CardContent>

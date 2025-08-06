@@ -14,6 +14,7 @@ import EditUploadImage from "./EditUploadImage";
 import EditUploadGallery from "./EditUploadGallery";
 import RoomManageEdit from "@/pages/admin/EDITFORM/RoomManageEdit";
 import AmenitySelector from "@/components/form/AmenitySelector";
+import EditPaymentInfoSection from "./EditPaymentInfoSection";
 import useAuthStore from "@/store/useAuthStore";
 import { toast } from "sonner";
 import {
@@ -59,7 +60,7 @@ function EditForm() {
 
   useEffect(() => {
     fetchReadPlace(id);
-  }, [id]);
+  }, [id, user]);
 
   useEffect(() => {
     if (isPlace && Object.keys(isPlace).length > 0) {
@@ -105,7 +106,7 @@ function EditForm() {
     setIsLoading(true);
     try {
       const res = await readPlace(id);
-      console.log(res);
+     
       setIsPlace(res.data.result);
     } catch (error) {
       console.log(error);
@@ -311,6 +312,9 @@ function EditForm() {
               )}
             </CardContent>
           </Card>
+
+          {/* Payment Information */}
+          <EditPaymentInfoSection placeId={id} userId={user?.id} />
 
           {/* Submit Button */}
           <div className="flex justify-end pt-6">

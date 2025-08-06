@@ -12,7 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar, CreditCard, ArrowLeft } from "lucide-react";
 
-function BookingContainer({ placeId, price, bookings, paymentInfo }) {
+function BookingContainer({
+  placeId,
+  price,
+  bookings,
+  paymentInfo,
+  selectedRoom,
+}) {
   const [step, setStep] = useState(1); // 1: Calendar & Form, 2: Payment Method, 3: Stripe Booking
   const [bookingData, setBookingData] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -23,8 +29,9 @@ function BookingContainer({ placeId, price, bookings, paymentInfo }) {
       placeId: placeId,
       price: price,
       bookings: bookings,
+      selectedRoom: selectedRoom,
     });
-  }, [placeId]);
+  }, [placeId, selectedRoom, price, bookings]);
 
   const handleBookingSubmit = (data) => {
     setBookingData(data);

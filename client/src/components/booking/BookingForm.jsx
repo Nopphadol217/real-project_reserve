@@ -2,6 +2,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import useBookingStore from "@/store/useBookingStore";
 import BookingConfirm from "./BookingConfirm";
+import CheckoutButton from "./CheckoutButton";
 import { useState } from "react";
 
 function BookingForm({ onSubmit, showStripeOnly = false }) {
@@ -10,16 +11,31 @@ function BookingForm({ onSubmit, showStripeOnly = false }) {
   const placeId = useBookingStore((state) => state.placeId);
   const range = useBookingStore((state) => state.range);
   const nights = useBookingStore((state) => state.nights);
+  const selectedRoom = useBookingStore((state) => state.selectedRoom);
+  const getTotalPrice = useBookingStore((state) => state.getTotalPrice);
 
   const checkIn = range?.from;
   const checkOut = range?.to;
 
   const formatNumber = (number) => {
-    return number?.toLocaleString() + "฿";
+    if (!number || isNaN(number)) return "0฿";
+    return number.toLocaleString() + "฿";
   };
 
-  // คำนวณราคารวม
-  const total = price * (nights || 0);
+  // Use store's total price calculation with fallback
+  const total = getTotalPrice() || 0;
+  // Get current room price with fallback
+  const roomPrice = selectedRoom?.price || price || 0;
+
+  // Debug logging
+  console.log("BookingForm Debug:", {
+    selectedRoom,
+    price,
+    roomPrice,
+    nights,
+    total,
+    range,
+  });
 
   const handleShowPaymentOptions = () => {
     const bookingData = {
@@ -27,9 +43,11 @@ function BookingForm({ onSubmit, showStripeOnly = false }) {
       checkIn: checkIn.toISOString(),
       checkOut: checkOut.toISOString(),
       totalPrice: total,
-      price: price,
+      price: roomPrice, // Use current room price
       nights: nights,
       placeTitle: "ชื่อที่พัก", // ควรได้มาจาก props หรือ store
+      roomId: selectedRoom?.id,
+      roomName: selectedRoom?.name,
     };
 
     // ส่งข้อมูลกลับไปยัง BookingContainer เพื่อแสดงหน้าเลือกการชำระเงิน
@@ -58,13 +76,20 @@ function BookingForm({ onSubmit, showStripeOnly = false }) {
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
             <span>ราคาต่อคืน</span>
-            <span>{formatNumber(price)}</span>
+            <span>{formatNumber(roomPrice)}</span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span>จำนวนคืน</span>
             <span>{nights} คืน</span>
           </div>
+
+          {selectedRoom && (
+            <div className="flex justify-between text-sm text-blue-600">
+              <span>ห้อง</span>
+              <span>{selectedRoom.name}</span>
+            </div>
+          )}
 
           <div className="flex justify-between text-sm">
             <span>วันที่เข้าพัก</span>
@@ -119,6 +144,23 @@ function BookingForm({ onSubmit, showStripeOnly = false }) {
             >
               เลือกวิธีการชำระเงิน
             </Button>
+
+            {/* Alternative: Use CheckoutButton for direct payment */}
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-sm text-gray-600 mb-3 text-center">
+                หรือชำระเงินโดยตรง
+              </p>
+              <CheckoutButton
+                onStripeCheckout={() => {
+                  // Handle Stripe checkout
+                  setShowConfirm(true);
+                }}
+                onBankTransferCheckout={() => {
+                  // Handle bank transfer checkout
+                  handleShowPaymentOptions();
+                }}
+              />
+            </div>
 
             {showConfirm && (
               <div className="mt-6">

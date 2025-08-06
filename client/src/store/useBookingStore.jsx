@@ -42,8 +42,10 @@ const useBookingStore = create((set, get) => ({
   // Calculate total price
   getTotalPrice: () => {
     const { price, totalNights, selectedRoom } = get();
-    const roomPrice = selectedRoom?.price || price;
-    return roomPrice * totalNights;
+    const roomPrice = selectedRoom?.price || price || 0;
+    const nights = totalNights || 0;
+    const total = roomPrice * nights;
+    return total;
   },
 }));
 export default useBookingStore;

@@ -9,7 +9,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import Manage from "@/pages/admin/ManageList";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
-import SearchPage from "@/pages/SearchPage_new";
+
 import SearchPlaces from "@/pages/SearchPlaces";
 import Profile from "@/pages/user/profile/Profile";
 import AdminRoute from "./AdminRoute";
@@ -18,6 +18,10 @@ import UserManage from "@/pages/admin/UserManage";
 import BusinessRegister from "@/pages/BusinessRegister";
 import BusinessDashboard from "@/pages/business/BusinessDashboard";
 import BusinessBookings from "@/pages/business/BusinessBookings";
+import BusinessBookingManagement from "@/pages/business/BusinessBookingManagement";
+import BusinessCreateListing from "@/pages/business/BusinessCreateListing";
+import BusinessPaymentManagement from "@/pages/business/BusinessPaymentManagement";
+import BusinessEditPlaces from "@/pages/business/BusinessEditPlaces";
 
 import CreateListing from "@/pages/admin/EDITFORM/CreateListing";
 import ManageList from "@/pages/admin/ManageList";
@@ -94,11 +98,14 @@ function AppRoutes() {
             </BusinessRoute>
           }
         >
-          <Route index path="dashboard" element={<BusinessDashboard />} />
+          <Route index element={<BusinessDashboard />} />
+          <Route path="dashboard" element={<BusinessDashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="bookings" element={<BusinessBookings />} />
-          <Route path="places" element={<BusinessDashboard />} />
-          <Route path="payments" element={<BusinessDashboard />} />
+          <Route path="create-listing" element={<BusinessCreateListing />} />
+          <Route path="payments" element={<BusinessPaymentManagement />} />
+          <Route path="edit-places" element={<BusinessEditPlaces />} />
+          <Route path="edit-place/:id" element={<EditForm />} />
           <Route path="analytics" element={<BusinessDashboard />} />
         </Route>
 

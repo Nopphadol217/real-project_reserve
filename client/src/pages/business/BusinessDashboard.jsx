@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   BarChart,
   Bar,
@@ -26,96 +35,177 @@ import {
   MapPin,
   Star,
   Clock,
+  Edit,
+  Home,
+  CheckCircle,
+  AlertCircle,
+  CreditCard,
+  Activity,
 } from "lucide-react";
+import { Link } from "react-router";
+import useAuthStore from "@/store/useAuthStore";
+import usePlaceStore from "@/store/usePlaceStore";
+import { getAllBookingsWithPaymentAPI } from "@/api/paymentAPI";
 
 const BusinessDashboard = () => {
   const [dateRange, setDateRange] = useState("30days");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Simulated business data
-  const businessStats = {
-    totalPlaces: 8,
-    totalBookings: 156,
-    totalRevenue: 125000,
-    activeListings: 6,
-    occupancyRate: 78,
-    averageRating: 4.6,
-  };
+  // Get current user
+  const user = useAuthStore((state) => state.user);
+  const places = usePlaceStore((state) => state.places);
+  const actionListPlace = usePlaceStore((state) => state.actionListPlace);
 
-  const revenueData = [
-    { month: "ม.ค.", revenue: 45000, bookings: 23 },
-    { month: "ก.พ.", revenue: 52000, bookings: 28 },
-    { month: "มี.ค.", revenue: 48000, bookings: 25 },
-    { month: "เม.ย.", revenue: 61000, bookings: 32 },
-    { month: "พ.ค.", revenue: 55000, bookings: 29 },
-    { month: "มิ.ย.", revenue: 67000, bookings: 35 },
-  ];
+  useEffect(() => {
+    actionListPlace();
+    fetchBookingData();
+  }, [actionListPlace]);
 
-  const bookingStatusData = [
-    { name: "ยืนยันแล้ว", value: 128, color: "#10b981" },
-    { name: "รอยืนยัน", value: 15, color: "#f59e0b" },
-    { name: "ยกเลิก", value: 13, color: "#ef4444" },
-  ];
+  // Watch for changes in places and refetch bookings
+  useEffect(() => {
+    if (places.length > 0) {
+      fetchBookingData();
+    }
+  }, [places]);
 
-  const recentBookings = [
-    {
-      id: "BK001",
-      guestName: "คุณสมชาย ใจดี",
-      placeName: "Villa Sunset View",
-      checkIn: "2024-02-15",
-      checkOut: "2024-02-17",
-      total: 4500,
-      status: "confirmed",
-    },
-    {
-      id: "BK002",
-      guestName: "คุณมาลี สวยงาม",
-      placeName: "Beach House Deluxe",
-      checkIn: "2024-02-18",
-      checkOut: "2024-02-20",
-      total: 6800,
-      status: "pending",
-    },
-    {
-      id: "BK003",
-      guestName: "คุณประยุทธ ทองคำ",
-      placeName: "Mountain Resort",
-      checkIn: "2024-02-20",
-      checkOut: "2024-02-22",
-      total: 3200,
-      status: "confirmed",
-    },
-  ];
+  const fetchBookingData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getAllBookingsWithPaymentAPI();
+      if (response.data.success) {
+        // Filter bookings for places owned by current user
+        const userBookings = response.data.bookings.filter((booking) =>
+          places.some(
+            (place) => place.id === booking.placeId && place.userId === user?.id
+          )
+        );
+        setBookings(userBookings);
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [places, user?.id]);
 
-  const topPlaces = [
-    {
-      id: 1,
-      name: "Villa Sunset View",
-      bookings: 45,
-      revenue: 67500,
-      rating: 4.8,
-      occupancy: 85,
-    },
-    {
-      id: 2,
-      name: "Beach House Deluxe",
-      bookings: 38,
-      revenue: 52000,
-      rating: 4.6,
-      occupancy: 78,
-    },
-    {
-      id: 3,
-      name: "Mountain Resort",
-      bookings: 32,
-      revenue: 41000,
-      rating: 4.5,
-      occupancy: 72,
-    },
-  ];
+  // Memoize business stats calculation
+  const businessStats = useMemo(() => {
+    const userPlaces = places.filter((place) => place.userId === user?.id);
+    const totalRevenue = bookings.reduce((sum, booking) => {
+      return sum + (booking.paymentAmount || 0);
+    }, 0);
+
+    const confirmedBookings = bookings.filter(
+      (booking) =>
+        booking.paymentStatus === "confirmed" ||
+        booking.paymentStatus === "paid"
+    );
+
+    const averageRating =
+      userPlaces.length > 0
+        ? userPlaces.reduce((sum, place) => sum + (place.rating || 0), 0) /
+          userPlaces.length
+        : 0;
+
+    return {
+      totalPlaces: userPlaces.length,
+      totalBookings: bookings.length,
+      totalRevenue: totalRevenue,
+      activeListings: userPlaces.filter((place) => place.isActive !== false)
+        .length,
+      confirmedBookings: confirmedBookings.length,
+      averageRating: averageRating,
+    };
+  }, [places, bookings, user?.id]);
+
+  // Memoize revenue data calculation
+  const revenueData = useMemo(() => {
+    const monthlyData = {};
+
+    bookings.forEach((booking) => {
+      if (booking.createdAt && booking.paymentAmount) {
+        const date = new Date(booking.createdAt);
+        const monthKey = date.toLocaleDateString("th-TH", { month: "short" });
+
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { month: monthKey, revenue: 0, bookings: 0 };
+        }
+
+        monthlyData[monthKey].revenue += booking.paymentAmount;
+        monthlyData[monthKey].bookings += 1;
+      }
+    });
+
+    return Object.values(monthlyData).slice(-6); // Last 6 months
+  }, [bookings]);
+
+  // Memoize booking status data calculation
+  const bookingStatusData = useMemo(() => {
+    const statusCounts = {
+      confirmed: 0,
+      pending: 0,
+      cancelled: 0,
+    };
+
+    bookings.forEach((booking) => {
+      if (
+        booking.paymentStatus === "confirmed" ||
+        booking.paymentStatus === "paid"
+      ) {
+        statusCounts.confirmed++;
+      } else if (booking.paymentStatus === "pending") {
+        statusCounts.pending++;
+      } else {
+        statusCounts.cancelled++;
+      }
+    });
+
+    return [
+      { name: "ยืนยันแล้ว", value: statusCounts.confirmed, color: "#10b981" },
+      { name: "รอยืนยัน", value: statusCounts.pending, color: "#f59e0b" },
+      { name: "ยกเลิก", value: statusCounts.cancelled, color: "#ef4444" },
+    ];
+  }, [bookings]);
+
+  // Memoize recent bookings
+  const recentBookings = useMemo(() => {
+    return bookings
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+  }, [bookings]);
+
+  // Memoize top places calculation
+  const topPlaces = useMemo(() => {
+    const userPlaces = places.filter((place) => place.userId === user?.id);
+
+    return userPlaces
+      .map((place) => {
+        const placeBookings = bookings.filter(
+          (booking) => booking.placeId === place.id
+        );
+        const revenue = placeBookings.reduce(
+          (sum, booking) => sum + (booking.paymentAmount || 0),
+          0
+        );
+
+        return {
+          id: place.id,
+          name: place.title,
+          bookings: placeBookings.length,
+          revenue: revenue,
+          rating: place.rating || 0,
+          image: place.images?.[0] || "/placeholder.jpg",
+        };
+      })
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }, [places, bookings, user?.id]);
 
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
+      case "paid":
         return "text-green-600 bg-green-50";
       case "pending":
         return "text-yellow-600 bg-yellow-50";
@@ -129,6 +219,7 @@ const BusinessDashboard = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "confirmed":
+      case "paid":
         return "ยืนยันแล้ว";
       case "pending":
         return "รอยืนยัน";
@@ -237,6 +328,73 @@ const BusinessDashboard = () => {
           </Card>
         </div>
 
+        {/* Quick Actions / Management Navigation */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link to="/business/create-listing">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Home className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">สร้างที่พัก</p>
+                    <p className="text-sm text-gray-600">เพิ่มที่พักใหม่</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/business/bookings">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">จัดการการจอง</p>
+                    <p className="text-sm text-gray-600">ดูและจัดการจอง</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/business/payments">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <CreditCard className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">จัดการการชำระ</p>
+                    <p className="text-sm text-gray-600">ดูสถานะการชำระ</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/business/edit-places">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Edit className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">แก้ไขที่พัก</p>
+                    <p className="text-sm text-gray-600">จัดการที่พักของคุณ</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Revenue Chart */}
@@ -323,27 +481,33 @@ const BusinessDashboard = () => {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium">{booking.guestName}</p>
+                        <p className="font-medium">
+                          {booking.User?.firstName} {booking.User?.lastName}
+                        </p>
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-                            booking.status
+                            booking.paymentStatus
                           )}`}
                         >
-                          {getStatusText(booking.status)}
+                          {getStatusText(booking.paymentStatus)}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
-                        {booking.placeName}
+                        {booking.Place?.title}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {new Date(booking.checkIn).toLocaleDateString("th-TH")}{" "}
+                        {new Date(booking.checkInDate).toLocaleDateString(
+                          "th-TH"
+                        )}{" "}
                         -{" "}
-                        {new Date(booking.checkOut).toLocaleDateString("th-TH")}
+                        {new Date(booking.checkOutDate).toLocaleDateString(
+                          "th-TH"
+                        )}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-green-600">
-                        ฿{booking.total.toLocaleString()}
+                        ฿{booking.paymentAmount?.toLocaleString() || 0}
                       </p>
                     </div>
                   </div>

@@ -17,6 +17,7 @@ import { useNavigate } from "react-router";
 import { createBookingAPI } from "@/api/bookingAPI";
 import { getPaymentInfoAPI } from "@/api/paymentAPI";
 import PaymentUpload from "@/components/checkout/PaymentUpload";
+import useBookingStore from "@/store/useBookingStore";
 
 const PaymentMethodSelector = ({
   bookingData,
@@ -29,6 +30,11 @@ const PaymentMethodSelector = ({
   const [createdBooking, setCreatedBooking] = useState(null);
   const [placePaymentInfo, setPlacePaymentInfo] = useState(null);
   const navigate = useNavigate();
+
+  // Get current room and price information from booking store
+  const selectedRoom = useBookingStore((state) => state.selectedRoom);
+  const getTotalPrice = useBookingStore((state) => state.getTotalPrice);
+  const totalNights = useBookingStore((state) => state.totalNights);
 
   // ดึงข้อมูลการชำระเงินของที่พักนี้
   useEffect(() => {
@@ -190,7 +196,10 @@ const PaymentMethodSelector = ({
   }
 
   const nights = calculateNights(bookingData.checkIn, bookingData.checkOut);
-  const totalPrice = nights * bookingData.price;
+  // Use the booking store's total price calculation which considers selected room
+  const totalPrice = getTotalPrice();
+  // Get the current room price
+  const roomPrice = selectedRoom?.price || bookingData.price;
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -346,12 +355,17 @@ const PaymentMethodSelector = ({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>ราคาต่อคืน</span>
-                    <span>{formatCurrency(bookingData.price)}</span>
+                    <span>{formatCurrency(roomPrice)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>จำนวนคืน</span>
                     <span>{nights} คืน</span>
                   </div>
+                  {selectedRoom && (
+                    <div className="flex justify-between text-sm text-blue-600">
+                      <span>ห้อง: {selectedRoom.name}</span>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />

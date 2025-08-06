@@ -12,6 +12,8 @@ import {
   CreditCard,
   CalendarCheck,
   BarChart3,
+  Building2,
+  DollarSign,
 } from "lucide-react";
 import { GoSearch } from "react-icons/go";
 export const publicLinks = [
@@ -88,5 +90,33 @@ export const adminLinks = [
     href: "/admin/bookings",
     label: "Booking Management (จัดการการจองทั้งหมด)",
     icon: <CalendarCheck />,
+  },
+];
+
+export const businessLinks = [
+  {
+    href: "/business/dashboard",
+    label: "Business Dashboard (แดชบอร์ดธุรกิจ)",
+    icon: <LayoutDashboard />,
+  },
+  {
+    href: "/business/places",
+    label: "My Properties (ที่พักของฉัน)",
+    icon: <Building2 />,
+  },
+  {
+    href: "/business/bookings",
+    label: "Booking Management (จัดการการจอง)",
+    icon: <CalendarCheck />,
+  },
+  {
+    href: "/business/payments",
+    label: "Revenue Management (จัดการรายได้)",
+    icon: <DollarSign />,
+  },
+  {
+    href: "/business/analytics",
+    label: "Business Analytics (สถิติธุรกิจ)",
+    icon: <BarChart3 />,
   },
 ];

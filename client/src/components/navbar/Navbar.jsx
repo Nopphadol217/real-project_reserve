@@ -125,12 +125,13 @@ function Navbar() {
                               สมัครสมาชิก / เข้าสู่ระบบ
                             </Link>
                             <div className="border-t border-gray-100 my-1"></div>
-                            <a
-                              href="#"
+                            <Link
+                              to="/business-register"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => setIsUserMenuOpen(false)}
                             >
                               เป็นเจ้าของที่พัก
-                            </a>
+                            </Link>
                             <a
                               href="#"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

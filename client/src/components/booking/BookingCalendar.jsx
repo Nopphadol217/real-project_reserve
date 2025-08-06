@@ -109,10 +109,8 @@ function BookingCalendar() {
 
   useEffect(() => {
     // เป็นการ setState เข้าไปใน useBookingStore ที่เราตั้งไว้
-    useBookingStore.setState({
-      range: range,
-      nights: calculateNights(),
-    });
+    const store = useBookingStore.getState();
+    store.setRange(range);
   }, [range]);
 
   return (

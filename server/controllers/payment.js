@@ -686,6 +686,80 @@ const getAllBookingsWithPayment = async (req, res) => {
   }
 };
 
+// ลบการจองที่มีสถานะยกเลิก
+const deleteCancelledBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const userId = req.user.id;
+
+    // ตรวจสอบว่าการจองมีอยู่และเป็นของ user นี้
+    const booking = await prisma.booking.findFirst({
+      where: {
+        id: parseInt(bookingId),
+        Place: {
+          userId: userId,
+        },
+      },
+      include: {
+        Place: true,
+      },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบการจองหรือคุณไม่มีสิทธิ์เข้าถึง",
+      });
+    }
+
+    // ตรวจสอบว่าการจองมีสถานะยกเลิกหรือไม่
+    if (booking.status !== "cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "สามารถลบได้เฉพาะการจองที่มีสถานะยกเลิกเท่านั้น",
+      });
+    }
+
+    // ลบ payment slip จาก Cloudinary ถ้ามี
+    if (booking.paymentSlip) {
+      try {
+        // แยก public_id จาก URL
+        const urlParts = booking.paymentSlip.split("/");
+        const fileWithExtension = urlParts[urlParts.length - 1];
+        const publicId = `payment/slips/${fileWithExtension.split(".")[0]}`;
+
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Payment slip deleted from Cloudinary:", publicId);
+      } catch (cloudinaryError) {
+        console.error(
+          "Error deleting payment slip from Cloudinary:",
+          cloudinaryError
+        );
+        // ไม่ต้อง return error เพราะอาจจะเป็นไฟล์ที่ไม่มีอยู่แล้ว
+      }
+    }
+
+    // ลบการจอง
+    await prisma.booking.delete({
+      where: {
+        id: parseInt(bookingId),
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "ลบการจองสำเร็จ",
+    });
+  } catch (error) {
+    console.error("Delete cancelled booking error:", error);
+    res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการลบข้อมูลการจอง",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   uploadPaymentInfo,
   getPaymentInfo,
@@ -698,4 +772,5 @@ module.exports = {
   getAllBookingsWithPayment,
   uploadUserPaymentInfo,
   getUserPaymentInfo,
+  deleteCancelledBooking,
 };

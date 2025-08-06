@@ -77,16 +77,12 @@ export function BusinessSidebar({ ...props }) {
         icon: Building,
         items: [
           {
-            title: "ที่พักของฉัน",
-            url: "/business/places",
-          },
-          {
             title: "เพิ่มที่พักใหม่",
-            url: "/business/places/create",
+            url: "/business/create-listing",
           },
           {
             title: "แก้ไขที่พัก",
-            url: "/business/places/edit",
+            url: "/business/edit-places",
           },
         ],
       },
@@ -104,10 +100,6 @@ export function BusinessSidebar({ ...props }) {
             url: "/business/bookings/pending",
           },
           {
-            title: "การจองวันนี้",
-            url: "/business/bookings/today",
-          },
-          {
             title: "ประวัติการจอง",
             url: "/business/bookings/history",
           },
@@ -121,14 +113,6 @@ export function BusinessSidebar({ ...props }) {
           {
             title: "รายได้และเงินรับ",
             url: "/business/payments",
-          },
-          {
-            title: "ประวัติการชำระ",
-            url: "/business/payments/history",
-          },
-          {
-            title: "รายงานการเงิน",
-            url: "/business/payments/reports",
           },
         ],
       },
@@ -146,13 +130,8 @@ export function BusinessSidebar({ ...props }) {
       },
       {
         name: "โปรไฟล์",
-        url: "/profile",
+        url: "/business/profile",
         icon: User,
-      },
-      {
-        name: "ติดต่อสนับสนุน",
-        url: "/support",
-        icon: MessageSquare,
       },
     ],
   };

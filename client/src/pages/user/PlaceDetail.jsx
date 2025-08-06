@@ -409,8 +409,7 @@ const PlaceDetail = () => {
                 <BookingContainer
                   placeId={place.id}
                   price={basePrice}
-                  roomId={selectedRoomId}
-                  roomName={getSelectedRoom()?.name}
+                  selectedRoom={getSelectedRoom()}
                   bookings={[]}
                 />
               </div>

@@ -165,7 +165,7 @@ const data = {
     },
     {
       name: "โปรไฟล์",
-      url: "/profile",
+      url: "/user/profile",
       icon: User,
     },
   ],

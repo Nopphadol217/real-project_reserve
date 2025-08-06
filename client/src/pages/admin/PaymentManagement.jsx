@@ -31,6 +31,7 @@ import {
   AlertCircle,
   Download,
   Building2,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -38,6 +39,7 @@ import {
   getAllBookingsWithPaymentAPI,
   confirmPaymentAPI,
   rejectPaymentAPI,
+  deleteCancelledBookingAPI,
 } from "@/api/paymentAPI";
 
 const PaymentManagement = () => {
@@ -47,6 +49,7 @@ const PaymentManagement = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showSlipDialog, setShowSlipDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [activeTab, setActiveTab] = useState("pending");
 
@@ -130,6 +133,24 @@ const PaymentManagement = () => {
       console.error("Error confirming booking and payment:", error);
       toast.error("เกิดข้อผิดพลาดในการยืนยันการจองและการชำระเงิน");
     }
+  };
+
+  const handleDeleteCancelledBooking = async (bookingId) => {
+    try {
+      await deleteCancelledBookingAPI(bookingId);
+      toast.success("ลบข้อมูลการจองที่ยกเลิกสำเร็จ");
+      setShowDeleteDialog(false);
+      setSelectedBooking(null);
+      fetchData(); // รีเฟรชข้อมูล
+    } catch (error) {
+      console.error("Error deleting cancelled booking:", error);
+      toast.error("เกิดข้อผิดพลาดในการลบข้อมูลการจอง");
+    }
+  };
+
+  const handleDeleteConfirmation = (booking) => {
+    setSelectedBooking(booking);
+    setShowDeleteDialog(true);
   };
 
   const getPaymentStatusBadge = (status) => {
@@ -844,6 +865,18 @@ const PaymentManagement = () => {
                                 ยกเลิกการจอง
                               </Button>
                             )}
+                          {/* Delete - ปุ่มสำหรับลบการจองที่มีสถานะยกเลิกแล้ว */}
+                          {booking.status === "cancelled" && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteConfirmation(booking)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              ลบข้อมูล
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -932,6 +965,79 @@ const PaymentManagement = () => {
               disabled={!rejectReason.trim()}
             >
               {selectedBooking?.paymentSlip ? "ปฏิเสธสลิป" : "ยกเลิกการจอง"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog สำหรับยืนยันการลบ */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              ยืนยันการลบข้อมูล
+            </DialogTitle>
+            <DialogDescription>
+              การจอง #{selectedBooking?.id} - {selectedBooking?.Place?.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-red-800 mb-1">
+                    คำเตือน: การลบข้อมูลไม่สามารถย้อนกลับได้
+                  </p>
+                  <p className="text-red-700">
+                    การดำเนินการนี้จะลบข้อมูลการจองและสลิปการโอนเงิน (ถ้ามี)
+                    อย่างถาวร
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="text-sm text-gray-600">
+              <p>
+                <strong>รายละเอียดการจอง:</strong>
+              </p>
+              <ul className="mt-2 space-y-1 text-xs">
+                <li>• ผู้จอง: {formatUserInfo(selectedBooking?.User).name}</li>
+                <li>
+                  • วันที่เข้าพัก:{" "}
+                  {selectedBooking?.checkinDate &&
+                    formatDate(selectedBooking.checkinDate)}
+                </li>
+                <li>
+                  • วันที่ออก:{" "}
+                  {selectedBooking?.checkoutDate &&
+                    formatDate(selectedBooking.checkoutDate)}
+                </li>
+                <li>
+                  • ยอดรวม:{" "}
+                  {selectedBooking?.totalPrice &&
+                    formatCurrency(selectedBooking.totalPrice)}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setSelectedBooking(null);
+              }}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleDeleteCancelledBooking(selectedBooking.id)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              ลบข้อมูลถาวร
             </Button>
           </DialogFooter>
         </DialogContent>

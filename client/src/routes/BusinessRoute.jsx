@@ -1,21 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import useAuthStore from "@/store/useAuthStore";
 import { Navigate } from "react-router";
 
 const BusinessRoute = ({ children }) => {
   const user = useAuthStore((state) => state.user);
-  const token = useAuthStore((state) => state.token);
+  const hydrate = useAuthStore((state) => state.hydrate);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
+  useEffect(() => {
+    hydrate();
+  }, []);
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
+  // Add loading state check
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">กำลังตรวจสอบข้อมูล...</p>
+        </div>
+      </div>
+    );
   }
 
   if (user?.role !== "BUSINESS") {
     return <Navigate to="/" replace />;
   }
 
-  // Check if business is approved
-  if (user?.status !== "approved") {
+  // Check if business is approved (allow undefined status for now during development)
+  if (user?.status && user?.status !== "approved") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">

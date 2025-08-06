@@ -313,7 +313,7 @@ const SearchPlaces = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredPlaces.map((place) => (
                       <Card
                         key={place.id}
@@ -325,17 +325,17 @@ const SearchPlaces = () => {
                         onClick={() => setSelectedPlace(place)}
                       >
                         <CardContent className="p-4">
-                          <div className="flex gap-4">
+                          <div className="flex flex-col gap-3">
                             {place.secure_url && (
                               <img
                                 src={place.secure_url}
                                 alt={place.title}
-                                className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
+                                className="w-full h-48 object-cover rounded-lg"
                               />
                             )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between mb-2">
-                                <h3 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                                <h3 className="font-semibold text-lg text-gray-900 line-clamp-2">
                                   {place.title}
                                 </h3>
                                 <Badge variant="secondary" className="text-xs">

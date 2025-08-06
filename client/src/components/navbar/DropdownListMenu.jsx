@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { adminLinks, privateLinks } from "@/utils/links";
+import { adminLinks, privateLinks, businessLinks } from "@/utils/links";
 import { Link } from "react-router";
 import LogoutButton from "../authentication/LogoutButton";
 import useAuthStore from "@/store/useAuthStore";
@@ -31,6 +31,20 @@ function DropdownListMenu() {
           {/* User Links - การจองและรายการโปรด */}
           {user.role === "ADMIN"
             ? adminLinks.map((item, index) => {
+                return (
+                  <DropdownMenuItem key={index} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center cursor-pointer"
+                    >
+                      <span className="text-sm mr-2">{item.icon}</span>
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                );
+              })
+            : user.role === "BUSINESS"
+            ? businessLinks.map((item, index) => {
                 return (
                   <DropdownMenuItem key={index} asChild>
                     <Link

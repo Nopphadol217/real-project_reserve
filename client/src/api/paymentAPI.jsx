@@ -107,6 +107,11 @@ export const rejectPaymentAPI = async (bookingId, reason) => {
   return await axios.put(`/payment/reject/${bookingId}`, { reason });
 };
 
+// ลบการจองที่มีสถานะยกเลิก (สำหรับ admin)
+export const deleteCancelledBookingAPI = async (bookingId) => {
+  return await axios.delete(`/payment/delete-booking/${bookingId}`);
+};
+
 // ดึงรายการการจองที่รอการยืนยันการชำระเงิน (สำหรับ admin)
 export const getPendingPaymentsAPI = async () => {
   return await axios.get("/payment/pending");

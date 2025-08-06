@@ -1,6 +1,6 @@
 import Navbar from "@/components/navbar/Navbar";
 import { Outlet } from "react-router";
-import PageIllustration from "@/pages/page-illustration";
+
 import useAuthStore from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
@@ -19,9 +19,7 @@ function Layout() {
     <div>
  
 
-      {/* เพิ่ม padding-top เพื่อไม่ให้เนื้อหาทับกับ navbar 
-          Main navbar (16) + Second navbar (จากการคำนวณประมาณ 20) = 36 = pt-36
-          ปรับให้เหมาะสมกับความสูงจริง */}
+
 
       <Navbar />
       <Outlet />

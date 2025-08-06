@@ -10,6 +10,7 @@ const {
   getPendingPayments,
   getAllBookingsWithPayment,
   createPaymentInfo,
+  deleteCancelledBooking,
 } = require("../controllers/payment");
 const { authCheck } = require("../middleware/authCheck");
 const { upload, handleMulterError } = require("../middleware/upload");
@@ -241,6 +242,11 @@ router.post("/payment/upload-slip/:bookingId", authCheck, uploadPaymentSlip);
 // Routes สำหรับ admin
 router.put("/payment/confirm/:bookingId", authCheck, confirmPayment);
 router.put("/payment/reject/:bookingId", authCheck, rejectPayment);
+router.delete(
+  "/payment/delete-booking/:bookingId",
+  authCheck,
+  deleteCancelledBooking
+);
 router.get("/payment/pending", authCheck, getPendingPayments);
 router.get("/payment/bookings", authCheck, getAllBookingsWithPayment);
 

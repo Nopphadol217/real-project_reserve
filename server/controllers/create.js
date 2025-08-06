@@ -231,13 +231,44 @@ exports.updatePlace = async (req, res, next) => {
         where: {
           placeId: Number(id),
           status: {
-            in: ["pending", "confirmed"], // booking ที่ยังใช้งานอยู่
+            in: ["pending", "confirmed"], // booking ที่ยังใช้งานอยู่ (ไม่รวม cancelled)
           },
         },
         select: {
           roomId: true,
         },
       });
+
+      // ตรวจสอบห้องที่ booking ถูก cancel แล้ว เพื่ออัพเดทสถานะเป็นว่าง
+      const cancelledBookingRooms = await prisma.booking.findMany({
+        where: {
+          placeId: Number(id),
+          status: "cancelled",
+        },
+        select: {
+          roomId: true,
+        },
+      });
+
+      // อัพเดทสถานะห้องที่ booking ถูก cancel ให้เป็นว่าง
+      if (cancelledBookingRooms.length > 0) {
+        const cancelledRoomIds = cancelledBookingRooms.map(
+          (booking) => booking.roomId
+        );
+        await prisma.room.updateMany({
+          where: {
+            id: {
+              in: cancelledRoomIds,
+            },
+          },
+          data: {
+            status: false, // เปลี่ยนเป็นว่าง
+          },
+        });
+        console.log(
+          `Updated ${cancelledRoomIds.length} rooms to available status due to cancelled bookings`
+        );
+      }
 
       bookedRoomIds = roomsWithBookings.map((booking) => booking.roomId);
 
@@ -292,21 +323,110 @@ exports.updatePlace = async (req, res, next) => {
           }
         }
       } else {
-        // ไม่มี booking เลย - ลบและสร้างใหม่ได้ปกติ
-        await prisma.room.deleteMany({
-          where: { placeId: Number(id) },
+        // ไม่มี booking เลย - ตรวจสอบอีกครั้งก่อนลบ
+        const finalCheck = await prisma.booking.findMany({
+          where: {
+            placeId: Number(id),
+            status: {
+              in: ["pending", "confirmed", "completed"], // รวม completed ด้วย แต่ไม่รวม cancelled
+            },
+          },
+          select: {
+            roomId: true,
+          },
         });
 
-        const roomData = roomDetails.map((room) => ({
-          name: room.name,
-          price: parseInt(room.price),
-          placeId: Number(id),
-          status: Boolean(room.status) || false, // เพิ่มสถานะห้อง
-        }));
-
-        await prisma.room.createMany({
-          data: roomData,
+        // ตรวจสอบและอัพเดทห้องที่มี booking cancelled
+        const cancelledCheck = await prisma.booking.findMany({
+          where: {
+            placeId: Number(id),
+            status: "cancelled",
+          },
+          select: {
+            roomId: true,
+          },
         });
+
+        if (cancelledCheck.length > 0) {
+          const cancelledRoomIds = cancelledCheck.map(
+            (booking) => booking.roomId
+          );
+          await prisma.room.updateMany({
+            where: {
+              id: {
+                in: cancelledRoomIds,
+              },
+            },
+            data: {
+              status: false, // เปลี่ยนเป็นว่าง
+            },
+          });
+          console.log(
+            `Updated ${cancelledRoomIds.length} rooms to available status due to cancelled bookings`
+          );
+        }
+
+        const finalBookedRoomIds = finalCheck.map((booking) => booking.roomId);
+
+        if (finalBookedRoomIds.length > 0) {
+          // มี booking อยู่จริง - ใช้วิธีการอัพเดทแบบปลอดภัย
+          await prisma.room.deleteMany({
+            where: {
+              placeId: Number(id),
+              id: {
+                notIn: finalBookedRoomIds,
+              },
+            },
+          });
+
+          // อัพเดทและเพิ่มห้องใหม่
+          for (const room of roomDetails) {
+            const existingRoom = await prisma.room.findFirst({
+              where: {
+                placeId: Number(id),
+                name: room.name,
+              },
+            });
+
+            if (existingRoom) {
+              // อัพเดทห้องที่มีอยู่
+              await prisma.room.update({
+                where: { id: existingRoom.id },
+                data: {
+                  name: room.name,
+                  price: parseInt(room.price),
+                  status: Boolean(room.status) || false,
+                },
+              });
+            } else {
+              // เพิ่มห้องใหม่
+              await prisma.room.create({
+                data: {
+                  name: room.name,
+                  price: parseInt(room.price),
+                  placeId: Number(id),
+                  status: Boolean(room.status) || false,
+                },
+              });
+            }
+          }
+        } else {
+          // แน่ใจว่าไม่มี booking - ลบและสร้างใหม่ได้
+          await prisma.room.deleteMany({
+            where: { placeId: Number(id) },
+          });
+
+          const roomData = roomDetails.map((room) => ({
+            name: room.name,
+            price: parseInt(room.price),
+            placeId: Number(id),
+            status: Boolean(room.status) || false,
+          }));
+
+          await prisma.room.createMany({
+            data: roomData,
+          });
+        }
       }
     }
 
@@ -388,7 +508,12 @@ exports.deletePlace = async (req, res, next) => {
       include: {
         galleries: true,
         roomDetails: true,
-        bookings: true,
+        bookings: {
+          include: {
+            User: true,
+          },
+        },
+        payments: true, // Include payment records for QR codes
       },
     });
 
@@ -462,6 +587,41 @@ exports.deletePlace = async (req, res, next) => {
       }
     }
 
+    // ลบ Payment Slip images จาก Cloudinary (จาก booking records)
+    for (const booking of place.bookings) {
+      if (booking.paymentSlip) {
+        // Extract public_id from Cloudinary URL
+        const urlParts = booking.paymentSlip.split("/");
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = publicIdWithExtension.split(".")[0]; // Remove file extension
+
+        try {
+          await cloudinary.uploader.destroy(`payment-slips/${publicId}`);
+          console.log(`Deleted payment slip: payment-slips/${publicId}`);
+        } catch (cloudinaryError) {
+          console.error(
+            "Error deleting payment slip from Cloudinary:",
+            cloudinaryError
+          );
+        }
+      }
+    }
+
+    // ลบ QR Code images จาก Cloudinary (จาก payment records)
+    for (const payment of place.payments) {
+      if (payment.qrCodePublicId) {
+        try {
+          await cloudinary.uploader.destroy(payment.qrCodePublicId);
+          console.log(`Deleted QR code: ${payment.qrCodePublicId}`);
+        } catch (cloudinaryError) {
+          console.error(
+            "Error deleting QR code from Cloudinary:",
+            cloudinaryError
+          );
+        }
+      }
+    }
+
     // ลบข้อมูลในฐานข้อมูลตามลำดับ (ลบ dependencies ก่อน)
 
     // 1. ลบ bookings ก่อน (ถ้ามี)
@@ -469,22 +629,27 @@ exports.deletePlace = async (req, res, next) => {
       where: { placeId: Number(id) },
     });
 
-    // 2. ลบ favorites ที่อ้างอิงถึง place นี้
+    // 2. ลบ payment records ที่เกี่ยวข้องกับ place นี้
+    await prisma.payment.deleteMany({
+      where: { placeId: Number(id) },
+    });
+
+    // 3. ลบ favorites ที่อ้างอิงถึง place นี้
     await prisma.favorite.deleteMany({
       where: { placeId: Number(id) },
     });
 
-    // 3. ลบ galleries
+    // 4. ลบ galleries
     await prisma.gallery.deleteMany({
       where: { placeId: Number(id) },
     });
 
-    // 4. ลบ rooms
+    // 5. ลบ rooms
     await prisma.room.deleteMany({
       where: { placeId: Number(id) },
     });
 
-    // 5. ลบ place สุดท้าย
+    // 6. ลบ place สุดท้าย
     await prisma.place.delete({
       where: { id: Number(id) },
     });
@@ -493,8 +658,19 @@ exports.deletePlace = async (req, res, next) => {
       success: true,
       message:
         activeBookingsCount && activeBookingsCount > 0
-          ? `ลบที่พักสำเร็จ (รวมถึงการจอง ${activeBookingsCount} รายการ)`
-          : "ลบที่พักสำเร็จ",
+          ? `ลบที่พักสำเร็จ (รวมถึงการจอง ${activeBookingsCount} รายการ, รูปภาพ ${
+              place.galleries.length + 1
+            } รูป, และข้อมูลการชำระเงิน ${place.payments.length} รายการ)`
+          : `ลบที่พักสำเร็จ (รวมถึงรูปภาพ ${
+              place.galleries.length + 1
+            } รูป และข้อมูลการชำระเงิน ${place.payments.length} รายการ)`,
+      deletedData: {
+        place: 1,
+        bookings: activeBookingsCount || 0,
+        payments: place.payments.length,
+        galleries: place.galleries.length,
+        rooms: place.roomDetails.length,
+      },
     });
   } catch (error) {
     console.error("Error deleting place:", error);

@@ -32,6 +32,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import SearchMap from "@/components/map/SearchMap";
 import usePlaceStore from "@/store/usePlaceStore";
+import { categories } from "@/utils/categories";
 
 const SearchPlaces = () => {
   const places = usePlaceStore((state) => state.places);
@@ -42,24 +43,11 @@ const SearchPlaces = () => {
 
   const [searchFilters, setSearchFilters] = useState({
     searchTerm: "",
-    checkIn: "",
-    checkOut: "",
     guests: 1,
     category: "all",
     minPrice: "",
     maxPrice: "",
   });
-
-  const categories = [
-    { value: "apartment", label: "อพาร์ทเมนต์" },
-    { value: "house", label: "บ้าน" },
-    { value: "hotel", label: "โรงแรม" },
-    { value: "resort", label: "รีสอร์ท" },
-    { value: "villa", label: "วิลลา" },
-    { value: "hostel", label: "โฮสเทล" },
-    { value: "condo", label: "คอนโด" },
-    { value: "studio", label: "สตูดิโอ" },
-  ];
 
   // Load places on component mount
   useEffect(() => {
@@ -179,11 +167,11 @@ const SearchPlaces = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Left Panel - Filters & Results */}
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col space-y-4">
             {/* Search Filters */}
-            <Card className="mb-4 flex-shrink-0">
+            <Card className="flex-shrink-0">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Search className="w-5 h-5" />
@@ -225,34 +213,6 @@ const SearchPlaces = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                {/* Date Range */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="checkIn">วันเช็คอิน</Label>
-                    <Input
-                      id="checkIn"
-                      type="date"
-                      value={searchFilters.checkIn}
-                      onChange={(e) =>
-                        handleSearchChange("checkIn", e.target.value)
-                      }
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="checkOut">วันเช็คเอาท์</Label>
-                    <Input
-                      id="checkOut"
-                      type="date"
-                      value={searchFilters.checkOut}
-                      onChange={(e) =>
-                        handleSearchChange("checkOut", e.target.value)
-                      }
-                      className="mt-1"
-                    />
-                  </div>
                 </div>
 
                 {/* Category & Price Range */}
@@ -431,14 +391,14 @@ const SearchPlaces = () => {
           </div>
 
           {/* Right Panel - Map */}
-          <div className="h-full">
-            <Card className="h-full">
+          <div className="order-first xl:order-last">
+            <Card className="h-[400px] xl:h-[600px]">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <MapPin className="w-5 h-5" />
                   แผนที่
                   {selectedPlace && (
-                    <Badge variant="default" className="ml-2">
+                    <Badge variant="default" className="ml-2 max-w-32 truncate">
                       {selectedPlace.title}
                     </Badge>
                   )}
@@ -448,7 +408,7 @@ const SearchPlaces = () => {
                 <SearchMap
                   places={filteredPlaces}
                   center={mapCenter}
-                  zoom={11}
+                  zoom={7}
                   selectedPlace={selectedPlace}
                   onMarkerClick={handleMapMarkerClick}
                   height="100%"

@@ -85,7 +85,7 @@ function Navbar() {
               {/* Become a host link - Desktop only */}
               <div className="hidden xl:block">
                 <button className="text-sm font-medium text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors duration-200 whitespace-nowrap">
-                  เป็นเจ้าของที่พัก
+                  <Link to="/business-register">เป็นเจ้าของที่พัก</Link>
                 </button>
               </div>
 

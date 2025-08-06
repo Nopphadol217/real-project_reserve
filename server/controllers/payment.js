@@ -481,17 +481,11 @@ const confirmPayment = async (req, res) => {
       },
     });
 
-    // อัปเดตสถานะความว่างของห้องเมื่อมีการยืนยันการจอง
-    await prisma.availability.updateMany({
-      where: {
-        roomId: updatedBooking.roomId,
-        date: {
-          gte: updatedBooking.checkIn,
-          lt: updatedBooking.checkOut,
-        },
-      },
+    // อัปเดตสถานะของห้องเป็นไม่ว่าง (status = true = จองแล้ว)
+    await prisma.room.update({
+      where: { id: updatedBooking.roomId },
       data: {
-        isAvailable: false,
+        status: true, // true = จองแล้ว, false = ว่าง
       },
     });
 

@@ -714,23 +714,17 @@ exports.manualCheckout = async (req, res, next) => {
       },
     });
 
-    // อัปเดตสถานะห้องให้ว่าง
-    await prisma.availability.updateMany({
-      where: {
-        roomId: booking.roomId,
-        date: {
-          gte: booking.checkIn,
-          lt: booking.checkOut,
-        },
-      },
+    // อัปเดตสถานะห้องให้ว่าง (status = false = ว่าง)
+    await prisma.room.update({
+      where: { id: booking.roomId },
       data: {
-        isAvailable: true,
+        status: false, // false = ว่าง, true = จองแล้ว
       },
     });
 
     res.json({
       success: true,
-      message: "Checkout สำเร็จ",
+      message: "Checkout สำเร็จ ห้องพร้อมให้บริการแล้ว",
       data: updatedBooking,
     });
   } catch (error) {

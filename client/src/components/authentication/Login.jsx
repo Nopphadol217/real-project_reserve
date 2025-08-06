@@ -38,8 +38,12 @@ function Login({ embedded = false }) {
       toast.message(<p className="text-emerald-500">{res.data.message}</p>, {
         description: dateTime,
       });
+
+      // Redirect based on user role
       if (res.data.user.role === "ADMIN") {
-        navigate("/admin");
+        navigate("/admin/dashboard");
+      } else if (res.data.user.role === "BUSINESS") {
+        navigate("/business/dashboard");
       } else {
         navigate("/");
       }

@@ -77,7 +77,7 @@ router.get("/:id", authCheck, async (req, res) => {
 });
 
 // PUT - อัปเดตข้อมูลผู้ใช้
-router.put("/:id", authCheck, adminCheck, async (req, res) => {
+router.put("/user/:id", authCheck, adminCheck, async (req, res) => {
   try {
     const { id } = req.params;
     const { firstname, lastname, email, role, enabled } = req.body;
@@ -145,7 +145,7 @@ router.put("/:id", authCheck, adminCheck, async (req, res) => {
 });
 
 // DELETE - ลบผู้ใช้ (soft delete)
-router.delete("/:id", authCheck, adminCheck, async (req, res) => {
+router.delete("/user/:id", authCheck, adminCheck, async (req, res) => {
   try {
     const { id } = req.params;
 

@@ -38,6 +38,10 @@ import {
   Shield,
   Power,
   PowerOff,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import useUserStore from "@/store/useUserStore";
@@ -50,6 +54,7 @@ const UserManage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showBusinessDialog, setShowBusinessDialog] = useState(false);
   const [editForm, setEditForm] = useState({
     firstname: "",
     lastname: "",
@@ -118,6 +123,77 @@ const UserManage = () => {
       console.error("Error toggling user status:", error);
       toast.error("เกิดข้อผิดพลาดในการเปลี่ยนสถานะบัญชี");
     }
+  };
+
+  // Business approval functions
+  const openBusinessDialog = (user) => {
+    setSelectedUser(user);
+    setShowBusinessDialog(true);
+  };
+
+  const approveBusinessUser = async (userId) => {
+    try {
+      await updateUserAPI(userId, {
+        status: "approved",
+        enabled: true,
+      });
+
+      toast.success("อนุมัติผู้ประกอบการสำเร็จ");
+      actionReadUser(); // รีเฟรชข้อมูลจาก API
+      setShowBusinessDialog(false);
+    } catch (error) {
+      console.error("Error approving business user:", error);
+      toast.error("เกิดข้อผิดพลาดในการอนุมัติ");
+    }
+  };
+
+  const rejectBusinessUser = async (userId) => {
+    try {
+      await updateUserAPI(userId, {
+        status: "rejected",
+        enabled: false,
+      });
+
+      toast.success("ปฏิเสธผู้ประกอบการสำเร็จ");
+      actionReadUser(); // รีเฟรชข้อมูลจาก API
+      setShowBusinessDialog(false);
+    } catch (error) {
+      console.error("Error rejecting business user:", error);
+      toast.error("เกิดข้อผิดพลาดในการปฏิเสธ");
+    }
+  };
+
+  const getBusinessStatusBadge = (user) => {
+    if (user.role !== "BUSINESS") return null;
+
+    const status = user.status || "pending";
+    const statusConfig = {
+      pending: {
+        label: "รออนุมัติ",
+        className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        icon: Clock,
+      },
+      approved: {
+        label: "อนุมัติแล้ว",
+        className: "bg-green-100 text-green-800 border-green-200",
+        icon: CheckCircle,
+      },
+      rejected: {
+        label: "ปฏิเสธ",
+        className: "bg-red-100 text-red-800 border-red-200",
+        icon: XCircle,
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+    const Icon = config.icon;
+
+    return (
+      <Badge className={config.className}>
+        <Icon className="w-3 h-3 mr-1" />
+        {config.label}
+      </Badge>
+    );
   };
 
   const getRoleBadge = (role) => {
@@ -298,6 +374,7 @@ const UserManage = () => {
                 <TableHead>ข้อมูลผู้ใช้</TableHead>
                 <TableHead>อีเมล</TableHead>
                 <TableHead>บทบาท</TableHead>
+                <TableHead>สถานะธุรกิจ</TableHead>
                 <TableHead>สถานะ</TableHead>
                 <TableHead>วันที่สมัคร</TableHead>
                 <TableHead>การจัดการ</TableHead>
@@ -327,6 +404,7 @@ const UserManage = () => {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{getRoleBadge(user.role)}</TableCell>
+                    <TableCell>{getBusinessStatusBadge(user)}</TableCell>
                     <TableCell>{getStatusBadge(user.enabled)}</TableCell>
                     <TableCell>
                       {user.createdAt
@@ -344,6 +422,20 @@ const UserManage = () => {
                           <Edit className="w-4 h-4" />
                           แก้ไข
                         </Button>
+
+                        {user.role === "BUSINESS" &&
+                          user.status === "pending" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openBusinessDialog(user)}
+                              className="flex items-center gap-2"
+                            >
+                              <Eye className="w-4 h-4" />
+                              ตรวจสอบ
+                            </Button>
+                          )}
+
                         <Button
                           size="sm"
                           variant={
@@ -370,7 +462,7 @@ const UserManage = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     {searchTerm
                       ? "ไม่พบผู้ใช้ที่ตรงกับการค้นหา"
                       : "ไม่มีข้อมูลผู้ใช้"}
@@ -519,6 +611,121 @@ const UserManage = () => {
             </Button>
             <Button onClick={handleSaveUser} disabled={isLoading}>
               {isLoading ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Business Approval Dialog */}
+      <Dialog open={showBusinessDialog} onOpenChange={setShowBusinessDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-blue-600" />
+              อนุมัติผู้ประกอบการ
+            </DialogTitle>
+            <DialogDescription>
+              ตรวจสอบและอนุมัติใบสมัครผู้ประกอบการ
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <h4 className="font-medium text-gray-900">ข้อมูลผู้สมัคร</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-600">ชื่อ:</span>
+                    <span className="ml-2 font-medium">
+                      {selectedUser.firstname} {selectedUser.lastname}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">อีเมล:</span>
+                    <span className="ml-2 font-medium">
+                      {selectedUser.email}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">เบอร์โทร:</span>
+                    <span className="ml-2 font-medium">
+                      {selectedUser.phone || "ไม่ระบุ"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">วันที่สมัคร:</span>
+                    <span className="ml-2 font-medium">
+                      {selectedUser.createdAt
+                        ? new Date(selectedUser.createdAt).toLocaleDateString(
+                            "th-TH"
+                          )
+                        : "ไม่ระบุ"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedUser.businessName && (
+                <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+                  <h4 className="font-medium text-blue-900">ข้อมูลธุรกิจ</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-blue-600">ชื่อธุรกิจ:</span>
+                      <span className="ml-2 font-medium">
+                        {selectedUser.businessName}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-blue-600">ประเภท:</span>
+                      <span className="ml-2 font-medium">
+                        {selectedUser.businessType || "ไม่ระบุ"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-blue-600">ที่อยู่:</span>
+                      <span className="ml-2 font-medium">
+                        {selectedUser.businessAddress || "ไม่ระบุ"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 p-3 border rounded-lg">
+                <Clock className="w-5 h-5 text-yellow-600" />
+                <span className="text-sm">สถานะปัจจุบัน: </span>
+                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                  รออนุมัติ
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowBusinessDialog(false)}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                selectedUser && rejectBusinessUser(selectedUser.id)
+              }
+              className="flex items-center gap-2"
+            >
+              <XCircle className="w-4 h-4" />
+              ปฏิเสธ
+            </Button>
+            <Button
+              onClick={() =>
+                selectedUser && approveBusinessUser(selectedUser.id)
+              }
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="w-4 h-4" />
+              อนุมัติ
             </Button>
           </DialogFooter>
         </DialogContent>

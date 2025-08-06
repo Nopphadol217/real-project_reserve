@@ -23,6 +23,7 @@ model User {
   password   String
   picture    String?
   role       Role       @default(USER)
+  enabled    Boolean    @default(true) // เพิ่มฟิลด์สำหรับเปิด/ปิดบัญชี
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   places     Place[]

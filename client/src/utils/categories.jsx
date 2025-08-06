@@ -1,45 +1,53 @@
 import {
-  Bed,
+  Building2,
   Hotel,
   House,
   Mountain,
-  Store,
-  Tent,
   Trees,
-  Utensils,
+  Bed,
+  Home,
+  Castle,
 } from "lucide-react";
 
 export const categories = [
   {
-    label: "Nature",
-    icon: Trees,
+    label: "อพาร์ทเมนต์",
+    value: "apartment",
+    icon: Building2,
   },
   {
-    label: "house",
+    label: "บ้าน",
+    value: "house",
     icon: House,
   },
   {
-    label: "camping",
-    icon: Tent,
-  },
-  {
-    label: "hotel",
+    label: "โรงแรม",
+    value: "hotel",
     icon: Hotel,
   },
   {
-    label: "hostel",
-    icon: Bed,
-  },
-  {
-    label: "moutain",
+    label: "รีสอร์ท",
+    value: "resort",
     icon: Mountain,
   },
   {
-    label: "store",
-    icon: Store,
+    label: "วิลลา",
+    value: "villa",
+    icon: Castle,
   },
   {
-    label: "food",
-    icon: Utensils,
+    label: "โฮสเทล",
+    value: "hostel",
+    icon: Bed,
+  },
+  {
+    label: "คอนโด",
+    value: "condo",
+    icon: Building2,
+  },
+  {
+    label: "สตูดิโอ",
+    value: "studio",
+    icon: Home,
   },
 ];

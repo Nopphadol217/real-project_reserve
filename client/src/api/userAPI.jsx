@@ -1,9 +1,9 @@
-import api from "@/lib/api";
+import API from "@/lib/api";
 
 // API สำหรับอัปเดตข้อมูลผู้ใช้
 export const updateUserAPI = async (userId, userData) => {
   try {
-    const response = await api.put(`/user/${userId}`, userData);
+    const response = await API.put(`/user/${userId}`, userData);
     return response.data;
   } catch (error) {
     console.error("Error updating user:", error);
@@ -14,7 +14,7 @@ export const updateUserAPI = async (userId, userData) => {
 // API สำหรับลบผู้ใช้
 export const deleteUserAPI = async (userId) => {
   try {
-    const response = await api.delete(`/user/${userId}`);
+    const response = await API.delete(`/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting user:", error);
@@ -25,7 +25,7 @@ export const deleteUserAPI = async (userId) => {
 // API สำหรับสร้างผู้ใช้ใหม่
 export const createUserAPI = async (userData) => {
   try {
-    const response = await api.post("/user", userData);
+    const response = await API.post("/user", userData);
     return response.data;
   } catch (error) {
     console.error("Error creating user:", error);
@@ -36,7 +36,7 @@ export const createUserAPI = async (userData) => {
 // API สำหรับรับข้อมูลผู้ใช้ตาม ID
 export const getUserByIdAPI = async (userId) => {
   try {
-    const response = await api.get(`/user/${userId}`);
+    const response = await API.get(`/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching user:", error);

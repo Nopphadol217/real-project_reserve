@@ -4,6 +4,7 @@ import Register from "@/components/authentication/Register";
 import AuthContainer from "@/components/authentication/AuthContainer";
 import Layout from "@/layouts/Layout";
 import LayoutAdmin from "@/layouts/LayoutAdmin";
+import LayoutBusiness from "@/layouts/LayoutBusiness";
 import Dashboard from "@/pages/admin/Dashboard";
 import Manage from "@/pages/admin/ManageList";
 import Home from "@/pages/Home";
@@ -12,7 +13,11 @@ import SearchPage from "@/pages/SearchPage_new";
 import SearchPlaces from "@/pages/SearchPlaces";
 import Profile from "@/pages/user/profile/Profile";
 import AdminRoute from "./AdminRoute";
+import BusinessRoute from "./BusinessRoute";
 import UserManage from "@/pages/admin/UserManage";
+import BusinessRegister from "@/pages/BusinessRegister";
+import BusinessDashboard from "@/pages/business/BusinessDashboard";
+import BusinessBookings from "@/pages/business/BusinessBookings";
 
 import CreateListing from "@/pages/admin/EDITFORM/CreateListing";
 import ManageList from "@/pages/admin/ManageList";
@@ -38,6 +43,7 @@ function AppRoutes() {
         {/* Separate authentication routes (keep for backward compatibility) */}
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="business-register" element={<BusinessRegister />} />
 
         {/* Public Routes */}
         <Route element={<Layout />}>
@@ -48,6 +54,7 @@ function AppRoutes() {
         </Route>
 
         <Route path="user" element={<Layout />}>
+          ```
           <Route index element={<Home />} />
           <Route path="profile" element={<Profile />} />
           <Route path="mybookings" element={<MyBookings />} />
@@ -76,6 +83,23 @@ function AppRoutes() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="bookings" element={<BookingManagement />} />
+        </Route>
+
+        {/* Business Routes */}
+        <Route
+          path="business"
+          element={
+            <BusinessRoute>
+              <LayoutBusiness />
+            </BusinessRoute>
+          }
+        >
+          <Route index path="dashboard" element={<BusinessDashboard />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="bookings" element={<BusinessBookings />} />
+          <Route path="places" element={<BusinessDashboard />} />
+          <Route path="payments" element={<BusinessDashboard />} />
+          <Route path="analytics" element={<BusinessDashboard />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

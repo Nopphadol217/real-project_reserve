@@ -1,5 +1,6 @@
 import React from "react";
 import { Heart } from "lucide-react";
+import { Separator } from "./separator";
 
 const Footer = ({ variant = "default" }) => {
   const isMinimal = variant === "minimal";
@@ -23,7 +24,7 @@ const Footer = ({ variant = "default" }) => {
   }
 
   return (
-    <footer className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 mt-16">
+    <footer className="bg-gradient-to-r from-red-500 to-red-600 text-white py-8 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Logo/Brand Section */}
@@ -34,8 +35,7 @@ const Footer = ({ variant = "default" }) => {
             <p className="text-blue-100 text-sm mt-1">ระบบจองที่พักออนไลน์</p>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-blue-500 mb-4"></div>
+          <Separator className="my-4" />
 
           {/* Copyright Section */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm">

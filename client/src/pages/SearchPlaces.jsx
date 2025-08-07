@@ -414,6 +414,7 @@ const SearchPlaces = () => {
                   selectedPlace={selectedPlace}
                   onMarkerClick={handleMapMarkerClick}
                   height="100%"
+                  
                 />
               </CardContent>
             </Card>

@@ -57,7 +57,7 @@ const SearchMap = ({
         center={center}
         zoom={zoom}
  
-        className="rounded-lg shadow-lg h-[70%] w-[100%] xl:h-[100%] xl:w-[100%]"
+        className="rounded-lg shadow-lg h-[70%] w-[100%] xl:h-[100%] xl:w-[100%] z-0"
         scrollWheelZoom={true}
       >
         <TileLayer

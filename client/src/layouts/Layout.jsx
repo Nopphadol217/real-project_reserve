@@ -1,4 +1,5 @@
 import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/ui/Footer";
 import { Outlet } from "react-router";
 
 import useAuthStore from "@/store/useAuthStore";
@@ -16,13 +17,12 @@ function Layout() {
   }, [isHydrated]);
 
   return (
-    <div>
- 
-
-
-
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <Outlet />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
     </div>
   );
 }

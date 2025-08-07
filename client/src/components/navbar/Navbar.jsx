@@ -33,7 +33,7 @@ function Navbar() {
   return (
     <>
       {/* Main Navbar */}
-      <nav className="bg-white border-b border-gray-200 shadow-sm">
+      <nav className="bg-[#F12026] border-b border-gray-200 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo Section */}
@@ -47,7 +47,7 @@ function Navbar() {
                 {/* Home Link - Always visible */}
                 <Link
                   to="/"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
+                  className="text-sm font-medium text-[#FFEED4] hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
                 >
                   <Home className="w-4 h-4" />
                   หน้าหลัก
@@ -59,7 +59,7 @@ function Navbar() {
                     <Link
                       key={`user-${index}`}
                       to={link.href}
-                      className="text-sm  font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex justify-center  items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-50"
+                      className="text-sm  font-medium text-[#FFEED4] hover:text-blue-600 transition-colors duration-200 flex justify-center  items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-50"
                     >
                       <span className="w-5 h-5 flex justify-center items-center">
                         {link.icon}
@@ -70,8 +70,8 @@ function Navbar() {
                 ) : (
                   // Public Links for non-logged in users
                   <Link
-                    to="/search"
-                    className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
+                    to="/search-places"
+                    className="text-sm font-medium text-[#FFEED4] hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
                   >
                     <Search className="w-4 h-4" />
                     ค้นหาที่พัก
@@ -84,15 +84,8 @@ function Navbar() {
             <div className="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
               {/* Become a host link - Desktop only */}
               <div className="hidden xl:block">
-                <button className="text-sm font-medium text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-full transition-colors duration-200 whitespace-nowrap">
+                <button className="text-sm font-medium text-[#FFEED4] hover:bg-gray-100 px-3 py-2 rounded-full transition-colors duration-200 whitespace-nowrap">
                   <Link to="/business-register">เป็นเจ้าของที่พัก</Link>
-                </button>
-              </div>
-
-              {/* Language/Globe icon - Desktop only */}
-              <div className="hidden lg:block">
-                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
-                  <Globe className="w-4 h-4 text-gray-700" />
                 </button>
               </div>
 
@@ -102,7 +95,7 @@ function Navbar() {
                   <div className="flex items-center border border-gray-300 rounded-full p-1 hover:shadow-md transition-shadow duration-200">
                     <div className="flex items-center">
                       <button className="p-1 md:p-2">
-                        <Menu className="w-4 h-4 text-gray-700" />
+                        <Menu className="w-4 h-4 text-[#FFEED4]" />
                       </button>
 
                       {/* User Menu Button */}
@@ -132,12 +125,7 @@ function Navbar() {
                             >
                               เป็นเจ้าของที่พัก
                             </Link>
-                            <a
-                              href="#"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                              ช่วยเหลือ
-                            </a>
+                           
                           </div>
                         </div>
                       )}

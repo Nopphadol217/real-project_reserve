@@ -63,9 +63,9 @@ const PlaceImageContainer = ({ place }) => {
 
   if (!place?.secure_url) {
     return (
-      <div className="w-full h-64 sm:h-80 lg:h-96 bg-gray-200 rounded-xl flex items-center justify-center mb-8">
+      <div className="w-full h-48 sm:h-64 md:h-80 lg:h-96 bg-gray-200 rounded-xl flex items-center justify-center mb-8">
         <div className="text-center text-gray-500">
-          <p>ไม่มีรูปภาพ</p>
+          <p className="text-sm md:text-base">ไม่มีรูปภาพ</p>
         </div>
       </div>
     );
@@ -74,24 +74,14 @@ const PlaceImageContainer = ({ place }) => {
   // Prepare images for grid (max 5 images for display)
   const gridImages = allImages.slice(0, 5);
 
-  if (!place?.secure_url) {
-    return (
-      <div className="w-full h-64 sm:h-80 lg:h-96 bg-gray-200 rounded-xl flex items-center justify-center mb-8">
-        <div className="text-center text-gray-500">
-          <p>ไม่มีรูปภาพ</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="mb-8">
-        {/* Bento Grid Layout like in the image */}
-        <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[400px] rounded-lg overflow-hidden">
-          {/* Main Image - Takes 2x2 grid (left side) */}
+        {/* Responsive Bento Grid Layout */}
+        <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[300px] md:h-[400px] rounded-lg overflow-hidden">
+          {/* Main Image - Takes different spans based on screen size */}
           <div
-            className="col-span-2 row-span-2 relative cursor-pointer hover:opacity-95 hover:scale-102 duration-500 transition-all"
+            className="col-span-2 row-span-2 relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all"
             onClick={() => openDialog(0)}
           >
             <img
@@ -101,7 +91,7 @@ const PlaceImageContainer = ({ place }) => {
             />
           </div>
 
-          {/* Right side - 4 smaller images */}
+          {/* Right side - 4 smaller images, responsive layout */}
           {allImages.slice(1, 5).map((item, index) => {
             const actualIndex = index + 1;
             const isLastItem = actualIndex === 4 && allImages.length > 5;
@@ -109,7 +99,7 @@ const PlaceImageContainer = ({ place }) => {
             return (
               <div
                 key={actualIndex}
-                className="relative cursor-pointer hover:opacity-95 hover:scale-102 duration-500 transition-all"
+                className="relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all hidden md:block"
                 onClick={() => openDialog(actualIndex)}
               >
                 <img
@@ -121,7 +111,7 @@ const PlaceImageContainer = ({ place }) => {
                 {/* Overlay for last item */}
                 {isLastItem && (
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-                    <span className="text-white font-semibold text-lg">
+                    <span className="text-white font-semibold text-sm md:text-lg">
                       +{allImages.length - 5} ภาพ
                     </span>
                   </div>
@@ -129,24 +119,45 @@ const PlaceImageContainer = ({ place }) => {
               </div>
             );
           })}
+
+          {/* Mobile: Show only one additional image */}
+          {allImages.length > 1 && (
+            <div
+              className="relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all md:hidden"
+              onClick={() => openDialog(1)}
+            >
+              <img
+                src={allImages[1]?.url}
+                alt={allImages[1]?.alt}
+                className="w-full h-full object-cover"
+              />
+              {allImages.length > 2 && (
+                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                  <span className="text-white font-semibold text-sm">
+                    +{allImages.length - 2} ภาพ
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Gallery Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
-          className="max-w-6xl w-full h-[90vh] p-0 bg-white"
+          className="max-w-7xl w-[95vw] h-[90vh] p-0 bg-white"
           hideCloseIcon={true}
         >
           {viewMode === "grid" ? (
             /* Gallery Grid View */
             <div className="relative w-full h-full flex flex-col bg-white">
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-semibold text-gray-900">
+              <div className="flex items-center justify-between p-4 md:p-6 border-b bg-white sticky top-0 z-10">
+                <h2 className="text-lg md:text-xl font-semibold text-gray-900">
                   ภาพทั้งหมด ({allImages.length} รูป)
                 </h2>
-             <Button
+                <Button
                   onClick={() => setIsDialogOpen(false)}
                   variant="ghost"
                   size="icon"
@@ -156,23 +167,30 @@ const PlaceImageContainer = ({ place }) => {
                 </Button>
               </div>
 
-              {/* Grid Gallery with ScrollArea */}
-              <ScrollArea className="flex-1 p-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {allImages.map((image, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square cursor-pointer rounded-lg overflow-hidden hover:opacity-90 hover:scale-102 duration-500 transition-all group"
-                      onClick={() => openSlideView(index)}
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.alt}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
-                    </div>
-                  ))}
+              {/* Improved Grid Gallery with ScrollArea */}
+              <ScrollArea className="flex-1 h-full">
+                <div className="p-4 md:p-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                    {allImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-square cursor-pointer rounded-lg overflow-hidden hover:opacity-90 hover:scale-[1.02] duration-300 transition-all group shadow-sm hover:shadow-md"
+                        onClick={() => openSlideView(index)}
+                      >
+                        <img
+                          src={image.url}
+                          alt={image.alt}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
+
+                        {/* Image number overlay */}
+                        <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                          {index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </ScrollArea>
             </div>
@@ -180,7 +198,7 @@ const PlaceImageContainer = ({ place }) => {
             /* Slide View */
             <div className="relative w-full h-full flex flex-col bg-white">
               {/* Slide Header */}
-              <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center justify-between p-4 border-b bg-white">
                 <div className="flex items-center gap-3">
                   <Button
                     onClick={backToGrid}
@@ -194,16 +212,28 @@ const PlaceImageContainer = ({ place }) => {
                     {currentImageIndex + 1} / {allImages.length}
                   </span>
                 </div>
-                
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-gray-100 text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
               </div>
 
               {/* Main Image Viewer */}
-              <div className="flex-1 relative flex items-center justify-center p-6">
+              <div className="flex-1 relative flex items-center justify-center p-4 md:p-6">
                 <img
                   src={allImages[currentImageIndex]?.url}
                   alt={allImages[currentImageIndex]?.alt}
-                  className="rounded-lg shadow-lg object-cover"
-                  style={{ width: "650px", height: "439px" }}
+                  className="rounded-lg shadow-lg object-cover max-w-full max-h-full"
+                  style={{
+                    maxWidth: "90%",
+                    maxHeight: "70vh",
+                    width: "auto",
+                    height: "auto",
+                  }}
                 />
 
                 {/* Navigation Buttons */}
@@ -211,14 +241,14 @@ const PlaceImageContainer = ({ place }) => {
                   <>
                     <Button
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:bg-gray-50 text-gray-700 border"
+                      className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:bg-gray-50 text-gray-700 border"
                       size="icon"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </Button>
                     <Button
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:bg-gray-50 text-gray-700 border"
+                      className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:bg-gray-50 text-gray-700 border"
                       size="icon"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -228,14 +258,14 @@ const PlaceImageContainer = ({ place }) => {
               </div>
 
               {/* Bottom Thumbnails with ScrollArea */}
-              <div className="h-20 bg-gray-50 border-t">
-                <ScrollArea className="h-full p-4">
-                  <div className="flex gap-2 h-12">
+              <div className="h-16 md:h-20 bg-gray-50 border-t">
+                <ScrollArea className="h-full p-3 md:p-4">
+                  <div className="flex gap-2 h-10 md:h-12">
                     {allImages.map((image, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`flex-shrink-0 h-12 aspect-square rounded-lg overflow-hidden hover:scale-102 duration-300 transition-all ${
+                        className={`flex-shrink-0 h-10 md:h-12 aspect-square rounded-lg overflow-hidden hover:scale-[1.02] duration-300 transition-all ${
                           currentImageIndex === index
                             ? "ring-2 ring-blue-500 opacity-100"
                             : "opacity-70 hover:opacity-90"

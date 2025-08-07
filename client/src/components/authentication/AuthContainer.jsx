@@ -180,27 +180,7 @@ function AuthContainer() {
                       : "สร้างบัญชีใหม่และเข้าร่วมชุมชนนักท่องเที่ยวที่ใหญ่ที่สุด"}
                   </p>
 
-                  {/* Feature list - Hidden on mobile */}
-                  <div className="space-y-2 sm:space-y-3 lg:space-y-4 hidden sm:block">
-                    <div className="flex items-center justify-center lg:justify-start">
-                      <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
-                      <span className="text-white/90 text-sm lg:text-base">
-                        ที่พักคุณภาพสูงกว่า 1,000+ แห่ง
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-center lg:justify-start">
-                      <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
-                      <span className="text-white/90 text-sm lg:text-base">
-                        จองง่าย ปลอดภัย ยืนยันทันที
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-center lg:justify-start">
-                      <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
-                      <span className="text-white/90 text-sm lg:text-base">
-                        รีวิวจริงจากผู้ใช้งาน
-                      </span>
-                    </div>
-                  </div>
+                 
                 </div>
 
                 <div className="mt-6 sm:mt-8 lg:mt-12 text-center lg:text-left">

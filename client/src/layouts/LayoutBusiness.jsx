@@ -1,4 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
+import Footer from "@/components/ui/Footer";
 import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 import { Outlet } from "react-router";
@@ -16,9 +17,12 @@ function LayoutBusiness() {
     <SidebarProvider>
       <BusinessSidebar />
 
-      <div className="w-full">
+      <div className="w-full min-h-screen flex flex-col">
         <HeaderTigger />
-        <Outlet />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer variant="minimal" />
       </div>
     </SidebarProvider>
   );

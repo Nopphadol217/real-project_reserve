@@ -1,5 +1,5 @@
-
 import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/ui/Footer";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
@@ -21,10 +21,12 @@ function LayoutAdmin() {
     <SidebarProvider>
       <AppSidebar />
 
-      <div className="w-full ">
-      
+      <div className="w-full min-h-screen flex flex-col">
         <HeaderTigger />
-        <Outlet />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer variant="minimal" />
       </div>
     </SidebarProvider>
   );

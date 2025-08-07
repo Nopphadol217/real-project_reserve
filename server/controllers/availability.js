@@ -24,29 +24,34 @@ const checkRoomAvailability = async (req, res) => {
     }
 
     // หาการจองที่ทับซ้อนกับช่วงวันที่ที่ต้องการ
-    const conflictingBookings = await prisma.booking.findMany({
-      where: {
-        placeId: parseInt(placeId),
-        status: {
-          in: ["confirmed", "pending"], // เปลี่ยนเป็น lowercase
-        },
-        OR: [
-          {
-            // การจองที่เริ่มก่อนหรือในช่วงที่ต้องการ และสิ้นสุดหลังวันเช็คอิน
-            checkIn: {
-              lte: checkOutDate,
-            },
-            checkOut: {
-              gt: checkInDate,
-            },
-          },
-        ],
-        ...(roomId && {
-          roomId: parseInt(roomId), // เปลี่ยนจาก roomDetails เป็น roomId
-        }),
+    let whereCondition = {
+      status: {
+        in: ["confirmed", "pending"], // เปลี่ยนเป็น lowercase
       },
+      OR: [
+        {
+          // การจองที่เริ่มก่อนหรือในช่วงที่ต้องการ และสิ้นสุดหลังวันเช็คอิน
+          checkIn: {
+            lte: checkOutDate,
+          },
+          checkOut: {
+            gt: checkInDate,
+          },
+        },
+      ],
+    };
+
+    // ถ้าระบุ roomId ให้ตรวจสอบเฉพาะห้องนั้น มิเช่นนั้นตรวจสอบทั้ง place
+    if (roomId) {
+      whereCondition.roomId = parseInt(roomId);
+    } else {
+      whereCondition.placeId = parseInt(placeId);
+    }
+
+    const conflictingBookings = await prisma.booking.findMany({
+      where: whereCondition,
       include: {
-        room: true, // เปลี่ยนจาก roomDetails เป็น room
+        Room: true, // เปลี่ยนเป็น uppercase
       },
     });
 

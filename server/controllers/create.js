@@ -94,6 +94,11 @@ exports.createPlace = async (req, res, next) => {
 };
 
 exports.listPlace = async (req, res, next) => {
+  const { id } = req.params;
+
+  // Convert id to number if it's a valid number, otherwise set to null
+  const userId = id && id !== "null" ? parseInt(id) : null;
+
   try {
     const places = await prisma.place.findMany({
       include: {
@@ -112,16 +117,25 @@ exports.listPlace = async (req, res, next) => {
             status: true,
           },
         },
+        favorites: userId
+          ? {
+              where: { userId: userId },
+              select: { id: true },
+            }
+          : false,
       },
     });
-
     // แปลง amenities JSON string กลับเป็น array
     const placesWithAmenities = places.map((place) => ({
       ...place,
       amenities: place.amenities ? JSON.parse(place.amenities) : [],
     }));
+    const placeWithLikes = places.map((place) => ({
+      ...place,
+      isFavorite: userId ? place.favorites.length > 0 : false, // ตรวจสอบว่ามี favorite หรือไม่ (เฉพาะเมื่อมี userId)
+    }));
 
-    res.json({ result: placesWithAmenities });
+    res.json({ result: placesWithAmenities, favorites: placeWithLikes });
   } catch (error) {
     next(error);
   }

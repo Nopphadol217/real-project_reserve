@@ -8,7 +8,7 @@ const Footer = ({ variant = "default" }) => {
   if (isMinimal) {
     return (
       <footer className="bg-gray-50 border-t border-gray-200 py-4 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-6">
           <div className="text-center">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-gray-600">
               <span>© 2025 BookyLife - สร้างโดย</span>

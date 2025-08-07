@@ -48,6 +48,11 @@ export const privateLinks = [
     label: "ประวัติการจอง",
     icon: <Star />,
   },
+  {
+    href: "/user/my-favorites",
+    label: "รายการโปรด",
+    icon: <Heart />,
+  },
 ];
 
 export const adminLinks = [

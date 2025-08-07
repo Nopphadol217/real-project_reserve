@@ -93,7 +93,62 @@ exports.createBooking = async (req, res, next) => {
       finalRoomId = selectedRoom.id;
     }
 
-    // 4 calculate total destructoring แปลงวันที่ ดึง ราคารวม และวันที่จองทั้งหมด
+    // ตรวจสอบความถูกต้องของวันที่
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: "ไม่สามารถจองย้อนหลังได้",
+      });
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return res.status(400).json({
+        success: false,
+        message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก",
+      });
+    }
+
+    // ตรวจสอบการจองที่ซ้ำซ้อนสำหรับห้องนี้เฉพาะ (ยกเว้น user นี้)
+    const conflictBookings = await prisma.booking.findMany({
+      where: {
+        roomId: finalRoomId,
+        userId: {
+          not: parseInt(userId), // ไม่รวม user ที่กำลังจอง
+        },
+        AND: [
+          {
+            checkIn: {
+              lt: checkOutDate,
+            },
+          },
+          {
+            checkOut: {
+              gt: checkInDate,
+            },
+          },
+        ],
+        status: {
+          in: ["pending", "confirmed"],
+        },
+      },
+    });
+
+    if (conflictBookings.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "ห้องที่เลือกถูกจองแล้วในช่วงวันที่ดังกล่าว",
+        conflictBookings: conflictBookings.map((b) => ({
+          checkIn: b.checkIn,
+          checkOut: b.checkOut,
+          status: b.status,
+        })),
+      });
+    } // 4 calculate total destructoring แปลงวันที่ ดึง ราคารวม และวันที่จองทั้งหมด
     const { total, totalNight } = calTotal(pricePerNight, checkIn, checkOut);
 
     // 5 insert to db บันทึกลง DataBase
@@ -163,10 +218,10 @@ exports.createBankTransferBooking = async (req, res, next) => {
       });
     }
 
-    // ตรวจสอบการจองที่ซ้ำซ้อน
+    // ตรวจสอบการจองที่ซ้ำซ้อนสำหรับห้องนี้เฉพาะ
     const conflictBookings = await prisma.booking.findMany({
       where: {
-        placeId: parseInt(placeId),
+        roomId: parseInt(roomId), // ตรวจสอบเฉพาะห้องที่เลือก
         AND: [
           {
             checkIn: {

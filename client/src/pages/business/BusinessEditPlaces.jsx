@@ -33,11 +33,11 @@ const BusinessEditPlaces = () => {
   useEffect(() => {
     const fetchPlaces = async () => {
       setLoading(true);
-      await actionListPlace();
+      await actionListPlace(user?.id);
       setLoading(false);
     };
     fetchPlaces();
-  }, [actionListPlace]);
+  }, [actionListPlace, user?.id]);
 
   // Filter places to show only those owned by current user
   const userPlaces = places.filter((place) => place.userId === user?.id);

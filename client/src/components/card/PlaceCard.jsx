@@ -1,6 +1,8 @@
 import { Card } from "../ui/card";
 import { Link } from "react-router";
 import { Bed, Users, Wifi, Car, Coffee } from "lucide-react";
+import FavoriteToggleButton from "./FavoriteToggleButton";
+import { useState, useEffect } from "react";
 
 function PlaceCard({ places }) {
   const {
@@ -15,7 +17,16 @@ function PlaceCard({ places }) {
     rooms,
     amenities,
     roomDetails,
+    isFavorite = false,
   } = places;
+
+  // จัดการ local state สำหรับ favorite status
+  const [currentIsFavorite, setCurrentIsFavorite] = useState(isFavorite);
+
+  // Update local state เมื่อ props เปลี่ยน
+  useEffect(() => {
+    setCurrentIsFavorite(isFavorite);
+  }, [isFavorite]);
 
   // คำนวณราคาเริ่มต้น (ถูกที่สุด)
   const getMinPrice = () => {
@@ -49,15 +60,25 @@ function PlaceCard({ places }) {
           <img
             src={secure_url}
             alt={title || "Place Image"}
-            className="w-full h-full object-cover 
+            className="z-0 w-full h-full object-cover 
                      transition-transform duration-700 
                      group-hover:scale-110"
             loading="lazy"
           />
 
+          {/* Favorite Button */}
+          <div className="absolute top-3 right-3">
+            <FavoriteToggleButton
+              placeId={id}
+              isFavorite={currentIsFavorite}
+              placeName={title}
+              onFavoriteChange={setCurrentIsFavorite}
+            />
+          </div>
+
           {/* Gradient Overlay */}
           <div
-            className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent 
+            className="absolute bg-gradient-to-t from-black/40 via-transparent to-transparent 
                          opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           />
 
@@ -111,9 +132,9 @@ function PlaceCard({ places }) {
             </div>
 
             {/* Top Amenities (show first 3) */}
-            {amenities && amenities.length > 0 && (
+            {amenities && Array.isArray(amenities) && amenities.length > 0 && (
               <div className="flex items-center space-x-1">
-                {amenities.slice(0, 3).map((amenityId) => {
+                {amenities.slice(0, 3).map((amenityId, index) => {
                   const iconMap = {
                     wifi: Wifi,
                     parking: Car,
@@ -123,7 +144,7 @@ function PlaceCard({ places }) {
 
                   return IconComponent ? (
                     <IconComponent
-                      key={amenityId}
+                      key={`${amenityId}-${index}`}
                       className="w-3 h-3 text-gray-400"
                     />
                   ) : null;

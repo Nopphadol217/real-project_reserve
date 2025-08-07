@@ -49,14 +49,17 @@ const getCategoryColor = (category) => {
   return colors[category] || "#ef4444";
 };
 
+import useAuthStore from "@/store/useAuthStore";
+
 const MapHome = () => {
   const places = usePlaceStore((state) => state.places);
   const actionListPlace = usePlaceStore((state) => state.actionListPlace);
+  const user = useAuthStore((state) => state.user);
   const [mapCenter, setMapCenter] = useState([13.7563, 100.5018]); // Bangkok default
 
   useEffect(() => {
-    actionListPlace();
-  }, [actionListPlace]);
+    actionListPlace(user?.id);
+  }, [actionListPlace, user?.id]);
 
   useEffect(() => {
     // Center map based on available places

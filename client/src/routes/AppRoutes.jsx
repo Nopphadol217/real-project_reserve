@@ -36,6 +36,7 @@ import PaymentManagement from "@/pages/admin/PaymentManagement";
 import BookingManagement from "@/pages/admin/BookingManagement";
 import Analytics from "@/pages/admin/Analytics";
 import MyOrders from "@/pages/user/MyOrders";
+import MyFavorites from "@/pages/user/MyFavorites";
 
 function AppRoutes() {
   return (
@@ -58,11 +59,11 @@ function AppRoutes() {
         </Route>
 
         <Route path="user" element={<Layout />}>
-          ```
           <Route index element={<Home />} />
           <Route path="profile" element={<Profile />} />
           <Route path="mybookings" element={<MyBookings />} />
           <Route path="my-orders" element={<MyOrders />} />
+          <Route path="my-favorites" element={<MyFavorites />} />
           <Route path="checkout/:id" element={<Checkout />} />
           <Route path="complete/:session_id" element={<Complete />} />
         </Route>

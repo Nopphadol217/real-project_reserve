@@ -12,9 +12,7 @@ export const readPlace = async (id) => {
 };
 
 export const listPlaces = async(userId)=>{
-  return await axios.get(`${import.meta.env.VITE_API}/places`, {
-    userId: userId
-  });
+  return await axios.get(`${import.meta.env.VITE_API}/places/${userId}`);
 }
   
 

@@ -28,14 +28,21 @@ import useAuthStore from "@/store/useAuthStore";
 const PlaceHomeContainer = () => {
   const actionPlaces = usePlaceStore((state) => state.actionListPlace);
   const places = usePlaceStore((state) => state.places);
+  const isLoading = usePlaceStore((state) => state.isLoading);
+  const error = usePlaceStore((state) => state.error);
+  const userId = useAuthStore((state) => state.user);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredPlaces, setFilteredPlaces] = useState([]);
 
   useEffect(() => {
-    actionPlaces();
-  }, []);
+    const id = userId?.id ?? null;
+    console.log("User ID:", id);
+    // เรียก API ทั้งในกรณีที่มี userId และไม่มี userId
+    // เพื่อให้แสดงที่พักได้แม้ไม่ได้ล็อกอิน
+    actionPlaces(id);
+  }, [userId?.id]);
 
   // Filter places based on search and category
   useEffect(() => {
@@ -100,11 +107,40 @@ const PlaceHomeContainer = () => {
           </div>
 
           {/* All Places Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-            {(filteredPlaces || []).slice(0, 10).map((place) => (
-              <PlaceCard key={place.id} places={place} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              {[...Array(10)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-gray-200 rounded-lg h-48 mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="mb-4">
+                <Search className="w-16 h-16 text-gray-300 mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                เกิดข้อผิดพลาดในการโหลดข้อมูล
+              </h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <Button
+                onClick={() => actionPlaces(userId?.id ?? null)}
+                variant="outline"
+                className="border-red-500 text-red-600 hover:bg-red-50"
+              >
+                ลองใหม่อีกครั้ง
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              {(filteredPlaces || []).slice(0, 10).map((place) => (
+                <PlaceCard key={place.id} places={place} />
+              ))}
+            </div>
+          )}
 
           {filteredPlaces && filteredPlaces.length > 10 && (
             <div className="text-center mt-8">

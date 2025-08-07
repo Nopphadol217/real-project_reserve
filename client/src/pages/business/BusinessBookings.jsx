@@ -47,8 +47,8 @@ const BusinessBookings = () => {
   const actionListPlace = usePlaceStore((state) => state.actionListPlace);
 
   useEffect(() => {
-    actionListPlace();
-  }, [actionListPlace]);
+    actionListPlace(user?.id);
+  }, [actionListPlace, user?.id]);
 
   useEffect(() => {
     if (places.length > 0) {

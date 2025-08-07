@@ -117,6 +117,7 @@ model Favorite {
   userId    Int
   placeId   Int
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   Place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
 

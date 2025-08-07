@@ -33,10 +33,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SearchMap from "@/components/map/SearchMap";
 import usePlaceStore from "@/store/usePlaceStore";
 import { categories } from "@/utils/categories";
+import useAuthStore from "@/store/useAuthStore";
 
 const SearchPlaces = () => {
   const places = usePlaceStore((state) => state.places);
   const actionListPlace = usePlaceStore((state) => state.actionListPlace);
+  const user = useAuthStore((state) => state.user);
   const [filteredPlaces, setFilteredPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [mapCenter, setMapCenter] = useState([13.7563, 100.5018]); // Bangkok center
@@ -51,8 +53,8 @@ const SearchPlaces = () => {
 
   // Load places on component mount
   useEffect(() => {
-    actionListPlace();
-  }, [actionListPlace]);
+    actionListPlace(user?.id);
+  }, [actionListPlace, user?.id]);
 
   // Update filtered places when places or filters change
   useEffect(() => {

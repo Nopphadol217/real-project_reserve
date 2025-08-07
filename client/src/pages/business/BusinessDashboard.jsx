@@ -58,9 +58,9 @@ const BusinessDashboard = () => {
   const actionListPlace = usePlaceStore((state) => state.actionListPlace);
 
   useEffect(() => {
-    actionListPlace();
+    actionListPlace(user?.id);
     fetchBookingData();
-  }, [actionListPlace]);
+  }, [actionListPlace, user?.id]);
 
   // Watch for changes in places and refetch bookings
   useEffect(() => {

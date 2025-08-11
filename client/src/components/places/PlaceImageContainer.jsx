@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight, Grid3X3, ArrowLeft } from "lucide-react";
@@ -76,9 +76,9 @@ const PlaceImageContainer = ({ place }) => {
 
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-6">
         {/* Responsive Bento Grid Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[300px] md:h-[400px] rounded-lg overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 grid-rows-3  xl:grid-rows-3 gap-2 h-[400px] md:h-[350px] rounded-lg overflow-hidden">
           {/* Main Image - Takes different spans based on screen size */}
           <div
             className="col-span-2 row-span-2 relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all"
@@ -145,58 +145,43 @@ const PlaceImageContainer = ({ place }) => {
 
       {/* Gallery Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent
-          className="max-w-7xl w-[95vw] h-[90vh] p-0 bg-white"
-          hideCloseIcon={true}
-        >
+        <DialogContent className="max-w-full w-[50vh] h-[80vh] sm:w-[90vh] md:w-[140vh] xl:w-[180vh] xl:h-[100vh] max-h-[95vh] p-0 bg-white overflow-y-auto rounded-lg">
+          <DialogTitle className="flex   mt-4 mx-auto">
+            <span>ภาพทั้งหมด ({allImages.length} รูป)</span>
+          </DialogTitle>
           {viewMode === "grid" ? (
             /* Gallery Grid View */
             <div className="relative w-full h-full flex flex-col bg-white">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 md:p-6 border-b bg-white sticky top-0 z-10">
-                <h2 className="text-lg md:text-xl font-semibold text-gray-900">
-                  ภาพทั้งหมด ({allImages.length} รูป)
-                </h2>
-                <Button
-                  onClick={() => setIsDialogOpen(false)}
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-gray-100 text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
 
               {/* Improved Grid Gallery with ScrollArea */}
-              <ScrollArea className="flex-1 h-full">
-                <div className="p-4 md:p-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-                    {allImages.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative aspect-square cursor-pointer rounded-lg overflow-hidden hover:opacity-90 hover:scale-[1.02] duration-300 transition-all group shadow-sm hover:shadow-md"
-                        onClick={() => openSlideView(index)}
-                      >
-                        <img
-                          src={image.url}
-                          alt={image.alt}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
+              <div className="p-4 md:p-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                  {allImages.map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square cursor-pointer rounded-lg overflow-hidden hover:opacity-90 hover:scale-[1.02] duration-300 transition-all group shadow-sm hover:shadow-md"
+                      onClick={() => openSlideView(index)}
+                    >
+                      <img
+                        src={image.url}
+                        alt={image.alt}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
 
-                        {/* Image number overlay */}
-                        <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                          {index + 1}
-                        </div>
+                      {/* Image number overlay */}
+                      <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                        {index + 1}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           ) : (
             /* Slide View */
-            <div className="relative w-full h-full flex flex-col bg-white">
+            <div className="mx-auto relative  h-full flex  flex-col bg-white w-[300px] sm:w-[550px] md:w-full  xl:w-full  xl:h-full">
               {/* Slide Header */}
               <div className="flex items-center justify-between p-4 border-b bg-white">
                 <div className="flex items-center gap-3">
@@ -212,28 +197,14 @@ const PlaceImageContainer = ({ place }) => {
                     {currentImageIndex + 1} / {allImages.length}
                   </span>
                 </div>
-                <Button
-                  onClick={() => setIsDialogOpen(false)}
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-gray-100 text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
               </div>
 
               {/* Main Image Viewer */}
-              <div className="flex-1 relative flex items-center justify-center p-4 md:p-6">
+              <div className="mx-auto xl:flex-1 relative flex items-center justify-center p-2 sm:p-4 md:p-6 md:w-[650px]  xl:w-full  xl:h-full ">
                 <img
                   src={allImages[currentImageIndex]?.url}
                   alt={allImages[currentImageIndex]?.alt}
-                  className="rounded-lg shadow-lg object-cover max-w-full max-h-full"
-                  style={{
-                    maxWidth: "90%",
-                    maxHeight: "70vh",
-                    width: "auto",
-                    height: "auto",
-                  }}
+                  className="rounded-lg object-contain max-w-full max-h-[calc(100vh-150px)]"
                 />
 
                 {/* Navigation Buttons */}
@@ -241,24 +212,24 @@ const PlaceImageContainer = ({ place }) => {
                   <>
                     <Button
                       onClick={prevImage}
-                      className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:bg-gray-50 text-gray-700 border"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-md shadow-lg hover:bg-gray-100 text-gray-700 border"
                       size="icon"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-6 h-6" />
                     </Button>
                     <Button
                       onClick={nextImage}
-                      className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:bg-gray-50 text-gray-700 border"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-md shadow-lg hover:bg-gray-100 text-gray-700 border"
                       size="icon"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <ChevronRight className="w-6 h-6" />
                     </Button>
                   </>
                 )}
               </div>
 
               {/* Bottom Thumbnails with ScrollArea */}
-              <div className="h-16 md:h-20 bg-gray-50 border-t">
+              <div className="h-16 md:h-20 bg-gray-50 border-t grid  ">
                 <ScrollArea className="h-full p-3 md:p-4">
                   <div className="flex gap-2 h-10 md:h-12">
                     {allImages.map((image, index) => (

@@ -35,6 +35,16 @@ export const listBookings = async () => {
   }
 };
 
+// List pending payment bookings for specific user
+export const listPendingPayments = async (userId) => {
+  try {
+    const response = await api.get(`/bookings/pending-payments/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Checkout payment
 export const checkout = async (bookingId) => {
   try {

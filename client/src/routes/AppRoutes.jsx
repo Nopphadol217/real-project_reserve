@@ -37,6 +37,7 @@ import BookingManagement from "@/pages/admin/BookingManagement";
 import Analytics from "@/pages/admin/Analytics";
 import MyOrders from "@/pages/user/MyOrders";
 import MyFavorites from "@/pages/user/MyFavorites";
+import PendingPayment from "@/pages/user/PendingPayment";
 
 function AppRoutes() {
   return (
@@ -64,6 +65,7 @@ function AppRoutes() {
           <Route path="mybookings" element={<MyBookings />} />
           <Route path="my-orders" element={<MyOrders />} />
           <Route path="my-favorites" element={<MyFavorites />} />
+          <Route path="pending-payment" element={<PendingPayment />} />
           <Route path="checkout/:id" element={<Checkout />} />
           <Route path="complete/:session_id" element={<Complete />} />
         </Route>

@@ -24,6 +24,9 @@ const PaymentMethodSelector = ({
   paymentInfo,
   onBack,
   onSelectPaymentMethod,
+  isOpen,
+  onClose,
+  onPaymentComplete,
 }) => {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -35,6 +38,9 @@ const PaymentMethodSelector = ({
   const selectedRoom = useBookingStore((state) => state.selectedRoom);
   const getTotalPrice = useBookingStore((state) => state.getTotalPrice);
   const totalNights = useBookingStore((state) => state.totalNights);
+
+  // Check if this is for existing booking (has bookingId)
+  const isExistingBooking = bookingData?.bookingId;
 
   // ดึงข้อมูลการชำระเงินของที่พักนี้
   useEffect(() => {
@@ -139,15 +145,29 @@ const PaymentMethodSelector = ({
           return;
         }
 
-        // สำหรับ Bank Transfer - สร้าง booking แล้วไปหน้าอัปโหลดสลิป
-        const response = await createBookingAPI({
-          ...bookingData,
-          paymentMethod: "bank_transfer",
-        });
+        if (isExistingBooking) {
+          // สำหรับการจองที่มีอยู่แล้ว - แสดงหน้าอัปโหลดสลิปเลย
+          setCreatedBooking({
+            id: bookingData.bookingId,
+            placeId: bookingData.placeId,
+            totalPrice: bookingData.totalPrice,
+            checkIn: bookingData.checkIn,
+            checkOut: bookingData.checkOut,
+            guests: bookingData.guests,
+            roomId: bookingData.roomId,
+          });
+          toast.success("กรุณาชำระเงินและอัปโหลดสลิป");
+        } else {
+          // สำหรับการจองใหม่ - สร้าง booking แล้วไปหน้าอัปโหลดสลิป
+          const response = await createBookingAPI({
+            ...bookingData,
+            paymentMethod: "bank_transfer",
+          });
 
-        if (response.data.success) {
-          setCreatedBooking(response.data.data);
-          toast.success("สร้างการจองสำเร็จ กรุณาชำระเงินและอัปโหลดสลิป");
+          if (response.data.success) {
+            setCreatedBooking(response.data.data);
+            toast.success("สร้างการจองสำเร็จ กรุณาชำระเงินและอัปโหลดสลิป");
+          }
         }
       }
     } catch (error) {
@@ -166,7 +186,13 @@ const PaymentMethodSelector = ({
 
   const handlePaymentUploaded = () => {
     toast.success("อัปโหลดสลิปสำเร็จ รอการตรวจสอบจากเจ้าหน้าที่");
-    navigate("/user/mybookings");
+
+    // ถ้าเป็น existing booking และมี callback function
+    if (isExistingBooking && onPaymentComplete) {
+      onPaymentComplete();
+    } else {
+      navigate("/user/mybookings");
+    }
   };
 
   // ถ้าสร้าง booking แล้วและเลือก bank transfer ให้แสดงหน้าอัปโหลดสลิป
@@ -174,9 +200,12 @@ const PaymentMethodSelector = ({
     return (
       <div className="w-full max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={onBack}>
+          <Button
+            variant="outline"
+            onClick={isExistingBooking && onClose ? onClose : onBack}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            กลับ
+            {isExistingBooking ? "ปิด" : "กลับ"}
           </Button>
           <div>
             <h2 className="text-2xl font-bold">ชำระเงินผ่านธนาคาร</h2>
@@ -388,7 +417,9 @@ const PaymentMethodSelector = ({
                   : selectedMethod === "stripe"
                   ? "ไปหน้าชำระเงิน"
                   : selectedMethod === "bank_transfer"
-                  ? "ยืนยันการจอง"
+                  ? isExistingBooking
+                    ? "ไปชำระเงิน"
+                    : "ยืนยันการจอง"
                   : "เลือกวิธีการชำระเงิน"}
               </Button>
 

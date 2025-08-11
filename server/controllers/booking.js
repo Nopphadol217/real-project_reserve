@@ -44,6 +44,49 @@ exports.listBookings = async (req, res, next) => {
   }
 };
 
+// List pending payment bookings for specific user
+exports.listPendingPayments = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    console.log("Listing pending payments for user:", userId);
+    const pendingBookings = await prisma.booking.findMany({
+      where: {
+        userId: parseInt(userId),
+        status: "pending",
+        paymentStatus: "unpaid",
+      },
+      include: {
+        Place: {
+          select: {
+            id: true,
+            title: true,
+            secure_url: true,
+            category: true,
+          },
+        },
+        Room: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json({
+      success: true,
+      bookings: pendingBookings,
+      message: "Pending payment bookings",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.createBooking = async (req, res, next) => {
   try {
     //step 1 destructoring req.body

@@ -6,6 +6,7 @@ const {
   checkout,
   checkOutStatus,
   listBookings,
+  listPendingPayments,
   clearRoomBookings,
   processAutomaticCheckout,
   manualCheckout,
@@ -15,6 +16,9 @@ const router = express.Router();
 
 // @ENDPOINT http://localhost:5000/api/bookings
 router.get("/bookings", authCheck, listBookings);
+
+// @ENDPOINT http://localhost:5000/api/bookings/pending-payments/:userId
+router.get("/bookings/pending-payments/:userId", listPendingPayments);
 
 // @ENDPOINT http://localhost:5000/api/booking
 router.post("/booking", authCheck, createBooking);

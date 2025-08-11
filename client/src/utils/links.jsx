@@ -14,6 +14,7 @@ import {
   BarChart3,
   Building2,
   DollarSign,
+  Clock,
 } from "lucide-react";
 import { GoSearch } from "react-icons/go";
 export const publicLinks = [
@@ -38,6 +39,11 @@ export const userLinks = [
 ];
 
 export const privateLinks = [
+  {
+    href: "/user/pending-payment",
+    label: "รอชำระเงิน",
+    icon: <Clock />,
+  },
   {
     href: "/user/mybookings",
     label: "การจองของฉัน",

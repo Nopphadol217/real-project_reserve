@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import PaymentMethodSelector from "@/components/booking/PaymentMethodSelector";
 import useAuthStore from "@/store/useAuthStore";
+import PaymentUpload from "@/components/checkout/PaymentUpload";
 
 const PendingPayment = () => {
   const user = useAuthStore((state) => state.user);
@@ -26,6 +27,7 @@ const PendingPayment = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -55,6 +57,11 @@ const PendingPayment = () => {
     setShowPaymentModal(true);
   };
 
+  const handleUploadSlip = (booking) => {
+    setSelectedBooking(booking);
+    setShowUploadModal(true);
+  };
+
   const calculateNights = (checkIn, checkOut) => {
     const nights = Math.ceil(
       (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)
@@ -75,7 +82,7 @@ const PendingPayment = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          รายการรอชำระเงิน
+          รายการรอชำระเงินผ่านธนาคาร
         </h1>
         <p className="text-gray-600">กรุณาชำระเงินเพื่อยืนยันการจองของคุณ</p>
       </div>
@@ -188,11 +195,12 @@ const PendingPayment = () => {
                       </div>
 
                       <Button
-                        onClick={() => handlePayNow(booking)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2"
+                        onClick={() => handleUploadSlip(booking)}
+                        variant="outline"
+                        className="border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-2"
                       >
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        ชำระเงินตอนนี้
+                        <Upload className="w-4 h-4 mr-2" />
+                        อัปโหลดสลิป
                       </Button>
                     </div>
                   </div>
@@ -203,36 +211,49 @@ const PendingPayment = () => {
         </div>
       )}
 
-      {/* Payment Modal */}
-      {showPaymentModal && selectedBooking && (
-        <PaymentMethodSelector
-          isOpen={showPaymentModal}
-          onClose={() => {
-            setShowPaymentModal(false);
-            setSelectedBooking(null);
-          }}
-          bookingData={{
-            placeId: selectedBooking.placeId,
-            checkIn: selectedBooking.checkIn,
-            checkOut: selectedBooking.checkOut,
-            totalPrice: selectedBooking.totalPrice,
-            price: selectedBooking.Room?.price || 0,
-            nights: calculateNights(
-              selectedBooking.checkIn,
-              selectedBooking.checkOut
-            ),
-            placeTitle: selectedBooking.Place.title,
-            roomId: selectedBooking.roomId,
-            roomName: selectedBooking.Room?.name || "ห้องมาตรฐาน",
-            bookingId: selectedBooking.id, // ส่ง bookingId ที่มีอยู่แล้ว
-          }}
-          onPaymentComplete={() => {
-            setShowPaymentModal(false);
-            setSelectedBooking(null);
-            fetchPendingPayments(); // Refresh list
-            toast.success("ชำระเงินเรียบร้อยแล้ว");
-          }}
-        />
+      {/* Upload Slip Modal */}
+      {showUploadModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">อัปโหลดสลิปการโอนเงิน</h2>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowUploadModal(false);
+                    setSelectedBooking(null);
+                  }}
+                >
+                  ปิด
+                </Button>
+              </div>
+
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-semibold mb-2">
+                  {selectedBooking.Place.title}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  รหัสการจอง: #{selectedBooking.id}
+                </p>
+                <p className="text-sm text-gray-600">
+                  ยอดชำระ: ฿{selectedBooking.totalPrice?.toLocaleString()}
+                </p>
+              </div>
+
+              <PaymentUpload
+                booking={selectedBooking}
+                paymentInfo={selectedBooking.Place.paymentInfo}
+                onPaymentUploaded={() => {
+                  setShowUploadModal(false);
+                  setSelectedBooking(null);
+                  fetchPendingPayments(); // Refresh list
+                  toast.success("อัปโหลดสลิปเรียบร้อยแล้ว รอการตรวจสอบ");
+                }}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

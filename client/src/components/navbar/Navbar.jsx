@@ -33,7 +33,7 @@ function Navbar() {
   return (
     <>
       {/* Main Navbar */}
-      <nav className="bg-[#F12026] border-b border-gray-200 shadow-sm">
+      <nav className=" bg-gradient-to-r from-orange-500 via-red-500 to-pink-600   border-b border-gray-100 shadow-sm transition-all duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo Section */}
@@ -47,7 +47,7 @@ function Navbar() {
                 {/* Home Link - Always visible */}
                 <Link
                   to="/"
-                  className="text-sm font-medium text-[#FFEED4] hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
+                  className="text-sm font-medium text-[#FFEED4] hover:text-red-600 transition-colors duration-200 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50"
                 >
                   <Home className="w-4 h-4" />
                   หน้าหลัก
@@ -59,7 +59,7 @@ function Navbar() {
                     <Link
                       key={`user-${index}`}
                       to={link.href}
-                      className="text-sm  font-medium text-[#FFEED4] hover:text-blue-600 transition-colors duration-200 flex justify-center  items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-50"
+                      className="text-sm  font-medium text-[#FFEED4] hover:text-red-600 transition-colors duration-200 flex justify-center  items-center gap-4 px-3 py-2 rounded-lg hover:bg-blue-50"
                     >
                       <span className="w-5 h-5 flex justify-center items-center">
                         {link.icon}
@@ -84,7 +84,7 @@ function Navbar() {
             <div className="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
               {/* Become a host link - Desktop only */}
               <div className="hidden xl:block">
-                <button className="text-sm font-medium text-[#FFEED4] hover:bg-gray-100 px-3 py-2 rounded-full transition-colors duration-200 whitespace-nowrap">
+                <button className="text-sm font-medium text-[#FFEED4]  group hover:bg-gray-100 hover:text-red-500  px-3 py-2 rounded-full transition-colors duration-200 whitespace-nowrap">
                   <Link to="/business-register">เป็นเจ้าของที่พัก</Link>
                 </button>
               </div>
@@ -120,12 +120,11 @@ function Navbar() {
                             <div className="border-t border-gray-100 my-1"></div>
                             <Link
                               to="/business-register"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              className="block px-4 py-2 text-sm  hover:bg-gray-50 hover:text-red-500"
                               onClick={() => setIsUserMenuOpen(false)}
                             >
                               เป็นเจ้าของที่พัก
                             </Link>
-                           
                           </div>
                         </div>
                       )}

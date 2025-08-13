@@ -103,7 +103,7 @@ function MenuList({ isMobileOnlyToggle }) {
         >
           <div className="relative w-6 h-6">
             <Menu
-              className={`absolute inset-0 text-black transition-all duration-300 ${
+              className={`absolute inset-0 text-white transition-all duration-300 ${
                 state.right
                   ? "opacity-0 rotate-90 scale-75 pointer-events-none"
                   : "opacity-100 rotate-0 scale-100 pointer-events-auto"

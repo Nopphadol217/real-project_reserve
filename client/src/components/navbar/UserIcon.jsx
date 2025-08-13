@@ -3,7 +3,7 @@ import { Link } from "react-router"
 
 function UserIcon() {
   return (
-    <Link to='/login'>
+    <Link to='/auth'>
         <UserCircle/>
     </Link>
   )

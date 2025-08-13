@@ -3,12 +3,13 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
-const clientId = 
-createRoot(document.getElementById("root")).render(
+import { HelmetProvider } from "react-helmet-async";
+const clientId = createRoot(document.getElementById("root")).render(
   <>
     <GoogleOAuthProvider>
-      <App />
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
     </GoogleOAuthProvider>
   </>
 );

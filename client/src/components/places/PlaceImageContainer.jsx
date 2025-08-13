@@ -71,89 +71,189 @@ const PlaceImageContainer = ({ place }) => {
     );
   }
 
-  // Prepare images for grid (max 5 images for display)
-  const gridImages = allImages.slice(0, 5);
-
   return (
     <>
       <div className="mb-6">
-        {/* Responsive Bento Grid Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 grid-rows-3  xl:grid-rows-3 gap-2 h-[400px] md:h-[350px] rounded-lg overflow-hidden">
-          {/* Main Image - Takes different spans based on screen size */}
-          <div
-            className="col-span-2 row-span-2 relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all"
-            onClick={() => openDialog(0)}
-          >
-            <img
-              src={allImages[0]?.url}
-              alt={allImages[0]?.alt}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Right side - 4 smaller images, responsive layout */}
-          {allImages.slice(1, 5).map((item, index) => {
-            const actualIndex = index + 1;
-            const isLastItem = actualIndex === 4 && allImages.length > 5;
-
-            return (
-              <div
-                key={actualIndex}
-                className="relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all hidden md:block"
-                onClick={() => openDialog(actualIndex)}
-              >
-                <img
-                  src={item.url}
-                  alt={item.alt}
-                  className="w-full h-full object-cover"
-                />
-
-                {/* Overlay for last item */}
-                {isLastItem && (
-                  <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm md:text-lg">
-                      +{allImages.length - 5} ภาพ
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Mobile: Show only one additional image */}
-          {allImages.length > 1 && (
-            <div
-              className="relative cursor-pointer hover:opacity-95 hover:scale-[1.02] duration-300 transition-all md:hidden"
-              onClick={() => openDialog(1)}
+        {/* Mobile: Simple Image Slice */}
+        <div className="block sm:hidden">
+          <div className="relative">
+            <div 
+              className="w-full h-64 rounded-lg overflow-hidden cursor-pointer"
+              onClick={() => openDialog(0)}
             >
               <img
-                src={allImages[1]?.url}
-                alt={allImages[1]?.alt}
-                className="w-full h-full object-cover"
+                src={allImages[0]?.url}
+                alt={allImages[0]?.alt}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
-              {allImages.length > 2 && (
-                <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
-                    +{allImages.length - 2} ภาพ
-                  </span>
+              {allImages.length > 1 && (
+                <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  1 / {allImages.length}
                 </div>
               )}
             </div>
+            
+            {/* Mobile navigation dots */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {allImages.slice(0, Math.min(5, allImages.length)).map((_, index) => (
+                  <button
+                    key={index}
+                    className="w-2 h-2 rounded-full bg-white/60 hover:bg-white/90 transition-all"
+                    onClick={() => openDialog(index)}
+                  />
+                ))}
+                {allImages.length > 5 && (
+                  <span className="text-white text-xs ml-2">+{allImages.length - 5}</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Tablet and Desktop: Enhanced Bento Grid Layout */}
+        <div className="hidden sm:block">
+          {allImages.length === 1 ? (
+            // Single image - full width
+            <div 
+              className="w-full h-[400px] md:h-[450px] lg:h-[500px] rounded-xl overflow-hidden cursor-pointer"
+              onClick={() => openDialog(0)}
+            >
+              <img
+                src={allImages[0]?.url}
+                alt={allImages[0]?.alt}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          ) : allImages.length === 2 ? (
+            // Two images - side by side
+            <div className="grid grid-cols-2 gap-2 h-[400px] md:h-[450px] rounded-xl overflow-hidden">
+              {allImages.slice(0, 2).map((image, index) => (
+                <div
+                  key={index}
+                  className="relative cursor-pointer hover:opacity-95 hover:scale-[1.01] transition-all duration-300"
+                  onClick={() => openDialog(index)}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : allImages.length === 3 ? (
+            // Three images - main left, two right
+            <div className="grid grid-cols-2 grid-rows-2 gap-2 h-[400px] md:h-[450px] rounded-xl overflow-hidden">
+              <div
+                className="row-span-2 cursor-pointer hover:opacity-95 hover:scale-[1.01] transition-all duration-300"
+                onClick={() => openDialog(0)}
+              >
+                <img
+                  src={allImages[0]?.url}
+                  alt={allImages[0]?.alt}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {allImages.slice(1, 3).map((image, index) => (
+                <div
+                  key={index + 1}
+                  className="cursor-pointer hover:opacity-95 hover:scale-[1.01] transition-all duration-300"
+                  onClick={() => openDialog(index + 1)}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Four or more images - Enhanced Bento Grid
+            <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[400px] md:h-[450px] lg:h-[500px] rounded-xl overflow-hidden">
+              {/* Main Image - Takes 2x2 space */}
+              <div
+                className="col-span-2 row-span-2 relative cursor-pointer hover:opacity-95 hover:scale-[1.01] transition-all duration-300 group"
+                onClick={() => openDialog(0)}
+              >
+                <img
+                  src={allImages[0]?.url}
+                  alt={allImages[0]?.alt}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+
+              {/* Secondary Images */}
+              {allImages.slice(1, 5).map((image, index) => {
+                const actualIndex = index + 1;
+                const isLastVisible = actualIndex === 4 && allImages.length > 5;
+
+                return (
+                  <div
+                    key={actualIndex}
+                    className="relative cursor-pointer hover:opacity-95 hover:scale-[1.01] transition-all duration-300 group"
+                    onClick={() => openDialog(actualIndex)}
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.alt}
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {/* Overlay for additional images */}
+                    {isLastVisible && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[1px]">
+                        <div className="text-center text-white">
+                          <div className="text-lg md:text-xl font-bold mb-1">
+                            +{allImages.length - 5}
+                          </div>
+                          <div className="text-xs md:text-sm opacity-90">
+                            ภาพเพิ่มเติม
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                );
+              })}
+
+              {/* Fill empty spaces if less than 5 images */}
+              {allImages.length < 5 && 
+                Array.from({ length: 5 - allImages.length }).map((_, index) => (
+                  <div 
+                    key={`empty-${index}`} 
+                    className="bg-gray-100 rounded-lg"
+                  />
+                ))
+              }
+            </div>
           )}
         </div>
+
+        {/* Image counter for all layouts */}
+        {allImages.length > 1 && (
+          <div className="mt-3 text-center">
+            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              ทั้งหมด {allImages.length} ภาพ
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Gallery Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-full w-[50vh] h-[80vh] sm:w-[90vh] md:w-[140vh] xl:w-[180vh] xl:h-[100vh] max-h-[95vh] p-0 bg-white overflow-y-auto rounded-lg">
-          <DialogTitle className="flex   mt-4 mx-auto">
+          <DialogTitle className="flex mt-4 mx-auto">
             <span>ภาพทั้งหมด ({allImages.length} รูป)</span>
           </DialogTitle>
           {viewMode === "grid" ? (
             /* Gallery Grid View */
             <div className="relative w-full h-full flex flex-col bg-white">
-              {/* Header */}
-
               {/* Improved Grid Gallery with ScrollArea */}
               <div className="p-4 md:p-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
@@ -181,7 +281,7 @@ const PlaceImageContainer = ({ place }) => {
             </div>
           ) : (
             /* Slide View */
-            <div className="mx-auto relative  h-full flex  flex-col bg-white w-[300px] sm:w-[550px] md:w-full  xl:w-full  xl:h-full">
+            <div className="mx-auto relative h-full flex flex-col bg-white w-[300px] sm:w-[550px] md:w-full xl:w-full xl:h-full">
               {/* Slide Header */}
               <div className="flex items-center justify-between p-4 border-b bg-white">
                 <div className="flex items-center gap-3">
@@ -200,7 +300,7 @@ const PlaceImageContainer = ({ place }) => {
               </div>
 
               {/* Main Image Viewer */}
-              <div className="mx-auto xl:flex-1 relative flex items-center justify-center p-2 sm:p-4 md:p-6 md:w-[650px]  xl:w-full  xl:h-full ">
+              <div className="mx-auto xl:flex-1 relative flex items-center justify-center p-2 sm:p-4 md:p-6 md:w-[650px] xl:w-full xl:h-full">
                 <img
                   src={allImages[currentImageIndex]?.url}
                   alt={allImages[currentImageIndex]?.alt}
@@ -229,7 +329,7 @@ const PlaceImageContainer = ({ place }) => {
               </div>
 
               {/* Bottom Thumbnails with ScrollArea */}
-              <div className="h-16 md:h-20 bg-gray-50 border-t grid  ">
+              <div className="h-16 md:h-20 bg-gray-50 border-t grid">
                 <ScrollArea className="h-full p-3 md:p-4">
                   <div className="flex gap-2 h-10 md:h-12">
                     {allImages.map((image, index) => (

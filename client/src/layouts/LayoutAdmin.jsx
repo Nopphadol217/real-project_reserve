@@ -8,7 +8,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import HeaderTigger from "./HeaderTigger";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 
 function LayoutAdmin() {
   const hydrate = useAuthStore((state) => state.hydrate);

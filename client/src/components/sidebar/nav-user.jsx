@@ -32,7 +32,7 @@ import {
 import useAuthStore from "@/store/useAuthStore";
 import { logoutAPI } from "@/api/authAPI";
 import { toast } from "sonner";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -137,10 +137,7 @@ export function NavUser() {
                 <User />
                 ข้อมูลส่วนตัว
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/user/settings")}>
-                <Settings />
-                การตั้งค่า
-              </DropdownMenuItem>
+         
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -148,28 +145,22 @@ export function NavUser() {
                 <Calendar />
                 การจองที่รอดำเนินการ
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/user/myorders")}>
+              <DropdownMenuItem onClick={() => navigate("/user/my-orders")}>
                 <Receipt />
                 การจองที่ชำระแล้ว
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Bell />
-                การแจ้งเตือน
-              </DropdownMenuItem>
+ 
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                บัญชีผู้ใช้
+                <Link to={"/user/profile"}>บัญชีผู้ใช้</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                การเงิน
-              </DropdownMenuItem>
+          
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

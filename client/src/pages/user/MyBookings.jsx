@@ -329,7 +329,7 @@ const MyBookings = () => {
                             #{booking.id}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col xl:flex-row justify-center items-center gap-3">
                               {booking.Place?.secure_url && (
                                 <img
                                   src={booking.Place.secure_url}

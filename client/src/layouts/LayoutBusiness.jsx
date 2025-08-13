@@ -4,7 +4,7 @@ import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 import { Outlet } from "react-router";
 import HeaderTigger from "./HeaderTigger";
-import { BusinessSidebar } from "@/components/business-sidebar";
+import { BusinessSidebar } from "@/components/sidebar/business-sidebar";
 
 function LayoutBusiness() {
   const hydrate = useAuthStore((state) => state.hydrate);

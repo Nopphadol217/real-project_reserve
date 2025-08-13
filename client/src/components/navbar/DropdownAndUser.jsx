@@ -15,7 +15,7 @@ function DropdownAndUser() {
       <div className="flex items-center border border-gray-300 rounded-full p-1 hover:shadow-md transition-shadow duration-200">
         <div className="flex items-center space-x-2">
           <button className="p-2">
-            <Menu className="w-4 h-4 text-gray-700" />
+            <Menu className="w-4 h-4 text-white hover:text-red-500" />
           </button>
           <Link
             to="/auth"
@@ -29,10 +29,10 @@ function DropdownAndUser() {
   }
 
   return (
-    <div className="flex items-center border border-gray-300 rounded-full p-1 hover:shadow-md transition-shadow duration-200">
+    <div className="flex items-center border border-gray-300  rounded-lg p-1 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center space-x-2">
         <button className="p-2">
-          <Menu className="w-4 h-4 text-gray-700" />
+          <Menu className="w-4 h-4 text-white " />
         </button>
 
         {/* User Avatar */}

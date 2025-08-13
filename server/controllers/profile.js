@@ -34,9 +34,10 @@ exports.listUser = async (req,res,next) => {
         firstname:true,
         lastname:true,
         role:true,
+        businessInfo:true
       }
     })
-    res.json({message:"HELLO USER",user:user})
+    res.json({success:true,user:user})
   } catch (error) {
     next(error)
   }

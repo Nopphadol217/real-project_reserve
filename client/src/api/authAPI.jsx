@@ -8,6 +8,12 @@ export const registerAPI = async (data) => {
   });
 };
 
+export const businessRegisterAPI = async (data) => {
+  return await axios.post("http://localhost:5000/api/business-register", data, {
+    withCredentials: true,
+  });
+};
+
 export const loginAPI = async (data) => {
   return await axios.post(`${import.meta.env.VITE_API}/login`, data, {
     withCredentials: true,

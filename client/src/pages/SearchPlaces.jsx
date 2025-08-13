@@ -79,11 +79,20 @@ const SearchPlaces = () => {
 
       // Filter by category
       if (searchFilters.category && searchFilters.category !== "all") {
-        filtered = filtered.filter(
-          (place) =>
-            place.category?.toLowerCase() ===
-            searchFilters.category.toLowerCase()
-        );
+        filtered = filtered.filter((place) => {
+          // ค้นหา category object จาก categories array
+          const categoryObj = categories.find(
+            (cat) => cat.value === searchFilters.category
+          );
+          if (!categoryObj) return false;
+
+          // เปรียบเทียบทั้ง value และ label กับ place.category
+          const placeCategory = place.category?.toLowerCase() || "";
+          return (
+            placeCategory === categoryObj.value.toLowerCase() ||
+            placeCategory === categoryObj.label.toLowerCase()
+          );
+        });
       }
 
       // Filter by price range
@@ -272,6 +281,20 @@ const SearchPlaces = () => {
                 <div>
                   <Label className="text-sm font-medium">ประเภทที่พัก</Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
+                    {/* All Categories Button */}
+                    <div
+                      className={`p-2 border rounded-lg cursor-pointer transition-colors ${
+                        searchFilters.category === "all"
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => handleSearchChange("category", "all")}
+                    >
+                      <Label className="text-xs cursor-pointer">
+                        ทุกประเภท
+                      </Label>
+                    </div>
+
                     {categories.map((category) => (
                       <div
                         key={category.value}
@@ -414,7 +437,6 @@ const SearchPlaces = () => {
                   selectedPlace={selectedPlace}
                   onMarkerClick={handleMapMarkerClick}
                   height="100%"
-                  
                 />
               </CardContent>
             </Card>

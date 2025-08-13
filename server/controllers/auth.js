@@ -319,3 +319,102 @@ exports.updateProfile = async (req, res) => {
     return renderError(500, "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์");
   }
 };
+
+exports.businessRegister = async (req, res, next) => {
+  try {
+    const {
+      firstname,
+      lastname,
+      email,
+      phone,
+      password,
+      businessName,
+      businessType,
+      businessAddress,
+      businessPhone,
+      businessDescription,
+    } = req.body;
+    console.log(req.body);
+    // ตรวจสอบว่ามี email นี้ในระบบแล้วหรือไม่
+    const existedUser = await prisma.user.findUnique({ where: { email } });
+    if (existedUser) {
+      return renderError(400, "มี email นี้ในระบบแล้ว");
+    }
+
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (!firstname || !lastname || !email || !phone || !password) {
+      return renderError(400, "กรุณากรอกข้อมูลส่วนตัวให้ครบถ้วน");
+    }
+
+    if (!businessName || !businessType || !businessAddress) {
+      return renderError(400, "กรุณากรอกข้อมูลธุรกิจให้ครบถ้วน");
+    }
+
+    // แฮชรหัสผ่าน
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    // สร้างผู้ใช้ใหม่ด้วยสถานะ PENDING (รอการอนุมัติ)
+    const user = await prisma.user.create({
+      data: {
+        username: `${firstname} ${lastname}`,
+        email,
+        password: hashPassword,
+        phone: phone,
+        role: "PENDING_BUSINESS", // สถานะรอการอนุมัติเป็น BUSINESS
+        businessInfo: {
+          create: {
+            businessName,
+            businessType,
+            businessAddress,
+            businessPhone,
+            businessDescription,
+            status: "PENDING", // รอการอนุมัติ
+          },
+        },
+      },
+      include: {
+        businessInfo: true,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "สมัครสมาชิกผู้ประกอบการสำเร็จ รอการตรวจสอบจากทีมงาน",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        businessInfo: user.businessInfo,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+exports.checkEmail = async (req, res, next) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "อีเมลเป็นข้อมูลที่จำเป็น",
+      });
+    }
+
+    const existedUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    res.status(200).json({
+      success: true,
+      exists: !!existedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};

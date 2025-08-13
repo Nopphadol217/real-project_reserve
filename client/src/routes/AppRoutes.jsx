@@ -15,6 +15,7 @@ import Profile from "@/pages/user/profile/Profile";
 import AdminRoute from "./AdminRoute";
 import BusinessRoute from "./BusinessRoute";
 import UserManage from "@/pages/admin/UserManage";
+import UserManagement from "@/pages/admin/UserManagement";
 import BusinessRegister from "@/pages/BusinessRegister";
 import BusinessDashboard from "@/pages/business/BusinessDashboard";
 import BusinessBookings from "@/pages/business/BusinessBookings";
@@ -87,6 +88,7 @@ function AppRoutes() {
           <Route path="manage-list/:id" element={<EditForm />} />
           <Route path="payment-info/:id" element={<EditPaymentInfo />} />
           <Route path="manage-user" element={<UserManage />} />
+          <Route path="user-management" element={<UserManagement />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="bookings" element={<BookingManagement />} />

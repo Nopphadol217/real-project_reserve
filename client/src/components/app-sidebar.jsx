@@ -132,8 +132,8 @@ const data = {
           url: "/admin/manage-user",
         },
         {
-          title: "เจ้าของที่พัก",
-          url: "/admin/hosts",
+          title: "อนุมัติเจ้าของที่พัก",
+          url: "/admin/user-management",
         },
         {
           title: "ลูกค้า",

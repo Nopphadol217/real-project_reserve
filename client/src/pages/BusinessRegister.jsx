@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router";
+import { businessRegisterAPI } from "@/api/authAPI";
 
 const BusinessRegister = () => {
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ const BusinessRegister = () => {
     agreePrivacy: false,
   });
 
+  const [errors, setErrors] = useState({});
+  const [isEmailChecking, setIsEmailChecking] = useState(false);
+
   const businessTypes = [
     { value: "hotel", label: "โรงแรม" },
     { value: "resort", label: "รีสอร์ท" },
@@ -71,6 +75,58 @@ const BusinessRegister = () => {
       ...prev,
       [field]: value,
     }));
+
+    // Clear errors when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: null,
+      }));
+    }
+
+    // Real-time email validation
+    if (field === "email" && value) {
+      validateEmail(value);
+    }
+  };
+
+  const validateEmail = async (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "รูปแบบอีเมลไม่ถูกต้อง",
+      }));
+      return;
+    }
+
+    // Check if email already exists
+    try {
+      setIsEmailChecking(true);
+      const response = await fetch(
+        `http://localhost:5000/api/check-email?email=${encodeURIComponent(
+          email
+        )}`
+      );
+      const data = await response.json();
+
+      if (data.exists) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "อีเมลนี้มีผู้ใช้งานแล้ว",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          email: null,
+        }));
+      }
+    } catch (error) {
+      console.error("Error checking email:", error);
+    } finally {
+      setIsEmailChecking(false);
+    }
   };
 
   const validateForm = () => {
@@ -129,27 +185,30 @@ const BusinessRegister = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role: "BUSINESS", // กำหนดเป็น BUSINESS แต่จะเป็น pending
         businessName: formData.businessName,
         businessType: formData.businessType,
         businessAddress: formData.businessAddress,
         businessPhone: formData.businessPhone,
         businessDescription: formData.businessDescription,
-        status: "pending", // รอการอนุมัติ
       };
 
-      // จำลอง API call (ต้องสร้าง API จริงในภายหลัง)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // เรียก API
+      const response = await businessRegisterAPI(submitData);
 
-      toast.success("สมัครสมาชิกผู้ประกอบการสำเร็จ!");
-      toast.success(
-        "กรุณารอการตรวจสอบจากทีมงาน จะแจ้งผลทางอีเมลภายใน 2-3 วันทำการ"
-      );
-
-      navigate("/login");
+      if (response.data.success) {
+        toast.success("สมัครสมาชิกผู้ประกอบการสำเร็จ!");
+        toast.success(
+          "กรุณารอการตรวจสอบจากทีมงาน จะแจ้งผลทางอีเมลภายใน 2-3 วันทำการ"
+        );
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก");
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองใหม่อีกครั้ง");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -215,16 +274,35 @@ const BusinessRegister = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">อีเมล *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      placeholder="example@email.com"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        placeholder="example@email.com"
+                        required
+                        className={errors.email ? "border-red-500" : ""}
+                      />
+                      {isEmailChecking && (
+                        <div className="absolute right-3 top-3">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                      {!isEmailChecking && formData.email && !errors.email && (
+                        <div className="absolute right-3 top-3">
+                          <Check className="w-4 h-4 text-green-500" />
+                        </div>
+                      )}
+                    </div>
+                    {errors.email && (
+                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="phone">เบอร์โทรศัพท์ *</Label>
@@ -391,59 +469,6 @@ const BusinessRegister = () => {
                     placeholder="อธิบายธุรกิจของคุณ เช่น บริการที่ให้, จุดเด่น, ประสบการณ์"
                     rows={3}
                   />
-                </div>
-              </div>
-
-              {/* Terms and Conditions */}
-              <div className="space-y-4 border-t pt-6">
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="agreeTerms"
-                    checked={formData.agreeTerms}
-                    onCheckedChange={(checked) =>
-                      handleInputChange("agreeTerms", checked)
-                    }
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor="agreeTerms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      ยอมรับ{" "}
-                      <Link
-                        to="/terms"
-                        className="text-blue-600 hover:underline"
-                      >
-                        ข้อตกลงและเงื่อนไข
-                      </Link>{" "}
-                      *
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="agreePrivacy"
-                    checked={formData.agreePrivacy}
-                    onCheckedChange={(checked) =>
-                      handleInputChange("agreePrivacy", checked)
-                    }
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor="agreePrivacy"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      ยอมรับ{" "}
-                      <Link
-                        to="/privacy"
-                        className="text-blue-600 hover:underline"
-                      >
-                        นโยบายความเป็นส่วนตัว
-                      </Link>{" "}
-                      *
-                    </Label>
-                  </div>
                 </div>
               </div>
 

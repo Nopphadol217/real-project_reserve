@@ -6,6 +6,7 @@ const userStore = (set) => ({
   actionReadUser: async () => {
     try {
       const res = await readUserAPI();
+ 
       // ตรวจสอบว่า response มีข้อมูลที่ถูกต้องหรือไม่
       const users = Array.isArray(res.data.user) ? res.data.user : [];
       set({ users });

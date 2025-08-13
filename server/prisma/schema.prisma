@@ -13,23 +13,25 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  googleId   String?    @unique
-  facebookId String?    @unique
-  username   String     @unique
-  firstname  String?
-  lastname   String?
-  email      String     @unique
-  password   String
-  picture    String?
-  role       Role       @default(USER)
-  enabled    Boolean    @default(true) // เพิ่มฟิลด์สำหรับเปิด/ปิดบัญชี
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  places     Place[]
-  bookings   Booking[]
-  favorites  Favorite[]
-  payments   Payment[] // ข้อมูลการชำระเงินของ user
+  id           Int           @id @default(autoincrement())
+  googleId     String?       @unique
+  facebookId   String?       @unique
+  username     String        @unique
+  firstname    String?
+  lastname     String?
+  email        String        @unique
+  password     String
+  phone        String?
+  picture      String?
+  role         Role          @default(USER)
+  enabled      Boolean       @default(true) // เพิ่มฟิลด์สำหรับเปิด/ปิดบัญชี
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  places       Place[]
+  bookings     Booking[]
+  favorites    Favorite[]
+  payments     Payment[] // ข้อมูลการชำระเงินของ user
+  businessInfo BusinessInfo? // ข้อมูลธุรกิจ (สำหรับ BUSINESS และ PENDING_BUSINESS)
 }
 
 model Place {
@@ -124,8 +126,30 @@ model Favorite {
   @@unique([userId, placeId]) // ป้องกันการเพิ่มรายการโปรดซ้ำ
 }
 
+model BusinessInfo {
+  id                  Int            @id @default(autoincrement())
+  userId              Int            @unique
+  businessName        String
+  businessType        String
+  businessAddress     String
+  businessPhone       String?
+  businessDescription String?        @db.Text
+  status              BusinessStatus @default(PENDING)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  User                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum BusinessStatus {
+  PENDING // รอการอนุมัติ
+  APPROVED // อนุมัติแล้ว
+  REJECTED // ถูกปฏิเสธ
+  SUSPENDED // ถูกระงับ
+}
+
 enum Role {
   USER
   ADMIN
-  BUSINESS // ผู้ประกอบการ
+  BUSINESS // ผู้ประกอบการที่ได้รับการอนุมัติแล้ว
+  PENDING_BUSINESS // ผู้ประกอบการที่รอการอนุมัติ
 }

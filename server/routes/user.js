@@ -19,6 +19,9 @@ router.get("/", authCheck, adminCheck, async (req, res) => {
         updatedAt: true,
         enabled: true,
       },
+      include:{
+         businessInfo: true,
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -194,36 +197,6 @@ router.delete("/user/:id", authCheck, adminCheck, async (req, res) => {
   }
 });
 
-// POST - เปิดใช้งานบัญชีผู้ใช้อีกครั้ง
-router.post("/:id/enable", authCheck, adminCheck, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
-      data: { enabled: true },
-      select: {
-        id: true,
-        email: true,
-        firstname: true,
-        lastname: true,
-        role: true,
-        enabled: true,
-      },
-    });
-
-    res.json({
-      success: true,
-      message: "เปิดใช้งานบัญชีผู้ใช้สำเร็จ",
-      user: updatedUser,
-    });
-  } catch (error) {
-    console.error("Error enabling user:", error);
-    res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการเปิดใช้งานบัญชีผู้ใช้",
-    });
-  }
-});
+ 
 
 module.exports = router;

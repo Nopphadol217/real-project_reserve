@@ -6,14 +6,24 @@ const {
   logout,
   refreshToken,
   updateProfile,
+  businessRegister,
+  checkEmail,
 } = require("../controllers/auth");
-const { authCheck } =require("../middleware/authCheck")
+const { authCheck } = require("../middleware/authCheck");
 const router = express.Router();
 const csrf = require("csurf");
 
 //@ENDPOINT METHOD POST
 //Register User [http://localhost:5000/api/register]
 router.post("/register", register);
+
+//@ENDPOINT METHOD GET
+//Check Email [http://localhost:5000/api/check-email]
+router.get("/check-email", checkEmail);
+
+//@ENDPOINT METHOD POST
+//Business Register [http://localhost:5000/api/business-register]
+router.post("/business-register", businessRegister);
 
 //@ENDPOINT METHOD POST
 //Login User [http://localhost:5000/api/login]

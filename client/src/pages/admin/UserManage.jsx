@@ -18,6 +18,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -46,6 +47,7 @@ import {
 import { toast } from "sonner";
 import useUserStore from "@/store/useUserStore";
 import { updateUserAPI } from "@/api/userAPI";
+import { deleteUserAPI } from "@/api/adminAPI";
 
 const UserManage = () => {
   const actionReadUser = useUserStore((state) => state.actionReadUser);
@@ -166,14 +168,14 @@ const UserManage = () => {
   const getBusinessStatusBadge = (user) => {
     if (user.role !== "BUSINESS") return null;
 
-    const status = user.status || "pending";
+    const status = user.businessInfo?.status || "APPROVED" || "PENDING";
     const statusConfig = {
-      pending: {
+      PENDING: {
         label: "รออนุมัติ",
         className: "bg-yellow-100 text-yellow-800 border-yellow-200",
         icon: Clock,
       },
-      approved: {
+      APPROVED: {
         label: "อนุมัติแล้ว",
         className: "bg-green-100 text-green-800 border-green-200",
         icon: CheckCircle,
@@ -254,6 +256,18 @@ const UserManage = () => {
 
   const stats = getUserStats();
 
+  const handleDeleteUser = (userId) => {
+    // Call API to delete user
+    deleteUserAPI(userId)
+      .then(() => {
+        toast.success("ลบผู้ใช้สำเร็จ");
+        actionReadUser(); // รีเฟรชข้อมูลจาก API
+      })
+      .catch((error) => {
+        console.error("Error deleting user:", error);
+        toast.error("เกิดข้อผิดพลาดในการลบผู้ใช้");
+      });
+  };
   return (
     <div className="space-y-6 mx-4">
       {/* Header */}
@@ -375,9 +389,8 @@ const UserManage = () => {
                 <TableHead>อีเมล</TableHead>
                 <TableHead>บทบาท</TableHead>
                 <TableHead>สถานะธุรกิจ</TableHead>
-                <TableHead>สถานะ</TableHead>
-                <TableHead>วันที่สมัคร</TableHead>
-                <TableHead>การจัดการ</TableHead>
+
+                <TableHead className="text-center">การจัดการ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -405,13 +418,8 @@ const UserManage = () => {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{getRoleBadge(user.role)}</TableCell>
                     <TableCell>{getBusinessStatusBadge(user)}</TableCell>
-                    <TableCell>{getStatusBadge(user.enabled)}</TableCell>
-                    <TableCell>
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString("th-TH")
-                        : "ไม่ระบุ"}
-                    </TableCell>
-                    <TableCell>
+
+                    <TableCell className="flex justify-center">
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
@@ -435,27 +443,32 @@ const UserManage = () => {
                               ตรวจสอบ
                             </Button>
                           )}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="destructive">ลบผู้ใช้</Button>
+                          </DialogTrigger>
 
-                        <Button
-                          size="sm"
-                          variant={
-                            user.enabled === false ? "default" : "destructive"
-                          }
-                          onClick={() => toggleUserStatus(user)}
-                          className="flex items-center gap-2"
-                        >
-                          {user.enabled === false ? (
-                            <>
-                              <Power className="w-4 h-4" />
-                              เปิด
-                            </>
-                          ) : (
-                            <>
-                              <PowerOff className="w-4 h-4" />
-                              ปิด
-                            </>
-                          )}
-                        </Button>
+                          <DialogContent>
+                             <DialogHeader>
+            <DialogTitle>ยืนยันการลบผู้ใช้</DialogTitle>
+            <DialogDescription>
+              คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ {user.email}?
+            </DialogDescription>
+          </DialogHeader>
+                            <Button
+                              size="sm"
+                              variant={
+                                user.enabled === false
+                                  ? "default"
+                                  : "destructive"
+                              }
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="flex items-center gap-2"
+                            >
+                              ลบผู้ใช้
+                            </Button>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -611,121 +624,6 @@ const UserManage = () => {
             </Button>
             <Button onClick={handleSaveUser} disabled={isLoading}>
               {isLoading ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Business Approval Dialog */}
-      <Dialog open={showBusinessDialog} onOpenChange={setShowBusinessDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-600" />
-              อนุมัติผู้ประกอบการ
-            </DialogTitle>
-            <DialogDescription>
-              ตรวจสอบและอนุมัติใบสมัครผู้ประกอบการ
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedUser && (
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                <h4 className="font-medium text-gray-900">ข้อมูลผู้สมัคร</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-gray-600">ชื่อ:</span>
-                    <span className="ml-2 font-medium">
-                      {selectedUser.firstname} {selectedUser.lastname}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">อีเมล:</span>
-                    <span className="ml-2 font-medium">
-                      {selectedUser.email}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">เบอร์โทร:</span>
-                    <span className="ml-2 font-medium">
-                      {selectedUser.phone || "ไม่ระบุ"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">วันที่สมัคร:</span>
-                    <span className="ml-2 font-medium">
-                      {selectedUser.createdAt
-                        ? new Date(selectedUser.createdAt).toLocaleDateString(
-                            "th-TH"
-                          )
-                        : "ไม่ระบุ"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {selectedUser.businessName && (
-                <div className="bg-blue-50 p-4 rounded-lg space-y-3">
-                  <h4 className="font-medium text-blue-900">ข้อมูลธุรกิจ</h4>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-blue-600">ชื่อธุรกิจ:</span>
-                      <span className="ml-2 font-medium">
-                        {selectedUser.businessName}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-blue-600">ประเภท:</span>
-                      <span className="ml-2 font-medium">
-                        {selectedUser.businessType || "ไม่ระบุ"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-blue-600">ที่อยู่:</span>
-                      <span className="ml-2 font-medium">
-                        {selectedUser.businessAddress || "ไม่ระบุ"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 p-3 border rounded-lg">
-                <Clock className="w-5 h-5 text-yellow-600" />
-                <span className="text-sm">สถานะปัจจุบัน: </span>
-                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                  รออนุมัติ
-                </Badge>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowBusinessDialog(false)}
-            >
-              ยกเลิก
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() =>
-                selectedUser && rejectBusinessUser(selectedUser.id)
-              }
-              className="flex items-center gap-2"
-            >
-              <XCircle className="w-4 h-4" />
-              ปฏิเสธ
-            </Button>
-            <Button
-              onClick={() =>
-                selectedUser && approveBusinessUser(selectedUser.id)
-              }
-              className="flex items-center gap-2"
-            >
-              <CheckCircle className="w-4 h-4" />
-              อนุมัติ
             </Button>
           </DialogFooter>
         </DialogContent>

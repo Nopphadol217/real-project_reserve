@@ -1,5 +1,5 @@
 import Navbar from "@/components/navbar/Navbar";
-import Footer from "@/components/ui/Footer";
+import Footer from "@/pages/Footer";
 import { Outlet } from "react-router";
 
 import useAuthStore from "@/store/useAuthStore";

@@ -338,7 +338,7 @@ function Dashboard() {
                 <Activity className="h-5 w-5" />
                 การจองล่าสุด
               </CardTitle>
-              <CardDescription>การจอง 5 รายการล่าสุด</CardDescription>
+              <CardDescription>การจอง รายการล่าสุด</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingBookings ? (
@@ -386,7 +386,7 @@ function Dashboard() {
                 <Building className="h-5 w-5" />
                 ที่พักล่าสุด
               </CardTitle>
-              <CardDescription>ที่พัก 5 รายการล่าสุด</CardDescription>
+              <CardDescription>ที่พัก  รายการล่าสุด</CardDescription>
             </CardHeader>
             <CardContent>
               {Array.isArray(places) && places.length > 0 ? (

@@ -39,6 +39,7 @@ import Analytics from "@/pages/admin/Analytics";
 import MyOrders from "@/pages/user/MyOrders";
 import MyFavorites from "@/pages/user/MyFavorites";
 import PendingPayment from "@/pages/user/PendingPayment";
+import About from "@/pages/About";
 
 function AppRoutes() {
   return (
@@ -55,7 +56,7 @@ function AppRoutes() {
         {/* Public Routes */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-
+          <Route path="about" element={<About/>} />
           <Route path="search-places" element={<SearchPlaces />} />
           <Route path="place/:id" element={<PlaceDetail />} />
         </Route>

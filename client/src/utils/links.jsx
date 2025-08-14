@@ -17,6 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import { GoSearch } from "react-icons/go";
+import { href } from "react-router";
 export const publicLinks = [
   {
     icon: <Home />,
@@ -131,3 +132,20 @@ export const businessLinks = [
     icon: <BarChart3 />,
   },
 ];
+
+
+export const footerLinks = [
+  {
+    href: "/",
+    label: "หน้าแรก",
+  },
+  {
+    href: "/search-places",
+    label: "ค้นหาที่พัก",
+  },
+  {
+    href: "/about",
+    label: "เกี่ยวกับเรา",
+    
+  }
+]

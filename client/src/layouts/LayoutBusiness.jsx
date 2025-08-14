@@ -1,5 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import Footer from "@/components/ui/Footer";
+import Footer from "@/pages/Footer";
 import useAuthStore from "@/store/useAuthStore";
 import { useEffect } from "react";
 import { Outlet } from "react-router";

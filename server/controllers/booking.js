@@ -222,9 +222,10 @@ exports.createBooking = async (req, res, next) => {
 exports.createBankTransferBooking = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { placeId, checkIn, checkOut, totalPrice, roomId } = req.body;
+    const { placeId, checkIn, checkOut, totalPrice, roomId, paymentMethod } =
+      req.body;
 
-    console.log("Create bank transfer booking:", req.body);
+    console.log("Create booking:", req.body);
 
     // ตรวจสอบว่า place มีอยู่จริง
     const place = await prisma.place.findUnique({
@@ -337,7 +338,8 @@ exports.createBankTransferBooking = async (req, res, next) => {
         checkOut: checkOutDate,
         totalPrice: parseInt(totalPrice),
         status: "pending",
-        paymentStatus: "unpaid",
+        paymentStatus: paymentMethod === "cash" ? "pending" : "unpaid",
+        paymentMethod: paymentMethod,
       },
       include: {
         Place: {

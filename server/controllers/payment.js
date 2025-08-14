@@ -574,9 +574,25 @@ const getPendingPayments = async (req, res) => {
 
     let whereCondition = {
       paymentStatus: "pending",
-      paymentSlip: {
-        not: null,
-      },
+      OR: [
+        {
+          // การชำระเงินผ่านโอนเงิน - ต้องมี paymentSlip
+          AND: [
+            {
+              OR: [{ paymentMethod: "bank_transfer" }],
+            },
+            {
+              paymentSlip: {
+                not: null,
+              },
+            },
+          ],
+        },
+        {
+          // การชำระเงินสด - ไม่ต้องมี paymentSlip
+          paymentMethod: "cash",
+        },
+      ],
     };
 
     // ถ้าเป็น BUSINESS ให้แสดงเฉพาะการจองของที่พักตัวเอง

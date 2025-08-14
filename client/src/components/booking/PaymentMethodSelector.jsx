@@ -84,6 +84,15 @@ const PaymentMethodSelector = ({
       iconColor: "text-green-600",
       available: true, // เปิดให้ใช้งานเสมอ แต่จะแสดงข้อความเตือนถ้าไม่มีข้อมูล
     },
+    {
+      id: "cash",
+      name: "เงินสด",
+      description: "ชำระเงินสดเมื่อเข้าพัก (รอการยืนยันจากเจ้าหน้าที่)",
+      icon: Wallet,
+      color: "bg-orange-50 border-orange-200",
+      iconColor: "text-orange-600",
+      available: true,
+    },
   ];
 
   const formatCurrency = (amount) => {
@@ -168,6 +177,18 @@ const PaymentMethodSelector = ({
             setCreatedBooking(response.data.data);
             toast.success("สร้างการจองสำเร็จ กรุณาชำระเงินและอัปโหลดสลิป");
           }
+        }
+      } else if (selectedMethod === "cash") {
+        // สำหรับการชำระเงินสด
+        const response = await createBookingAPI({
+          ...bookingData,
+          paymentMethod: "cash",
+        });
+
+        if (response.data.success) {
+          toast.success("จองเรียบร้อย รอการยืนยันจากเจ้าหน้าที่");
+          toast.info("กรุณาชำระเงินสดเมื่อเข้าพัก");
+          navigate("/user/mybookings");
         }
       }
     } catch (error) {
@@ -420,6 +441,8 @@ const PaymentMethodSelector = ({
                   ? isExistingBooking
                     ? "ไปชำระเงิน"
                     : "ยืนยันการจอง"
+                  : selectedMethod === "cash"
+                  ? "ยืนยันการจอง (ชำระเงินสด)"
                   : "เลือกวิธีการชำระเงิน"}
               </Button>
 
@@ -427,7 +450,11 @@ const PaymentMethodSelector = ({
                 <p className="text-xs text-gray-500 text-center">
                   {selectedMethod === "stripe"
                     ? "คุณจะถูกนำไปยังหน้าชำระเงินที่ปลอดภัย"
-                    : "หลังจากยืนยันแล้วกรุณาโอนเงินและอัปโหลดสลิป"}
+                    : selectedMethod === "bank_transfer"
+                    ? "หลังจากยืนยันแล้วกรุณาโอนเงินและอัปโหลดสลิป"
+                    : selectedMethod === "cash"
+                    ? "หลังจากยืนยันแล้วกรุณาชำระเงินสดเมื่อเข้าพัก"
+                    : ""}
                 </p>
               )}
             </CardContent>

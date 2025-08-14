@@ -88,16 +88,27 @@ const MyBookings = () => {
   };
 
   const getPaymentMethodBadge = (booking) => {
-    // ถ้ามี paymentSlip แสดงว่าเป็นการชำระผ่านธนาคาร
-    if (booking.paymentSlip) {
+    // ตรวจสอบ paymentMethod ก่อน
+    if (booking.paymentMethod === "cash") {
       return (
-        <Badge variant="outline" className="font-medium">
+        <Badge variant="outline" className="font-medium text-orange-600">
+          เงินสด
+        </Badge>
+      );
+    }
+    // ถ้ามี paymentSlip แสดงว่าเป็นการชำระผ่านธนาคาร
+    else if (booking.paymentSlip || booking.paymentMethod === "bank_transfer") {
+      return (
+        <Badge variant="outline" className="font-medium text-green-600">
           ธนาคาร
         </Badge>
       );
     }
     // ถ้าไม่มี paymentSlip แต่ status เป็น paid แสดงว่าเป็น Stripe
-    else if (booking.status === "confirmed") {
+    else if (
+      booking.status === "confirmed" ||
+      booking.paymentMethod === "stripe"
+    ) {
       return (
         <Badge variant="outline" className="font-medium text-blue-600">
           Stripe
@@ -108,7 +119,7 @@ const MyBookings = () => {
     else if (booking.status === "pending") {
       return (
         <Badge variant="outline" className="font-medium text-orange-600">
-          Stripe (รอชำระ)
+          รอชำระ
         </Badge>
       );
     }

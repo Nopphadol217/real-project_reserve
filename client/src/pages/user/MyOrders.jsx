@@ -122,10 +122,25 @@ const MyOrders = () => {
   };
 
   const getPaymentMethodBadge = (order) => {
-    // ถ้ามี paymentSlip แสดงว่าชำระผ่าน Bank Transfer
-    if (order.paymentSlip) {
+    // ตรวจสอบ paymentMethod ก่อน
+    if (order.paymentMethod === "cash") {
       return (
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-orange-600"
+        >
+          <Wallet className="w-3 h-3" />
+          เงินสด
+        </Badge>
+      );
+    }
+    // ถ้ามี paymentSlip แสดงว่าชำระผ่าน Bank Transfer
+    else if (order.paymentSlip || order.paymentMethod === "bank_transfer") {
+      return (
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-green-600"
+        >
           <Building className="w-3 h-3" />
           โอนธนาคาร
         </Badge>
@@ -133,11 +148,15 @@ const MyOrders = () => {
     }
     // ถ้าไม่มี paymentSlip แต่มี paymentStatus = paid หรือ confirmed แสดงว่าชำระผ่าน Stripe
     else if (
+      order.paymentMethod === "stripe" ||
       order.paymentStatus === "paid" ||
       order.paymentStatus === "confirmed"
     ) {
       return (
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-blue-600"
+        >
           <CreditCard className="w-3 h-3" />
           Stripe
         </Badge>
@@ -146,18 +165,16 @@ const MyOrders = () => {
     // ถ้าสถานะ unpaid
     else if (order.paymentStatus === "unpaid") {
       return (
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-red-600"
+        >
           <Clock className="w-3 h-3" />
           ยังไม่ชำระ
         </Badge>
       );
     }
-    return (
-      <Badge variant="outline" className="flex items-center gap-1">
-        <QrCode className="w-3 h-3" />
-        ไม่ระบุ
-      </Badge>
-    );
+    return null;
   };
 
   if (loading) {

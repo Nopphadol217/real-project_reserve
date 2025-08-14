@@ -33,10 +33,12 @@ import {
   AlertCircle,
   Building2,
   XCircle,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   getAllBookingsWithPaymentAPI,
+  getPendingPaymentsAPI,
   confirmPaymentAPI,
   rejectPaymentAPI,
 } from "@/api/paymentAPI";
@@ -69,16 +71,28 @@ const BusinessPaymentManagement = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await getAllBookingsWithPaymentAPI();
-      console.log("Bookings response:", response.data);
 
-      // Check if response has data array directly or nested under bookings
-      const bookingsData = response.data.data || response.data.bookings || [];
+      // ดึงทั้ง paid bookings และ pending bookings
+      const [paidResponse, pendingResponse] = await Promise.all([
+        getAllBookingsWithPaymentAPI(),
+        getPendingPaymentsAPI(),
+      ]);
 
-      if (response.data.success && Array.isArray(bookingsData)) {
+      console.log("Paid bookings response:", paidResponse.data);
+      console.log("Pending bookings response:", pendingResponse.data);
+
+      // รวมข้อมูลจากทั้งสอง API
+      const paidBookingsData =
+        paidResponse.data.data || paidResponse.data.bookings || [];
+      const pendingBookingsData =
+        pendingResponse.data.data || pendingResponse.data.bookings || [];
+
+      const allBookingsData = [...paidBookingsData, ...pendingBookingsData];
+
+      if (Array.isArray(allBookingsData)) {
         // Only filter if places array exists and has data
         if (places && Array.isArray(places) && places.length > 0) {
-          const userBookings = bookingsData.filter((booking) =>
+          const userBookings = allBookingsData.filter((booking) =>
             places.some(
               (place) =>
                 place.id === booking.placeId && place.userId === user?.id
@@ -89,7 +103,7 @@ const BusinessPaymentManagement = () => {
           setBookings([]);
         }
       } else {
-        console.error("Invalid response format:", response.data);
+        console.error("Invalid response format");
         setBookings([]);
       }
     } catch (error) {
@@ -128,10 +142,25 @@ const BusinessPaymentManagement = () => {
   };
 
   const getPaymentMethodBadge = (booking) => {
-    // ถ้ามี paymentSlip แสดงว่าชำระผ่าน Bank Transfer
-    if (booking.paymentSlip) {
+    // ตรวจสอบ paymentMethod ก่อน
+    if (booking.paymentMethod === "cash") {
       return (
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-orange-600"
+        >
+          <Wallet className="w-3 h-3" />
+          เงินสด
+        </Badge>
+      );
+    }
+    // ถ้ามี paymentSlip แสดงว่าชำระผ่าน Bank Transfer
+    else if (booking.paymentSlip || booking.paymentMethod === "bank_transfer") {
+      return (
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-green-600"
+        >
           <Building2 className="w-3 h-3" />
           โอนธนาคาร
         </Badge>
@@ -139,11 +168,15 @@ const BusinessPaymentManagement = () => {
     }
     // ถ้าไม่มี paymentSlip แต่มี paymentStatus = paid หรือ confirmed แสดงว่าชำระผ่าน Stripe
     else if (
+      booking.paymentMethod === "stripe" ||
       booking.paymentStatus === "paid" ||
       booking.paymentStatus === "confirmed"
     ) {
       return (
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-blue-600"
+        >
           <CreditCard className="w-3 h-3" />
           Stripe
         </Badge>
@@ -152,9 +185,12 @@ const BusinessPaymentManagement = () => {
     // ถ้าสถานะ pending และไม่มี slip แสดงว่าเป็น Stripe ที่ยังไม่ได้ชำระ
     else if (booking.paymentStatus === "pending") {
       return (
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-orange-600"
+        >
           <Clock className="w-3 h-3" />
-          Stripe (รอชำระ)
+          รอชำระ
         </Badge>
       );
     }

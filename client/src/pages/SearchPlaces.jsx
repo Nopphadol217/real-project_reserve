@@ -204,27 +204,7 @@ const SearchPlaces = () => {
                   />
                 </div>
 
-                {/* Guests */}
-                <div>
-                  <Label htmlFor="guests">จำนวนผู้เข้าพัก</Label>
-                  <Select
-                    value={searchFilters.guests.toString()}
-                    onValueChange={(value) =>
-                      handleSearchChange("guests", parseInt(value))
-                    }
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} คน
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+               
 
                 {/* Category & Price Range */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

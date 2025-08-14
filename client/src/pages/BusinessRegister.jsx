@@ -23,6 +23,7 @@ import {
   EyeOff,
   Check,
   Star,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router";
@@ -219,7 +220,7 @@ const BusinessRegister = () => {
       <div className="max-w-2xl w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <Building2 className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+          <Building2 className="w-16 h-16 text-red-600 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900">
             สมัครสมาชิกผู้ประกอบการ
           </h1>
@@ -227,7 +228,11 @@ const BusinessRegister = () => {
             เข้าร่วมแพลตฟอร์มของเราและเริ่มต้นธุรกิจที่พักออนไลน์
           </p>
         </div>
-
+        <Link to="/" className="hover:text-red-500 transition-all duration-500">
+          <span>
+            <ArrowLeft className="inline-block w-4 h-4 mr-1 " /> กลับ
+          </span>
+        </Link>
         {/* Form */}
         <Card className="shadow-lg">
           <CardHeader>
@@ -240,7 +245,7 @@ const BusinessRegister = () => {
               {/* Personal Information */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                  <User className="w-5 h-5 text-blue-600" />
+                  <User className="w-5 h-5 text-red-600" />
                   ข้อมูลส่วนตัว
                 </h3>
 
@@ -288,7 +293,7 @@ const BusinessRegister = () => {
                       />
                       {isEmailChecking && (
                         <div className="absolute right-3 top-3">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
                         </div>
                       )}
                       {!isEmailChecking && formData.email && !errors.email && (
@@ -390,7 +395,7 @@ const BusinessRegister = () => {
               {/* Business Information */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-blue-600" />
+                  <Building2 className="w-5 h-5 text-red-600" />
                   ข้อมูลธุรกิจ
                 </h3>
 
@@ -487,7 +492,11 @@ const BusinessRegister = () => {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-green-500"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />

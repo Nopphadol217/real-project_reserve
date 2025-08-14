@@ -150,17 +150,6 @@ function ProfileEdit({ user }) {
                     placeholder="กรุณาใส่รหัสผ่านปัจจุบัน"
                     errors={errors}
                   />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  >
-                    {showCurrentPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-4">
@@ -187,17 +176,6 @@ function ProfileEdit({ user }) {
                   placeholder="กรุณาใส่รหัสผ่านใหม่"
                   errors={errors}
                 />
-                <button
-                  type="button"
-                  className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
               </div>
 
               {/* Confirm Password */}
@@ -211,17 +189,7 @@ function ProfileEdit({ user }) {
                     placeholder="ยืนยันรหัสผ่านใหม่"
                     errors={errors}
                   />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
+                  
                 </div>
               )}
 

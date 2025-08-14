@@ -89,6 +89,7 @@ model Booking {
   totalPrice    Int
   status        String   @default("pending") // pending, confirmed, cancelled
   paymentStatus String   @default("unpaid") // unpaid, paid, refunded
+  paymentMethod String   @default("bank_transfer") // bank_transfer, stripe, cash
   paymentSlip   String? // URL ของสลิปการโอนเงิน
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

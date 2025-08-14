@@ -106,7 +106,7 @@ function EditForm() {
     setIsLoading(true);
     try {
       const res = await readPlace(id);
-     
+
       setIsPlace(res.data.result);
     } catch (error) {
       console.log(error);
@@ -156,13 +156,23 @@ function EditForm() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <Link
-              to="/admin/places"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span>กลับไปหน้ารายการ</span>
-            </Link>
+            {user.role === "ADMIN" ? (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>กลับไปหน้ารายการ</span>
+              </Link>
+            ) : (
+              <Link
+                to="/business/dashboard"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>กลับไปหน้ารายการ</span>
+              </Link>
+            )}
           </div>
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center gap-3">

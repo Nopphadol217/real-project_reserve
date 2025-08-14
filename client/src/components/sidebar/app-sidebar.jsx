@@ -97,10 +97,7 @@ const data = {
           title: "รอการยืนยัน",
           url: "/admin/pending-bookings",
         },
-        {
-          title: "การจองวันนี้",
-          url: "/admin/today-bookings",
-        },
+
       ],
     },
     {
@@ -112,14 +109,8 @@ const data = {
           title: "รายการชำระเงิน",
           url: "/admin/payments",
         },
-        {
-          title: "รอการตรวจสอบ",
-          url: "/admin/pending-payments",
-        },
-        {
-          title: "ประวัติการชำระ",
-          url: "/admin/payment-history",
-        },
+
+      
       ],
     },
     {

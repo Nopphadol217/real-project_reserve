@@ -189,6 +189,7 @@ const BusinessBookings = () => {
               <TableHead>ผู้จอง</TableHead>
               <TableHead>ที่พัก</TableHead>
               <TableHead>วันที่เข้าพัก</TableHead>
+              <TableHead>วันที่ออก</TableHead>
               <TableHead>จำนวนเงิน</TableHead>
               <TableHead>สถานะการจอง</TableHead>
               <TableHead>สถานะการชำระ</TableHead>
@@ -204,7 +205,7 @@ const BusinessBookings = () => {
                     <User className="w-4 h-4 mr-2 text-gray-400" />
                     <div>
                       <p className="font-medium">
-                        {booking.User?.firstName} {booking.User?.lastName}
+                        {booking.User?.firstname} {booking.User?.lastname}
                       </p>
                       <p className="text-sm text-gray-500">
                         {booking.User?.email}
@@ -222,12 +223,17 @@ const BusinessBookings = () => {
                 </TableCell>
                 <TableCell>
                   <div>
-                    <p>{formatDate(booking.checkInDate)}</p>
+                    <p>{formatDate(booking.checkIn)}</p>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div>
                     <p className="text-sm text-gray-500">
-                      ถึง {formatDate(booking.checkOutDate)}
+                      ถึง {formatDate(booking.checkOut)}
                     </p>
                   </div>
                 </TableCell>
+
                 <TableCell>
                   <span className="font-bold text-green-600">
                     {formatCurrency(
@@ -235,7 +241,7 @@ const BusinessBookings = () => {
                     )}
                   </span>
                 </TableCell>
-                <TableCell>{getStatusBadge(booking.bookingStatus)}</TableCell>
+                <TableCell>{getStatusBadge(booking.status)}</TableCell>
                 <TableCell>
                   {getPaymentStatusBadge(booking.paymentStatus)}
                 </TableCell>

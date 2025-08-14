@@ -652,16 +652,26 @@ const getPendingPayments = async (req, res) => {
 // ดึงรายการการจองทั้งหมดพร้อมสถานะการชำระเงิน
 const getAllBookingsWithPayment = async (req, res) => {
   try {
-    // ปิดการตรวจสอบ role ชั่วคราวเพื่อทดสอบ
-    // const userRole = req.user.role;
-    // if (userRole !== "ADMIN" && userRole !== "BUSINESS") {
-    //   return res.status(403).json({
-    //     success: false,
-    //     message: "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้",
-    //   });
-    // }
+    const userRole = req.user.role;
+    const userId = req.user.id;
+
+    // สร้าง where condition ตาม role
+    let whereCondition = {};
+
+    // ถ้าเป็น BUSINESS ให้แสดงเฉพาะการจองของที่พักตัวเอง
+    if (userRole === "BUSINESS") {
+      whereCondition.Place = {
+        userId: userId,
+      };
+    } else if (userRole !== "ADMIN") {
+      return res.status(403).json({
+        success: false,
+        message: "คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้",
+      });
+    }
 
     const bookings = await prisma.booking.findMany({
+      where: whereCondition,
       include: {
         User: {
           select: {
@@ -707,15 +717,31 @@ const deleteCancelledBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const userId = req.user.id;
+    const userRole = req.user.role;
+    console.log(userId);
+    console.log(bookingId);
 
-    // ตรวจสอบว่าการจองมีอยู่และเป็นของ user นี้
+    // สร้าง where condition ตาม role
+    let whereCondition = {
+      id: parseInt(bookingId),
+    };
+
+    // ถ้าเป็น BUSINESS ให้ตรวจสอบว่าเป็น booking ของ place ตัวเอง
+    // ถ้าเป็น ADMIN ให้ลบได้ทุก booking
+    if (userRole === "BUSINESS") {
+      whereCondition.Place = {
+        userId: userId,
+      };
+    } else if (userRole !== "ADMIN") {
+      return res.status(403).json({
+        success: false,
+        message: "คุณไม่มีสิทธิ์ลบการจองนี้",
+      });
+    }
+
+    // ตรวจสอบว่าการจองมีอยู่
     const booking = await prisma.booking.findFirst({
-      where: {
-        id: parseInt(bookingId),
-        Place: {
-          userId: userId,
-        },
-      },
+      where: whereCondition,
       include: {
         Place: true,
       },
@@ -728,11 +754,20 @@ const deleteCancelledBooking = async (req, res) => {
       });
     }
 
-    // ตรวจสอบว่าการจองมีสถานะยกเลิกหรือไม่
-    if (booking.status !== "cancelled") {
+    // สำหรับ ADMIN สามารถลบ booking ในสถานะ cancelled หรือ rejected ได้
+    // สำหรับ BUSINESS สามารถลบได้เฉพาะ booking ที่ cancelled เท่านั้น
+    const allowedStatusForDeletion =
+      userRole === "ADMIN" ? ["cancelled", "rejected"] : ["cancelled"];
+
+    if (!allowedStatusForDeletion.includes(booking.status)) {
+      const statusMessage =
+        userRole === "ADMIN"
+          ? "สามารถลบได้เฉพาะการจองที่มีสถานะยกเลิกหรือถูกปฏิเสธเท่านั้น"
+          : "สามารถลบได้เฉพาะการจองที่มีสถานะยกเลิกเท่านั้น";
+
       return res.status(400).json({
         success: false,
-        message: "สามารถลบได้เฉพาะการจองที่มีสถานะยกเลิกเท่านั้น",
+        message: statusMessage,
       });
     }
 

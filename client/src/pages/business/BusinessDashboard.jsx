@@ -73,17 +73,38 @@ const BusinessDashboard = () => {
     try {
       setLoading(true);
       const response = await getAllBookingsWithPaymentAPI();
-      if (response.data.success) {
-        // Filter bookings for places owned by current user
-        const userBookings = response.data.bookings.filter((booking) =>
+
+      
+      // Handle different response structures
+      let bookingsData = [];
+      if (response.data) {
+        // Try different possible data structures
+        bookingsData = response.data.data || 
+                      response.data.bookings || 
+                      response.data || 
+                      [];
+      }
+      
+      // Ensure bookingsData is an array
+      if (!Array.isArray(bookingsData)) {
+        console.warn("Bookings data is not an array:", bookingsData);
+        bookingsData = [];
+      }
+      
+      // Filter bookings for places owned by current user only if places exist
+      if (places && places.length > 0 && user?.id) {
+        const userBookings = bookingsData.filter((booking) =>
           places.some(
             (place) => place.id === booking.placeId && place.userId === user?.id
           )
         );
         setBookings(userBookings);
+      } else {
+        setBookings([]);
       }
     } catch (error) {
       console.error("Error fetching booking data:", error);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -91,9 +112,9 @@ const BusinessDashboard = () => {
 
   // Memoize business stats calculation
   const businessStats = useMemo(() => {
-    const userPlaces = places.filter((place) => place.userId === user?.id);
+    const userPlaces = places.filter((place) => place.userId === user?.id) || [];
     const totalRevenue = bookings.reduce((sum, booking) => {
-      return sum + (booking.paymentAmount || 0);
+      return sum + (booking.totalPrice || booking.paymentAmount || 0);
     }, 0);
 
     const confirmedBookings = bookings.filter(
@@ -108,6 +129,11 @@ const BusinessDashboard = () => {
           userPlaces.length
         : 0;
 
+    // Calculate occupancy rate (simplified calculation)
+    const occupancyRate = userPlaces.length > 0 
+      ? Math.round((confirmedBookings.length / (userPlaces.length * 30)) * 100) 
+      : 0;
+
     return {
       totalPlaces: userPlaces.length,
       totalBookings: bookings.length,
@@ -116,6 +142,7 @@ const BusinessDashboard = () => {
         .length,
       confirmedBookings: confirmedBookings.length,
       averageRating: averageRating,
+      occupancyRate: occupancyRate
     };
   }, [places, bookings, user?.id]);
 
@@ -124,7 +151,7 @@ const BusinessDashboard = () => {
     const monthlyData = {};
 
     bookings.forEach((booking) => {
-      if (booking.createdAt && booking.paymentAmount) {
+      if (booking.createdAt && (booking.totalPrice || booking.paymentAmount)) {
         const date = new Date(booking.createdAt);
         const monthKey = date.toLocaleDateString("th-TH", { month: "short" });
 
@@ -132,7 +159,7 @@ const BusinessDashboard = () => {
           monthlyData[monthKey] = { month: monthKey, revenue: 0, bookings: 0 };
         }
 
-        monthlyData[monthKey].revenue += booking.paymentAmount;
+        monthlyData[monthKey].revenue += (booking.totalPrice || booking.paymentAmount || 0);
         monthlyData[monthKey].bookings += 1;
       }
     });
@@ -177,7 +204,7 @@ const BusinessDashboard = () => {
 
   // Memoize top places calculation
   const topPlaces = useMemo(() => {
-    const userPlaces = places.filter((place) => place.userId === user?.id);
+    const userPlaces = places.filter((place) => place.userId === user?.id) || [];
 
     return userPlaces
       .map((place) => {
@@ -185,7 +212,7 @@ const BusinessDashboard = () => {
           (booking) => booking.placeId === place.id
         );
         const revenue = placeBookings.reduce(
-          (sum, booking) => sum + (booking.paymentAmount || 0),
+          (sum, booking) => sum + (booking.totalPrice || booking.paymentAmount || 0),
           0
         );
 
@@ -196,6 +223,7 @@ const BusinessDashboard = () => {
           revenue: revenue,
           rating: place.rating || 0,
           image: place.images?.[0] || "/placeholder.jpg",
+          occupancy: Math.round((placeBookings.length / 30) * 100) // Simplified calculation
         };
       })
       .sort((a, b) => b.revenue - a.revenue)
@@ -229,6 +257,17 @@ const BusinessDashboard = () => {
         return status;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -406,20 +445,26 @@ const BusinessDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value, name) => [
-                      name === "revenue" ? `฿${value.toLocaleString()}` : value,
-                      name === "revenue" ? "รายได้" : "การจอง",
-                    ]}
-                  />
-                  <Bar dataKey="revenue" fill="#8b5cf6" />
-                </BarChart>
-              </ResponsiveContainer>
+              {revenueData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={revenueData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        name === "revenue" ? `฿${value.toLocaleString()}` : value,
+                        name === "revenue" ? "รายได้" : "การจอง",
+                      ]}
+                    />
+                    <Bar dataKey="revenue" fill="#8b5cf6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-500">
+                  ยังไม่มีข้อมูลรายได้
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -432,27 +477,33 @@ const BusinessDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={bookingStatusData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {bookingStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {bookingStatusData.some(item => item.value > 0) ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={bookingStatusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {bookingStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-500">
+                  ยังไม่มีข้อมูลการจอง
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -474,44 +525,44 @@ const BusinessDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentBookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium">
-                          {booking.User?.firstName} {booking.User?.lastName}
+                {recentBookings.length > 0 ? (
+                  recentBookings.map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium">
+                            {booking.User?.firstname} {booking.User?.lastname}
+                          </p>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
+                              booking.paymentStatus
+                            )}`}
+                          >
+                            {getStatusText(booking.paymentStatus)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {booking.Place?.title}
                         </p>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-                            booking.paymentStatus
-                          )}`}
-                        >
-                          {getStatusText(booking.paymentStatus)}
-                        </span>
+                        <p className="text-xs text-gray-500">
+                          {new Date(booking.checkIn).toLocaleDateString("th-TH")} - {new Date(booking.checkOut).toLocaleDateString("th-TH")}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        {booking.Place?.title}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(booking.checkInDate).toLocaleDateString(
-                          "th-TH"
-                        )}{" "}
-                        -{" "}
-                        {new Date(booking.checkOutDate).toLocaleDateString(
-                          "th-TH"
-                        )}
-                      </p>
+                      <div className="text-right">
+                        <p className="font-bold text-green-600">
+                          ฿{(booking.totalPrice || booking.paymentAmount || 0).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-green-600">
-                        ฿{booking.paymentAmount?.toLocaleString() || 0}
-                      </p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    ยังไม่มีการจอง
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -531,33 +582,39 @@ const BusinessDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {topPlaces.map((place, index) => (
-                  <div
-                    key={place.id}
-                    className="flex items-center gap-4 p-4 border rounded-lg"
-                  >
-                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-bold">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{place.name}</p>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                        <span>{place.bookings} การจอง</span>
-                        <span className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          {place.rating}
-                        </span>
-                        <span>{place.occupancy}% เข้าพัก</span>
+                {topPlaces.length > 0 ? (
+                  topPlaces.map((place, index) => (
+                    <div
+                      key={place.id}
+                      className="flex items-center gap-4 p-4 border rounded-lg"
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{place.name}</p>
+                        <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                          <span>{place.bookings} การจอง</span>
+                          <span className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            {place.rating.toFixed(1)}
+                          </span>
+                          <span>{place.occupancy}% เข้าพัก</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-green-600">
+                          ฿{place.revenue.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500">รายได้</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-green-600">
-                        ฿{place.revenue.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-gray-500">รายได้</p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    ยังไม่มีข้อมูลที่พัก
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>

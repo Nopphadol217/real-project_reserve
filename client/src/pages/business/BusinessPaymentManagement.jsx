@@ -87,12 +87,17 @@ const BusinessPaymentManagement = () => {
       const pendingBookingsData =
         pendingResponse.data.data || pendingResponse.data.bookings || [];
 
+      // รวมข้อมูลและกรองข้อมูลซ้ำโดยใช้ id
       const allBookingsData = [...paidBookingsData, ...pendingBookingsData];
+      const uniqueBookings = allBookingsData.filter(
+        (booking, index, self) =>
+          index === self.findIndex((b) => b.id === booking.id)
+      );
 
-      if (Array.isArray(allBookingsData)) {
+      if (Array.isArray(uniqueBookings)) {
         // Only filter if places array exists and has data
         if (places && Array.isArray(places) && places.length > 0) {
-          const userBookings = allBookingsData.filter((booking) =>
+          const userBookings = uniqueBookings.filter((booking) =>
             places.some(
               (place) =>
                 place.id === booking.placeId && place.userId === user?.id
@@ -286,8 +291,11 @@ const BusinessPaymentManagement = () => {
                   <p className="text-sm font-medium text-gray-500">รอยืนยัน</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {
-                      bookings.filter((b) => b.paymentStatus === "pending")
-                        .length
+                      bookings.filter(
+                        (b) =>
+                          b.paymentStatus === "pending" ||
+                          b.paymentStatus === "cash"
+                      ).length
                     }
                   </p>
                 </div>
@@ -354,6 +362,7 @@ const BusinessPaymentManagement = () => {
                   <TableHead>ผู้จอง</TableHead>
                   <TableHead>ที่พัก</TableHead>
                   <TableHead>วันที่เข้าพัก</TableHead>
+                  <TableHead>วันที่ออก</TableHead>
                   <TableHead>จำนวนเงิน</TableHead>
                   <TableHead>วิธีการชำระ</TableHead>
                   <TableHead>สถานะ</TableHead>
@@ -369,7 +378,7 @@ const BusinessPaymentManagement = () => {
                         <User className="w-4 h-4 mr-2 text-gray-400" />
                         <div>
                           <p className="font-medium">
-                            {booking.User?.firstName} {booking.User?.lastName}
+                            {booking.User?.firstname} {booking.User?.lastname}
                           </p>
                           <p className="text-sm text-gray-500">
                             {booking.User?.email}
@@ -386,12 +395,12 @@ const BusinessPaymentManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <p>{formatDate(booking.checkInDate)}</p>
-                        <p className="text-sm text-gray-500">
-                          ถึง {formatDate(booking.checkOutDate)}
-                        </p>
-                      </div>
+                      <p>{formatDate(booking.checkIn)}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="text-sm text-gray-500">
+                        {formatDate(booking.checkOut)}
+                      </p>
                     </TableCell>
                     <TableCell>
                       <span className="font-bold text-green-600">
@@ -405,9 +414,7 @@ const BusinessPaymentManagement = () => {
                       {getStatusBadge(booking.paymentStatus)}
                     </TableCell>
                     <TableCell>
-                      {booking.paymentDate
-                        ? formatDate(booking.paymentDate)
-                        : "-"}
+                      {booking.updatedAt ? formatDate(booking.updatedAt) : "-"}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -493,8 +500,8 @@ const BusinessPaymentManagement = () => {
                     <div>
                       <p className="text-sm text-gray-600">ชื่อ-นามสกุล</p>
                       <p className="font-medium">
-                        {selectedBooking.User?.firstName}{" "}
-                        {selectedBooking.User?.lastName}
+                        {selectedBooking.User?.firstname}{" "}
+                        {selectedBooking.User?.lastname}
                       </p>
                     </div>
                     <div>
@@ -525,19 +532,22 @@ const BusinessPaymentManagement = () => {
                     <div>
                       <p className="text-sm text-gray-600">วันที่เข้าพัก</p>
                       <p className="font-medium">
-                        {formatDate(selectedBooking.checkInDate)}
+                        {formatDate(selectedBooking.checkIn)}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">วันที่ออก</p>
                       <p className="font-medium">
-                        {formatDate(selectedBooking.checkOutDate)}
+                        {formatDate(selectedBooking.checkOut)}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">จำนวนเงิน</p>
                       <p className="font-medium text-green-600">
-                        {formatCurrency(selectedBooking.paymentAmount)}
+                        {formatCurrency(
+                          selectedBooking.totalPrice ||
+                            selectedBooking.paymentAmount
+                        )}
                       </p>
                     </div>
                     <div>

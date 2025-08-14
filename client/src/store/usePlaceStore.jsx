@@ -12,7 +12,7 @@ const placeStore = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const res = await listPlaces(userId);
-      console.log("Places response:", res.data);
+   
 
       // ตรวจสอบว่า response มีข้อมูลที่ถูกต้องหรือไม่
       const places = Array.isArray(res.data.result) ? res.data.result : [];

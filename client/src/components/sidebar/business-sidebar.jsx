@@ -65,10 +65,6 @@ export function BusinessSidebar({ ...props }) {
             title: "ภาพรวมธุรกิจ",
             url: "/business/dashboard",
           },
-          {
-            title: "สถิติและรายงาน",
-            url: "/business/analytics",
-          },
         ],
       },
       {
@@ -95,14 +91,6 @@ export function BusinessSidebar({ ...props }) {
             title: "การจองทั้งหมด",
             url: "/business/bookings",
           },
-          {
-            title: "รอการยืนยัน",
-            url: "/business/bookings/pending",
-          },
-          {
-            title: "ประวัติการจอง",
-            url: "/business/bookings/history",
-          },
         ],
       },
       {
@@ -125,7 +113,7 @@ export function BusinessSidebar({ ...props }) {
       },
       {
         name: "ค้นหาที่พัก",
-        url: "/search",
+        url: "/search-places",
         icon: Search,
       },
       {

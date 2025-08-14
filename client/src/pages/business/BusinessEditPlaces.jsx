@@ -23,6 +23,8 @@ import {
 import { Link } from "react-router";
 import usePlaceStore from "@/store/usePlaceStore";
 import useAuthStore from "@/store/useAuthStore";
+import { deletePlace } from "@/api/createPlaceAPI";
+import { toast } from "sonner";
 
 const BusinessEditPlaces = () => {
   const places = usePlaceStore((state) => state.places);
@@ -37,11 +39,20 @@ const BusinessEditPlaces = () => {
       setLoading(false);
     };
     fetchPlaces();
-  }, [actionListPlace, user?.id]);
+  }, [actionListPlace, user?.id,places?.id]);
 
   // Filter places to show only those owned by current user
   const userPlaces = places.filter((place) => place.userId === user?.id);
-
+  const handleDelete = async (placeId) => {
+    // Handle delete action
+    try {
+      await deletePlace(placeId);
+    } catch (error) {
+      console.log(error)
+      toast.error("ไม่สามารถลบได้กรุณาแก้สถานะการจ้องให้ว่าง");
+    }
+ 
+  };
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("th-TH", {
       style: "currency",
@@ -67,6 +78,8 @@ const BusinessEditPlaces = () => {
       </div>
     );
   }
+
+  
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -237,6 +250,7 @@ const BusinessEditPlaces = () => {
                             variant="outline"
                             size="sm"
                             className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDelete(place.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

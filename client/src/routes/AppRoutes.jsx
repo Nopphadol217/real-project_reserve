@@ -19,7 +19,7 @@ import UserManagement from "@/pages/admin/UserManagement";
 import BusinessRegister from "@/pages/BusinessRegister";
 import BusinessDashboard from "@/pages/business/BusinessDashboard";
 import BusinessBookings from "@/pages/business/BusinessBookings";
-import BusinessBookingManagement from "@/pages/business/BusinessBookingManagement";
+
 import BusinessCreateListing from "@/pages/business/BusinessCreateListing";
 import BusinessPaymentManagement from "@/pages/business/BusinessPaymentManagement";
 import BusinessEditPlaces from "@/pages/business/BusinessEditPlaces";

@@ -1,5 +1,9 @@
-const renderError = (res, status, message) => {
-  return res.status(status).json({ message });
+const renderError = (code, message) => {
+  const error = new Error(message);
+  error.statusCode = code;
+
+  throw error;
 };
 
-module.exports = renderError;
+
+module.exports = renderError

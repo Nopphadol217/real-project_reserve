@@ -15,13 +15,32 @@ const AdminRoute = ({ children }) => {
   // เช็คว่า Login หรือยัง
   if (!isHydrated) {
     return (
-      <div className="flex flex-col space-y-3">
-        <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-4 w-[200px]" />
+       <div className="flex gap-6">
+      {/* Sidebar Skeleton */}
+      <aside className="w-64 space-y-4">
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton
+              key={i}
+              className="h-10 w-full rounded-md"
+            />
+          ))}
         </div>
-      </div>
+      </aside>
+
+      {/* Main Content Skeleton */}
+      <main className="flex-1 space-y-6">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex flex-col space-y-3">
+            <Skeleton className="h-[180px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[80%]" />
+              <Skeleton className="h-4 w-[60%]" />
+            </div>
+          </div>
+        ))}
+      </main>
+    </div>
     );
   }
 

@@ -255,10 +255,7 @@ const PaymentMethodSelector = ({
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          กลับ
-        </Button>
+    
         <div>
           <h2 className="text-2xl font-bold">เลือกวิธีการชำระเงิน</h2>
           <p className="text-gray-600">เลือกวิธีการที่คุณต้องการชำระเงิน</p>

@@ -38,7 +38,6 @@ const PlaceHomeContainer = () => {
 
   useEffect(() => {
     const id = userId?.id ?? null;
-    console.log("User ID:", id);
     // เรียก API ทั้งในกรณีที่มี userId และไม่มี userId
     // เพื่อให้แสดงที่พักได้แม้ไม่ได้ล็อกอิน
     actionPlaces(id);

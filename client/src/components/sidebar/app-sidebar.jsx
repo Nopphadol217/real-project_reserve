@@ -93,10 +93,7 @@ const data = {
           title: "การจองทั้งหมด",
           url: "/admin/bookings",
         },
-        {
-          title: "รอการยืนยัน",
-          url: "/admin/pending-bookings",
-        },
+      
 
       ],
     },
@@ -125,10 +122,6 @@ const data = {
         {
           title: "อนุมัติเจ้าของที่พัก",
           url: "/admin/user-management",
-        },
-        {
-          title: "ลูกค้า",
-          url: "/admin/customers",
         },
       ],
     },

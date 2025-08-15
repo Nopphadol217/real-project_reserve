@@ -13,7 +13,7 @@ function Logo() {
         {/* Logo Container */}
 
         {/* Brand name - ซ่อนในมือถือ */}
-        <div className="hidden md:block">
+        <div className="">
           <span className="text-xl font-bold text-[#FFEED4] tracking-tight">
             {user?.role === "ADMIN" ? (
               "Admin Panel"
@@ -22,7 +22,7 @@ function Logo() {
                 <img
                   src="/logo/bookylife.png"
                   alt="BookyLife Logo"
-                  className="w-[100px]  object-contain filter rounded-md  "
+                  className="w-[100px] sm:w-[100px] md:w-[125px] xl:w-[150px]  object-contain filter rounded-md  "
                 />
               </>
             )}

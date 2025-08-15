@@ -77,7 +77,7 @@ function HeroSection1() {
             </div>
 
             <p className="text-xl sm:text-xl text-white/90 max-w-3xl xl:max-w-4xl mx-auto xl:mx-0 leading-relaxed font-light">
-              เว็บจองที่พักออนไลน์สำหรับการทดลองใช้งาน Bookylife Project นักศึกษา
+              เว็บจองที่พักออนไลน์
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center xl:justify-start items-center">

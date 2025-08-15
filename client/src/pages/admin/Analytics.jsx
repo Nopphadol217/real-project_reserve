@@ -58,7 +58,7 @@ const Analytics = () => {
       const bookingsData = response.data?.bookings || response.data?.data || [];
       setBookings(bookingsData);
 
-      console.log("Analytics data:", bookingsData);
+   
     } catch (error) {
       console.error("Error fetching analytics data:", error);
       toast.error("เกิดข้อผิดพลาดในการโหลดข้อมูลสถิติ");

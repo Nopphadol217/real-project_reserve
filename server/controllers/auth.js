@@ -334,33 +334,65 @@ exports.businessRegister = async (req, res, next) => {
       businessPhone,
       businessDescription,
     } = req.body;
-    console.log(req.body);
-    // ตรวจสอบว่ามี email นี้ในระบบแล้วหรือไม่
-    const existedUser = await prisma.user.findUnique({ where: { email } });
-    if (existedUser) {
-      return renderError(400, "มี email นี้ในระบบแล้ว");
-    }
 
-    // ตรวจสอบข้อมูลที่จำเป็น
+    // ตรวจสอบข้อมูลส่วนตัว
     if (!firstname || !lastname || !email || !phone || !password) {
-      return renderError(400, "กรุณากรอกข้อมูลส่วนตัวให้ครบถ้วน");
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลส่วนตัวให้ครบถ้วน" });
     }
 
+    // ตรวจสอบข้อมูลธุรกิจ
     if (!businessName || !businessType || !businessAddress) {
-      return renderError(400, "กรุณากรอกข้อมูลธุรกิจให้ครบถ้วน");
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลธุรกิจให้ครบถ้วน" });
     }
 
-    // แฮชรหัสผ่าน
+    // หา user ตาม email
+    const existedUser = await prisma.user.findUnique({
+      where: { email },
+      include: { businessInfo: true }
+    });
+
+    if (existedUser) {
+      if (existedUser.role === "USER") {
+        // อัปเดตเป็น PENDING_BUSINESS
+        const updatedUser = await prisma.user.update({
+          where: { id: existedUser.id },
+          data: {
+            role: "PENDING_BUSINESS",
+            businessInfo: {
+              create: {
+                businessName,
+                businessType,
+                businessAddress,
+                businessPhone,
+                businessDescription,
+                status: "PENDING"
+              }
+            }
+          },
+          include: { businessInfo: true }
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: "อัปเกรดเป็นผู้ประกอบการ รอการตรวจสอบ",
+          user: updatedUser
+        });
+
+      } else {
+        return res.status(400).json({ message: "มี email นี้ในระบบแล้ว" });
+      }
+    }
+
+    // ถ้าไม่มี user → สร้างใหม่
     const hashPassword = await bcrypt.hash(password, 10);
 
-    // สร้างผู้ใช้ใหม่ด้วยสถานะ PENDING (รอการอนุมัติ)
-    const user = await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         username: `${firstname} ${lastname}`,
         email,
         password: hashPassword,
-        phone: phone,
-        role: "PENDING_BUSINESS", // สถานะรอการอนุมัติเป็น BUSINESS
+        phone,
+        role: "PENDING_BUSINESS",
         businessInfo: {
           create: {
             businessName,
@@ -368,31 +400,26 @@ exports.businessRegister = async (req, res, next) => {
             businessAddress,
             businessPhone,
             businessDescription,
-            status: "PENDING", // รอการอนุมัติ
-          },
-        },
+            status: "PENDING"
+          }
+        }
       },
-      include: {
-        businessInfo: true,
-      },
+      include: { businessInfo: true }
     });
 
     res.status(200).json({
       success: true,
       message: "สมัครสมาชิกผู้ประกอบการสำเร็จ รอการตรวจสอบจากทีมงาน",
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        businessInfo: user.businessInfo,
-      },
+      user: newUser
     });
+
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(error);
   }
 };
+
+
 
 exports.checkEmail = async (req, res, next) => {
   try {

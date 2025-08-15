@@ -101,33 +101,6 @@ const BusinessRegister = () => {
       }));
       return;
     }
-
-    // Check if email already exists
-    try {
-      setIsEmailChecking(true);
-      const response = await fetch(
-        `http://localhost:5000/api/check-email?email=${encodeURIComponent(
-          email
-        )}`
-      );
-      const data = await response.json();
-
-      if (data.exists) {
-        setErrors((prev) => ({
-          ...prev,
-          email: "อีเมลนี้มีผู้ใช้งานแล้ว",
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          email: null,
-        }));
-      }
-    } catch (error) {
-      console.error("Error checking email:", error);
-    } finally {
-      setIsEmailChecking(false);
-    }
   };
 
   const validateForm = () => {
@@ -162,10 +135,7 @@ const BusinessRegister = () => {
       return false;
     }
 
-    if (!formData.agreeTerms || !formData.agreePrivacy) {
-      toast.error("กรุณายอมรับเงื่อนไขและนโยบายความเป็นส่วนตัว");
-      return false;
-    }
+ 
 
     return true;
   };
@@ -345,9 +315,10 @@ const BusinessRegister = () => {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
                           <Eye className="w-4 h-4" />
+                        ) : (
+                          
+                          <EyeOff className="w-4 h-4" />
                         )}
                       </Button>
                     </div>
@@ -375,9 +346,10 @@ const BusinessRegister = () => {
                         }
                       >
                         {showConfirmPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
                           <Eye className="w-4 h-4" />
+                        ) : (
+                          
+                          <EyeOff className="w-4 h-4" />
                         )}
                       </Button>
                     </div>

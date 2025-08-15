@@ -31,6 +31,7 @@ import {
   Building2,
   TrendingUp,
   DollarSign,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAllBookingsWithPaymentAPI } from "@/api/paymentAPI";
@@ -137,7 +138,13 @@ const BookingManagement = () => {
       return (
         <Badge variant="outline" className="flex items-center gap-1">
           <CreditCard className="w-3 h-3" />
-          Stripe
+          {booking.paymentMethod === "stripe"
+            ? "Stripe"
+            : booking.paymentMethod === "cash"
+            ? "เงินสด"
+            : booking.paymentMethod === "bank_transfer"
+            ? "โอนธนาคาร"
+            : "ไม่ระบุ"}
         </Badge>
       );
     } else if (booking.paymentStatus === "unpaid") {
@@ -145,6 +152,13 @@ const BookingManagement = () => {
         <Badge variant="outline" className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
           ยังไม่ชำระ
+        </Badge>
+      );
+    } else if (booking.paymentMethod === "cash") {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <Wallet className="w-3 h-3" />
+          เงินสด
         </Badge>
       );
     }

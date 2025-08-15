@@ -15,6 +15,8 @@ import {
   Building2,
   DollarSign,
   Clock,
+  User,
+  SearchCheck,
 } from "lucide-react";
 import { GoSearch } from "react-icons/go";
 import { href } from "react-router";
@@ -40,6 +42,22 @@ export const userLinks = [
 ];
 
 export const privateLinks = [
+  {
+    icon: <Home />,
+    href: "/",
+    label: "หน้าหลัก",
+  },
+  {
+    icon: <SearchCheck />,
+    href: "/search-places",
+    label: "ค้นหาที่พัก",
+  },
+  {
+    href: "/user/profile",
+    label: "โปรไฟล์ของฉัน",
+    icon: <User />,
+  },
+
   {
     href: "/user/pending-payment",
     label: "รอชำระเงิน",
@@ -133,7 +151,6 @@ export const businessLinks = [
   },
 ];
 
-
 export const footerLinks = [
   {
     href: "/",
@@ -146,6 +163,5 @@ export const footerLinks = [
   {
     href: "/about",
     label: "เกี่ยวกับเรา",
-    
-  }
-]
+  },
+];

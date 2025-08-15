@@ -164,14 +164,8 @@ const PlaceDetail = () => {
           </div>
 
           <div className="flex items-center space-x-3 mt-4 lg:mt-0">
-            <button className="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors">
-              <Share className="w-5 h-5" />
-              <span className="text-sm">แชร์</span>
-            </button>
-            <button className="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors">
-              <Heart className="w-5 h-5" />
-              <span className="text-sm">บันทึก</span>
-            </button>
+         
+           
           </div>
         </div>
 

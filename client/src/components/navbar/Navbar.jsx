@@ -1,11 +1,10 @@
 import { userLinks } from "@/utils/links";
-import Login from "../authentication/Login";
-import Register from "../authentication/register";
+
+
 import Logo from "./Logo";
-import SearchBar from "./SearchBar";
-import { Button } from "../ui/button";
+
 import { useState, useRef, useEffect } from "react";
-import MenuList from "./MenuList";
+
 import useAuthStore from "@/store/useAuthStore";
 import DropdownAndUser from "./DropdownAndUser";
 import { Search, Globe, Menu, User, Home } from "lucide-react";

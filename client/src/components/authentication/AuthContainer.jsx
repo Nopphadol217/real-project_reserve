@@ -321,11 +321,11 @@ function AuthContainer() {
                             </span>
                           </div>
                         </div>
+                      </form>
 
                         <div className="flex justify-center">
                           <GoogleButtonLogin />
                         </div>
-                      </form>
                     </div>
 
                     {/* Register Form */}

@@ -179,8 +179,6 @@ function AuthContainer() {
                       ? "เข้าสู่ระบบเพื่อค้นหาที่พักในฝันของคุณ พร้อมประสบการณ์ที่ไม่เหมือนใคร"
                       : "สร้างบัญชีใหม่และเข้าร่วมชุมชนนักท่องเที่ยวที่ใหญ่ที่สุด"}
                   </p>
-
-                 
                 </div>
 
                 <div className="mt-6 sm:mt-8 lg:mt-12 text-center lg:text-left">
@@ -321,11 +319,10 @@ function AuthContainer() {
                             </span>
                           </div>
                         </div>
-
-                        <div className="flex justify-center">
-                          <GoogleButtonLogin />
-                        </div>
                       </form>
+                      <div className="flex justify-center mt-4">
+                        <GoogleButtonLogin />
+                      </div>
                     </div>
 
                     {/* Register Form */}

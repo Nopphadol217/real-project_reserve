@@ -15,14 +15,14 @@ export const businessRegisterAPI = async (data) => {
 };
 
 export const loginAPI = async (data) => {
-  return await axios.post(`${import.meta.env.VITE_API_URL}/login`, data, {
+  return await axios.post(`https://real-project-reserve.onrender.com/api/login`, data, {
     withCredentials: true,
   });
 };
 
 export const googleLoginAPI = async (payload) => {
   return await axios.post(
-    `${import.meta.env.VITE_API}/auth/google-login`,
+    `https://real-project-reserve.onrender.com/api/auth/google-login`,
     payload,
     {
       withCredentials: true,

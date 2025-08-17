@@ -29,7 +29,7 @@ router.get("/info/:placeId", authCheck, getPaymentInfo);
 router.get("/payment/info/:placeId", getPaymentInfo);
 
 router.put(
-  "/update/:placeId",
+  "/payment/update/:placeId",
   authCheck,
   upload.single("qrCode"),
   updatePaymentInfo

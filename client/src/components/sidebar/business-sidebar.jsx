@@ -102,6 +102,7 @@ export function BusinessSidebar({ ...props }) {
             title: "รายได้และเงินรับ",
             url: "/business/payments",
           },
+    
         ],
       },
     ],

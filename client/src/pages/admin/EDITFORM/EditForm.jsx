@@ -14,7 +14,6 @@ import EditUploadImage from "./EditUploadImage";
 import EditUploadGallery from "./EditUploadGallery";
 import RoomManageEdit from "@/pages/admin/EDITFORM/RoomManageEdit";
 import AmenitySelector from "@/components/form/AmenitySelector";
-import EditPaymentInfoSection from "./EditPaymentInfoSection";
 import useAuthStore from "@/store/useAuthStore";
 import { toast } from "sonner";
 import {
@@ -322,9 +321,6 @@ function EditForm() {
               )}
             </CardContent>
           </Card>
-
-          {/* Payment Information */}
-          <EditPaymentInfoSection placeId={id} userId={user?.id} />
 
           {/* Submit Button */}
           <div className="flex justify-end pt-6">

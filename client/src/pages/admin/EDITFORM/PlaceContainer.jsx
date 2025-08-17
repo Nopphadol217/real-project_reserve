@@ -1,7 +1,7 @@
 import usePlaceStore from "@/store/usePlaceStore";
 import { useEffect } from "react";
-import TabelPlaceList from "./TabelPlaceList";
-import useUserStore from "@/store/useUserStore";
+import TabelPlaceList from "./TablePlaceList";
+
 
 function PlaceContainer() {
   const actionListPlace = usePlaceStore((state) => state.actionListPlace);

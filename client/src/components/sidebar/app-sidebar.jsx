@@ -78,10 +78,6 @@ const data = {
           title: "เพิ่มที่พักใหม่",
           url: "/admin/create-listing",
         },
-        {
-          title: "ที่พักรอการอนุมัติ",
-          url: "/admin/pending-listings",
-        },
       ],
     },
     {
@@ -138,9 +134,9 @@ const data = {
       icon: Search,
     },
     {
-      name: "รายการโปรด",
-      url: "/favorites",
-      icon: Heart,
+      name: "ประวัติการจอง",
+      url: "/user/mybookings",
+      icon: Calendar,
     },
     {
       name: "การจองของฉัน",

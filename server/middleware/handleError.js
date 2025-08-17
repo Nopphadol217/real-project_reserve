@@ -1,9 +1,12 @@
-const handleError = async (err, req, res, next) => {
-
-    res
-      .status(err.statusCode || 500)
-      .json({ message: err.message || "Something Wrong!!" });
-
+const handleError = (res, err) => {
+  console.error("Error:", err);
+  
+  res
+    .status(err.statusCode || err.status || 500)
+    .json({ 
+      success: false,
+      message: err.message || "Something Wrong!!" 
+    });
 };
 
-module.exports = handleError
+module.exports = handleError;

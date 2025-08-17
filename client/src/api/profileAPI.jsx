@@ -2,7 +2,7 @@ import api from "@/lib/api";
 import axios from "axios";
 
 export const profileAPI = async (token) => {
-  return await api.get("http://localhost:5000/api/profile", {
+  return await api.get(`${import.meta.env.VITE_API}/profile`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -10,5 +10,5 @@ export const profileAPI = async (token) => {
 };
 
 export const readUserAPI = async () =>{
-  return await axios.get(`http://localhost:5000/api/manage-users`)
+  return await axios.get(`${import.meta.env.VITE_API}/manage-users`)
 }

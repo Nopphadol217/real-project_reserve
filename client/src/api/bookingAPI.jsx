@@ -4,7 +4,7 @@ import axios from "axios";
 // Create booking
 export const createBooking = async (placeId, userId, data) => {
   try {
-    const response = await axios.post("http://localhost:5000/api/booking", {
+    const response = await axios.post(`${import.meta.env.VITE_API}/booking`, {
       placeId: placeId,
       userId: userId,
       ...data,
@@ -28,7 +28,7 @@ export const createBookingAPI = async (bookingData) => {
 // List user bookings
 export const listBookings = async () => {
   try {
-    const response = await axios.get("http://localhost:5000/api/bookings");
+    const response = await axios.get(`${import.meta.env.VITE_API}/bookings`);
     return response.data;
   } catch (error) {
     throw error;
@@ -48,7 +48,7 @@ export const listPendingPayments = async (userId) => {
 // Checkout payment
 export const checkout = async (bookingId) => {
   try {
-    const response = await axios.post("http://localhost:5000/api/checkout", {
+    const response = await axios.post(`${import.meta.env.VITE_API}/checkout`, {
       id: bookingId,
     });
     return response.data;
@@ -61,7 +61,7 @@ export const checkout = async (bookingId) => {
 export const checkOutStatus = async (sessionId) => {
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/checkout-status/${sessionId}`
+      `${import.meta.env.VITE_API}/checkout-status/${sessionId}`
     );
     return response.data;
   } catch (error) {

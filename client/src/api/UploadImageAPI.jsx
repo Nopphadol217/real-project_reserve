@@ -1,13 +1,13 @@
 import axios from "axios";
 
 export const uploadImageAPI = async (image) => {
-  return await axios.post("http://localhost:5000/api/upload-main-image",
+  return await axios.post(`${import.meta.env.VITE_API}/upload-main-image`,
     image
   );
 };
 
 export const uploadGalleryAPI = async (image) => {
-  return await axios.post("http://localhost:5000/api/upload-gallery",
+  return await axios.post(`${import.meta.env.VITE_API}/upload-gallery`,
     image
   );
 };

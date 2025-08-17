@@ -162,6 +162,17 @@ exports.readPlace = async (req, res, next) => {
             status: true,
           },
         },
+        payments: {
+          select: {
+            accountName: true,
+            bankName: true,
+            accountNumber: true,
+            qrCodeUrl: true,
+            qrCodePublicId: true,
+            userId: true,
+            placeId: true,
+          },
+        },
       },
     });
 

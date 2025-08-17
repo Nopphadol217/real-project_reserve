@@ -282,8 +282,11 @@ const updatePaymentInfo = async (req, res) => {
     // ถ้ามี QR Code ใหม่
     if (req.file) {
       // ลบรูปเก่าจาก Cloudinary
-      const existingPayment = await prisma.payment.findUnique({
-        where: { placeId: parseInt(placeId) },
+      const existingPayment = await prisma.payment.findFirst({
+        where: { 
+          placeId: parseInt(placeId),
+          userId: userId 
+        },
       });
 
       if (existingPayment && existingPayment.qrPublicId) {
@@ -300,8 +303,23 @@ const updatePaymentInfo = async (req, res) => {
       updateData.qrPublicId = qrCodeResult.public_id;
     }
 
+    // หา payment record ที่ต้องการอัปเดต
+    const paymentToUpdate = await prisma.payment.findFirst({
+      where: { 
+        placeId: parseInt(placeId),
+        userId: userId 
+      },
+    });
+
+    if (!paymentToUpdate) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบข้อมูลการชำระเงิน",
+      });
+    }
+
     const paymentInfo = await prisma.payment.update({
-      where: { placeId: parseInt(placeId) },
+      where: { id: paymentToUpdate.id },
       data: updateData,
     });
 
@@ -338,17 +356,27 @@ const deletePaymentInfo = async (req, res) => {
     }
 
     // ลบจาก Cloudinary
-    const existingPayment = await prisma.payment.findUnique({
-      where: { placeId: parseInt(placeId) },
+    const existingPayment = await prisma.payment.findFirst({
+      where: { 
+        placeId: parseInt(placeId),
+        userId: userId 
+      },
     });
 
     if (existingPayment && existingPayment.qrPublicId) {
       await cloudinary.uploader.destroy(existingPayment.qrPublicId);
     }
 
+    if (!existingPayment) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบข้อมูลการชำระเงิน",
+      });
+    }
+
     // ลบจากฐานข้อมูล
     await prisma.payment.delete({
-      where: { placeId: parseInt(placeId) },
+      where: { id: existingPayment.id },
     });
 
     res.json({

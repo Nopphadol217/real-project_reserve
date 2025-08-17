@@ -33,7 +33,7 @@ function BreadcrumbForm() {
           const isLast = index === pathParts.length - 1;
 
           return (
-            <div key={hrefAdmin} className="flex items-center">
+            <div key={index} className="flex items-center">
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem>
                 {isLast ? (

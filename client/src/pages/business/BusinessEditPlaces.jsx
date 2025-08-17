@@ -19,6 +19,7 @@ import {
   MapPin,
   Home,
   DollarSign,
+  CreditCard,
 } from "lucide-react";
 import { Link } from "react-router";
 import usePlaceStore from "@/store/usePlaceStore";
@@ -244,6 +245,15 @@ const BusinessEditPlaces = () => {
                           <Link to={`/business/edit-place/${place.id}`}>
                             <Button variant="outline" size="sm">
                               <Edit className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Link to={`/business/payment-settings/${place.id}`}>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            >
+                              <CreditCard className="w-4 h-4" />
                             </Button>
                           </Link>
                           <Button

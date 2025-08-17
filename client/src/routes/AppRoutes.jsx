@@ -23,6 +23,7 @@ import BusinessBookings from "@/pages/business/BusinessBookings";
 import BusinessCreateListing from "@/pages/business/BusinessCreateListing";
 import BusinessPaymentManagement from "@/pages/business/BusinessPaymentManagement";
 import BusinessEditPlaces from "@/pages/business/BusinessEditPlaces";
+import PaymentSettings from "@/pages/business/PaymentSettings";
 
 import CreateListing from "@/pages/admin/EDITFORM/CreateListing";
 import ManageList from "@/pages/admin/ManageList";
@@ -93,6 +94,7 @@ function AppRoutes() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="bookings" element={<BookingManagement />} />
+          <Route path="payment-settings/:placeId" element={<PaymentSettings />} />
         </Route>
 
         {/* Business Routes */}
@@ -112,6 +114,7 @@ function AppRoutes() {
           <Route path="payments" element={<BusinessPaymentManagement />} />
           <Route path="edit-places" element={<BusinessEditPlaces />} />
           <Route path="edit-place/:id" element={<EditForm />} />
+          <Route path="payment-settings/:placeId" element={<PaymentSettings />} />
           <Route path="analytics" element={<BusinessDashboard />} />
         </Route>
 

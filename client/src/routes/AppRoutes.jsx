@@ -57,7 +57,7 @@ function AppRoutes() {
         {/* Public Routes */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="about" element={<About/>} />
+          <Route path="about" element={<About />} />
           <Route path="search-places" element={<SearchPlaces />} />
           <Route path="place/:id" element={<PlaceDetail />} />
         </Route>
@@ -94,7 +94,10 @@ function AppRoutes() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="payments" element={<PaymentManagement />} />
           <Route path="bookings" element={<BookingManagement />} />
-          <Route path="payment-settings/:placeId" element={<PaymentSettings />} />
+          <Route
+            path="payment-settings/:placeId"
+            element={<PaymentSettings />}
+          />
         </Route>
 
         {/* Business Routes */}
@@ -114,7 +117,10 @@ function AppRoutes() {
           <Route path="payments" element={<BusinessPaymentManagement />} />
           <Route path="edit-places" element={<BusinessEditPlaces />} />
           <Route path="edit-place/:id" element={<EditForm />} />
-          <Route path="payment-settings/:placeId" element={<PaymentSettings />} />
+          <Route
+            path="payment-settings/:placeId"
+            element={<PaymentSettings />}
+          />
           <Route path="analytics" element={<BusinessDashboard />} />
         </Route>
 

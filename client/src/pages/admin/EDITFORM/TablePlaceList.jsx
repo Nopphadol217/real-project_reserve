@@ -106,9 +106,7 @@ function TablePlaceList() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               จัดการรายการที่พัก (Admin)
             </h1>
-            <p className="text-gray-600">
-              จัดการและตรวจสอบที่พักทั้งหมดในระบบ
-            </p>
+            <p className="text-gray-600">จัดการและตรวจสอบที่พักทั้งหมดในระบบ</p>
           </div>
         </div>
 
@@ -223,9 +221,7 @@ function TablePlaceList() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">
-                          ID: {item.userId}
-                        </span>
+                        <span className="text-sm">ID: {item.userId}</span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
@@ -257,7 +253,8 @@ function TablePlaceList() {
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-3">
-                              {item.roomDetails && item.roomDetails.length > 0 ? (
+                              {item.roomDetails &&
+                              item.roomDetails.length > 0 ? (
                                 item.roomDetails.map((room, index) => (
                                   <div
                                     key={index}
@@ -265,9 +262,12 @@ function TablePlaceList() {
                                   >
                                     <div className="flex justify-between items-center">
                                       <div>
-                                        <h4 className="font-medium">{room.name}</h4>
+                                        <h4 className="font-medium">
+                                          {room.name}
+                                        </h4>
                                         <p className="text-sm text-gray-600">
-                                          สถานะ: {room.status ? "ไม่ว่าง" : "ว่าง"}
+                                          สถานะ:{" "}
+                                          {room.status ? "ไม่ว่าง" : "ว่าง"}
                                         </p>
                                       </div>
                                       <div className="text-right">
@@ -346,8 +346,8 @@ function TablePlaceList() {
                             </Button>
                           </Link>
                           <Link to={`/admin/payment-settings/${item.id}`}>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             >
@@ -370,7 +370,8 @@ function TablePlaceList() {
                                   คุณแน่ใจใช่ไหมว่าต้องการลบข้อมูลนี้?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลจะถูกลบออกจากระบบอย่างถาวร
+                                  การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                  ข้อมูลจะถูกลบออกจากระบบอย่างถาวร
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -396,9 +397,7 @@ function TablePlaceList() {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   ยังไม่มีที่พัก
                 </h3>
-                <p className="text-gray-500 mb-6">
-                  ยังไม่มีที่พักในระบบ
-                </p>
+                <p className="text-gray-500 mb-6">ยังไม่มีที่พักในระบบ</p>
               </div>
             )}
           </CardContent>

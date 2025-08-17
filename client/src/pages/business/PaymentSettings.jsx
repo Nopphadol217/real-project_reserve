@@ -97,7 +97,7 @@ const PaymentSettings = () => {
       setLoading(true);
       const response = await getPaymentInfoAPI(placeId);
       console.log("Payment Info Response:", response);
-      
+
       if (response.data.success && response.data.data) {
         const info = response.data.data;
         console.log("Payment Info Data:", info);
@@ -191,7 +191,7 @@ const PaymentSettings = () => {
         const updatedInfo = response.data.data || response.data.paymentInfo;
         setPaymentInfo(updatedInfo);
         toast.success("บันทึกข้อมูลการชำระเงินสำเร็จ");
-        
+
         // รีเฟรชข้อมูล
         fetchPaymentInfo();
       }
@@ -257,10 +257,7 @@ const PaymentSettings = () => {
                   onValueChange={(value) => setValue("bankName", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder="เลือกธนาคาร"
-                   
-                    />
+                    <SelectValue placeholder="เลือกธนาคาร" />
                   </SelectTrigger>
                   <SelectContent>
                     {bankOptions.map((bank) => (

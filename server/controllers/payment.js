@@ -283,9 +283,9 @@ const updatePaymentInfo = async (req, res) => {
     if (req.file) {
       // ลบรูปเก่าจาก Cloudinary
       const existingPayment = await prisma.payment.findFirst({
-        where: { 
+        where: {
           placeId: parseInt(placeId),
-          userId: userId 
+          userId: userId,
         },
       });
 
@@ -305,9 +305,9 @@ const updatePaymentInfo = async (req, res) => {
 
     // หา payment record ที่ต้องการอัปเดต
     const paymentToUpdate = await prisma.payment.findFirst({
-      where: { 
+      where: {
         placeId: parseInt(placeId),
-        userId: userId 
+        userId: userId,
       },
     });
 
@@ -357,9 +357,9 @@ const deletePaymentInfo = async (req, res) => {
 
     // ลบจาก Cloudinary
     const existingPayment = await prisma.payment.findFirst({
-      where: { 
+      where: {
         placeId: parseInt(placeId),
-        userId: userId 
+        userId: userId,
       },
     });
 

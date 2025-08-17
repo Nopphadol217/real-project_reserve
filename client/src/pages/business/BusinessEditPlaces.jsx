@@ -40,7 +40,7 @@ const BusinessEditPlaces = () => {
       setLoading(false);
     };
     fetchPlaces();
-  }, [actionListPlace, user?.id,places?.id]);
+  }, [actionListPlace, user?.id, places?.id]);
 
   // Filter places to show only those owned by current user
   const userPlaces = places.filter((place) => place.userId === user?.id);
@@ -49,10 +49,9 @@ const BusinessEditPlaces = () => {
     try {
       await deletePlace(placeId);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("ไม่สามารถลบได้กรุณาแก้สถานะการจ้องให้ว่าง");
     }
- 
   };
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("th-TH", {
@@ -79,8 +78,6 @@ const BusinessEditPlaces = () => {
       </div>
     );
   }
-
-  
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -248,8 +245,8 @@ const BusinessEditPlaces = () => {
                             </Button>
                           </Link>
                           <Link to={`/business/payment-settings/${place.id}`}>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             >

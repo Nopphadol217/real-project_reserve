@@ -19,7 +19,7 @@ const upload = multer({
 // ใช้ CORS
 app.use(
   cors({
-    origin: "https://bookylife-nkstec.vercel.app", // frontend ของคุณ (React Dev Server)
+    origin: "http://localhost:5173", // frontend ของคุณ (React Dev Server)
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // ถ้าคุณใช้ cookies หรือ session

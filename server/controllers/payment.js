@@ -710,7 +710,7 @@ const getAllBookingsWithPayment = async (req, res) => {
             email: true,
           },
         },
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,

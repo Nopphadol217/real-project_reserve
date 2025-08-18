@@ -14,7 +14,7 @@ exports.listBookings = async (req, res, next) => {
         userId: id,
       },
       include: {
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,
@@ -56,7 +56,7 @@ exports.listPendingPayments = async (req, res, next) => {
         paymentStatus: "unpaid",
       },
       include: {
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,

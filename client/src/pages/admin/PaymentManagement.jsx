@@ -436,7 +436,7 @@ const PaymentManagement = () => {
                       <TableRow key={booking.id}>
                         <TableCell>
                           <div className="space-y-1">
-                            <p className="font-medium">{booking.Place.title}</p>
+                            <p className="font-medium">{booking.place.title}</p>
                             <p className="text-sm text-gray-600">
                               ห้อง: {booking.Room.name}
                             </p>

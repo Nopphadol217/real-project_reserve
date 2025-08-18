@@ -67,7 +67,7 @@ model Gallery {
   secure_url String // Cloudinary secure_url
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  Place      Place    @relation(fields: [placeId], references: [id])
+  place      Place    @relation(fields: [placeId], references: [id])
   placeId    Int // foreign key to Place
 
   @@map("gallery")
@@ -80,7 +80,7 @@ model Room {
   status    Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  Place     Place?    @relation("PlaceRoomDetails", fields: [placeId], references: [id])
+  place     Place?    @relation("PlaceRoomDetails", fields: [placeId], references: [id])
   placeId   Int
   bookings  Booking[]
 
@@ -102,7 +102,7 @@ model Booking {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   User          User     @relation(fields: [userId], references: [id])
-  Place         Place    @relation(fields: [placeId], references: [id])
+  place         Place    @relation(fields: [placeId], references: [id])
   Room          Room     @relation(fields: [roomId], references: [id])
 
   @@map("booking")
@@ -119,8 +119,8 @@ model Payment {
   qrCodePublicId String? // Cloudinary public_id ของ QR Code
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Place          Place?   @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place          Place?   @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId]) // ป้องกันการเพิ่มข้อมูลการชำระเงินซ้ำ
   @@map("payment")
@@ -132,8 +132,8 @@ model Favorite {
   placeId   Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId]) // ป้องกันการเพิ่มรายการโปรดซ้ำ
   @@map("favorite")
@@ -150,7 +150,7 @@ model BusinessInfo {
   status              BusinessStatus @default(PENDING)
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
-  User                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("businessinfo")
 }

@@ -406,8 +406,8 @@ exports.checkout = async (req, res, next) => {
     }
 
     // ดึงข้อมูล DB มา destructor เอาไปแสดง
-    const { totalPrice, checkIn, checkOut, Place, Room } = booking;
-    const { secure_url, title } = Place;
+    const { totalPrice, checkIn, checkOut, place, Room } = booking;
+    const { secure_url, title } = place;
 
     // สร้าง product name
     let productName = title;

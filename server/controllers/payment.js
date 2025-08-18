@@ -479,7 +479,7 @@ const confirmPayment = async (req, res) => {
           },
         },
         include: {
-          Place: true,
+          place: true,
         },
       });
 
@@ -504,7 +504,7 @@ const confirmPayment = async (req, res) => {
       },
       include: {
         User: true,
-        Place: true,
+        place: true,
         Room: true,
       },
     });
@@ -578,7 +578,7 @@ const rejectPayment = async (req, res) => {
       },
       include: {
         User: true,
-        Place: true,
+        place: true,
         Room: true,
       },
     });
@@ -647,7 +647,7 @@ const getPendingPayments = async (req, res) => {
             email: true,
           },
         },
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,

@@ -479,7 +479,7 @@ const confirmPayment = async (req, res) => {
           },
         },
         include: {
-          Place: true,
+          place: true,
         },
       });
 
@@ -504,7 +504,7 @@ const confirmPayment = async (req, res) => {
       },
       include: {
         User: true,
-        Place: true,
+        place: true,
         Room: true,
       },
     });
@@ -547,12 +547,12 @@ const rejectPayment = async (req, res) => {
       const booking = await prisma.booking.findFirst({
         where: {
           id: parseInt(bookingId),
-          Place: {
+          place: {
             userId: userId,
           },
         },
         include: {
-          Place: true,
+          place: true,
         },
       });
 
@@ -578,7 +578,7 @@ const rejectPayment = async (req, res) => {
       },
       include: {
         User: true,
-        Place: true,
+        place: true,
         Room: true,
       },
     });
@@ -710,7 +710,7 @@ const getAllBookingsWithPayment = async (req, res) => {
             email: true,
           },
         },
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,
@@ -771,7 +771,7 @@ const deleteCancelledBooking = async (req, res) => {
     const booking = await prisma.booking.findFirst({
       where: whereCondition,
       include: {
-        Place: true,
+        place: true,
       },
     });
 

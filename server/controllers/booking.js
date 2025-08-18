@@ -786,7 +786,7 @@ exports.manualCheckout = async (req, res, next) => {
 
     const booking = await prisma.booking.findFirst({
       where: { id: parseInt(bookingId) },
-      include: { Room: true, Place: true },
+      include: { Room: true, place: true },
     });
 
     if (!booking) {

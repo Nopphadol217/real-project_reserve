@@ -342,7 +342,7 @@ exports.createBankTransferBooking = async (req, res, next) => {
         paymentMethod: paymentMethod,
       },
       include: {
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,
@@ -382,7 +382,7 @@ exports.checkout = async (req, res, next) => {
         id: parseInt(id),
       },
       include: {
-        Place: {
+        place: {
           select: {
             id: true,
             secure_url: true,
@@ -480,7 +480,7 @@ exports.checkOutStatus = async (req, res, next) => {
       },
       include: {
         Room: true,
-        Place: true,
+        place: true,
       },
     });
 
@@ -501,7 +501,7 @@ exports.checkOutStatus = async (req, res, next) => {
         },
         include: {
           Room: true,
-          Place: true,
+          place: true,
         },
       });
 
@@ -550,7 +550,7 @@ exports.clearRoomBookings = async (req, res, next) => {
       },
       include: {
         Room: true,
-        Place: true,
+        place: true,
       },
     });
 
@@ -713,7 +713,7 @@ exports.processAutomaticCheckout = async (req, res, next) => {
       },
       include: {
         Room: true,
-        Place: true,
+        place: true,
       },
     });
 
@@ -809,7 +809,7 @@ exports.manualCheckout = async (req, res, next) => {
       data: { status: "completed" },
       include: {
         Room: true,
-        Place: true,
+        place: true,
         User: true,
       },
     });

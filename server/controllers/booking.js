@@ -648,7 +648,7 @@ exports.getAllBookingsWithPayment = async (req, res, next) => {
         paymentStatus: "paid",
       },
       include: {
-        Place: {
+        place: {
           select: {
             id: true,
             title: true,
@@ -786,7 +786,7 @@ exports.manualCheckout = async (req, res, next) => {
 
     const booking = await prisma.booking.findFirst({
       where: { id: parseInt(bookingId) },
-      include: { Room: true, place: true },
+      include: { Room: true, Place: true },
     });
 
     if (!booking) {

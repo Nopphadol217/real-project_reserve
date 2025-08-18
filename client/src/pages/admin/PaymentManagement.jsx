@@ -816,7 +816,7 @@ const PaymentManagement = () => {
                     <TableRow key={booking.id}>
                       <TableCell>
                         <div className="space-y-1">
-                          <p className="font-medium">{booking.Place.title}</p>
+                          <p className="font-medium">{booking.place.title}</p>
                           <p className="text-sm text-gray-600">
                             ห้อง: {booking.Room.name}
                           </p>
@@ -953,7 +953,7 @@ const PaymentManagement = () => {
           <DialogHeader>
             <DialogTitle>สลิปการโอนเงิน</DialogTitle>
             <DialogDescription>
-              การจอง #{selectedBooking?.id} - {selectedBooking?.Place?.title}
+              การจอง #{selectedBooking?.id} - {selectedBooking?.place?.title}
             </DialogDescription>
           </DialogHeader>
           {selectedBooking?.paymentSlip && (
@@ -988,7 +988,7 @@ const PaymentManagement = () => {
                 : "ยกเลิกการจอง"}
             </DialogTitle>
             <DialogDescription>
-              การจอง #{selectedBooking?.id} - {selectedBooking?.Place?.title}
+              การจอง #{selectedBooking?.id} - {selectedBooking?.place?.title}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -1038,7 +1038,7 @@ const PaymentManagement = () => {
               ยืนยันการลบข้อมูล
             </DialogTitle>
             <DialogDescription>
-              การจอง #{selectedBooking?.id} - {selectedBooking?.Place?.title}
+              การจอง #{selectedBooking?.id} - {selectedBooking?.place?.title}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

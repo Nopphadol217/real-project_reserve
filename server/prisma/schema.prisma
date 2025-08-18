@@ -32,6 +32,8 @@ model User {
   favorites    Favorite[]
   payments     Payment[] // ข้อมูลการชำระเงินของ user
   businessInfo BusinessInfo? // ข้อมูลธุรกิจ (สำหรับ BUSINESS และ PENDING_BUSINESS)
+
+  @@map("user")
 }
 
 model Place {
@@ -55,6 +57,8 @@ model Place {
   bookings    Booking[]
   favorites   Favorite[]
   payments    Payment[] // ข้อมูลการชำระเงินของ place
+
+  @@map("place")
 }
 
 model Gallery {
@@ -65,6 +69,8 @@ model Gallery {
   updatedAt  DateTime @updatedAt
   Place      Place    @relation(fields: [placeId], references: [id])
   placeId    Int // foreign key to Place
+
+  @@map("gallery")
 }
 
 model Room {
@@ -77,6 +83,8 @@ model Room {
   Place     Place?    @relation("PlaceRoomDetails", fields: [placeId], references: [id])
   placeId   Int
   bookings  Booking[]
+
+  @@map("room")
 }
 
 model Booking {
@@ -96,6 +104,8 @@ model Booking {
   User          User     @relation(fields: [userId], references: [id])
   Place         Place    @relation(fields: [placeId], references: [id])
   Room          Room     @relation(fields: [roomId], references: [id])
+
+  @@map("booking")
 }
 
 model Payment {
@@ -113,6 +123,7 @@ model Payment {
   Place          Place?   @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId]) // ป้องกันการเพิ่มข้อมูลการชำระเงินซ้ำ
+  @@map("payment")
 }
 
 model Favorite {
@@ -125,6 +136,7 @@ model Favorite {
   Place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId]) // ป้องกันการเพิ่มรายการโปรดซ้ำ
+  @@map("favorite")
 }
 
 model BusinessInfo {
@@ -139,6 +151,8 @@ model BusinessInfo {
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   User                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("businessinfo")
 }
 
 enum BusinessStatus {

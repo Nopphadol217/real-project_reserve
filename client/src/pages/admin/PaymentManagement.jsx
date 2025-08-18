@@ -610,7 +610,7 @@ const PaymentManagement = () => {
                           <TableCell>
                             <div className="space-y-1">
                               <p className="font-medium">
-                                {booking.Place.title}
+                                {booking.place.title}
                               </p>
                               <p className="text-sm text-gray-600">
                                 ห้อง: {booking.Room.name}

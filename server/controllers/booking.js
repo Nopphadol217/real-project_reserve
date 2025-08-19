@@ -734,7 +734,7 @@ exports.checkout = async (req, res, next) => {
       ],
       mode: "payment",
       return_url: `${
-        process.env.CLIENT_URL || "http://localhost:5173"
+        process.env.CLIENT_URL || "http://demo-hotel.nkstec.ac.th"
       }/user/complete/{CHECKOUT_SESSION_ID}`,
     });
 

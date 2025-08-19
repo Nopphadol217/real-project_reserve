@@ -185,8 +185,8 @@ const BookingInvoice = ({ booking }) => (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}> ข้อมูลที่พัก</Text>
         <View style={styles.placeInfo}>
-          <Text style={styles.placeName}>{booking.Place?.title}</Text>
-          <Text style={styles.placeDetails}>{booking.Place?.category}</Text>
+          <Text style={styles.placeName}>{booking.place?.title}</Text>
+          <Text style={styles.placeDetails}>{booking.place?.category}</Text>
         </View>
       </View>
 

@@ -12,6 +12,14 @@ function BookingCalendar() {
   const [range, setRange] = useState(defaultSelected);
   const bookings = useBookingStore((state) => state.bookings);
 
+  // Helper function สำหรับแปลง Date เป็น local date string (YYYY-MM-DD)
+  const formatDateForServer = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // สร้างรายการวันที่ถูกจองแล้ว
   const getDisabledDays = () => {
     const today = new Date();
@@ -70,18 +78,15 @@ function BookingCalendar() {
       }
 
       // ตรวจสอบว่าไม่มีวันที่ถูกจองในช่วงที่เลือก
-      const isConflict =
-        bookings &&
-        bookings.some((booking) => {
-          if (booking.status !== "confirmed" && booking.status !== "pending")
-            return false;
+      const isConflict = bookings && bookings.some((booking) => {
+        if (booking.status !== "confirmed" && booking.status !== "pending") return false;
 
-          const bookedStart = new Date(booking.checkIn);
-          const bookedEnd = new Date(booking.checkOut);
+        const bookedStart = new Date(booking.checkIn);
+        const bookedEnd = new Date(booking.checkOut);
 
-          // ตรวจสอบการทับซ้อน
-          return checkIn < bookedEnd && checkOut > bookedStart;
-        });
+        // ตรวจสอบการทับซ้อน
+        return checkIn < bookedEnd && checkOut > bookedStart;
+      });
 
       if (isConflict) {
         toast.error("มีการจองในช่วงวันที่เลือก กรุณาเลือกวันอื่น");
@@ -89,12 +94,18 @@ function BookingCalendar() {
         return;
       }
 
-      // ถ้าทุกอย่างถูกต้อง
-      setRange(selectedRange);
+      // ถ้าทุกอย่างถูกต้อง - สร้าง range ใหม่ที่มี formatted dates สำหรับส่งไป server
+      const finalRange = {
+        from: selectedRange.from,
+        to: selectedRange.to,
+        // เพิ่ม formatted dates สำหรับส่งไป server
+        checkInDate: formatDateForServer(checkIn),
+        checkOutDate: formatDateForServer(checkOut),
+      };
+
+      setRange(finalRange);
       toast.success(
-        `เลือกวันที่เข้าพัก: ${checkIn.toLocaleDateString(
-          "th-TH"
-        )} - ${checkOut.toLocaleDateString("th-TH")}`
+        `เลือกวันที่เข้าพัก: ${checkIn.toLocaleDateString("th-TH")} - ${checkOut.toLocaleDateString("th-TH")}`
       );
     }
   };
@@ -108,22 +119,10 @@ function BookingCalendar() {
   };
 
   useEffect(() => {
-  const store = useBookingStore.getState();
-
-  if (range.from && range.to) {
-    const formatDate = (date) => {
-      return date.toISOString().split("T")[0]; // ได้ YYYY-MM-DD
-    };
-
-    store.setRange({
-      from: formatDate(range.from),
-      to: formatDate(range.to),
-    });
-  } else {
+    // เป็นการ setState เข้าไปใน useBookingStore ที่เราตั้งไว้
+    const store = useBookingStore.getState();
     store.setRange(range);
-  }
-}, [range]);
-
+  }, [range]);
 
   return (
     <div className="space-y-4">
@@ -141,6 +140,12 @@ function BookingCalendar() {
               {range.from.toLocaleDateString("th-TH")} -{" "}
               {range.to.toLocaleDateString("th-TH")}
             </p>
+            {/* Debug info - ลบออกได้เมื่อทดสอบเสร็จแล้ว */}
+            {range.checkInDate && range.checkOutDate && (
+              <p className="text-xs text-green-600 mt-1">
+                Server format: {range.checkInDate} - {range.checkOutDate}
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -132,7 +132,7 @@ function AuthContainer() {
               <div
                 className={`absolute inset-0 bg-cover bg-center bg-no-repeat ${
                   isLogin
-                    ? "bg-[url(/background/login_background.png')]"
+                    ? "bg-[url('/background/login_background.png')]"
                     : "bg-[url('/background/register_background.png')]"
                 }`}
               ></div>

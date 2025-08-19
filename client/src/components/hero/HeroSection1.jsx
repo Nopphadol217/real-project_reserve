@@ -42,7 +42,7 @@ function HeroSection1() {
           content="Bookylife เป็นโปรเจคเว็บจองที่พักสำหรับนักศึกษา ใช้เพื่อการทดลองและศึกษา ไม่มีการให้บริการจริง"
         />
         <meta property="og:image" content="/logo/bookylife_og.png" />
-        <meta property="og:url" content="https://yourwebsite.com" />
+        <meta property="og:url" content="https://demo-hotel.nkstec.ac.th" />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />

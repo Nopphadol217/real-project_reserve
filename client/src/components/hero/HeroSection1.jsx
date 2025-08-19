@@ -55,7 +55,7 @@ function HeroSection1() {
       </Helmet>
 
       {/* Hero Section */}
-      <div className="relative w-full bg-[url('/background/hero_section.png')] bg-cover bg-center bg-no-repeat">
+      <div className="relative w-full bg-[url('/background/hero_section.webp')] bg-cover bg-center bg-no-repeat">
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-red-900/20"></div>
         <div className="relative container z-10 mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-20">

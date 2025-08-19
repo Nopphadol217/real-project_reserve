@@ -20,7 +20,7 @@ function Logo() {
             ) : (
               <>
                 <img
-                  src="/logo/bookylife.png"
+                  src="/logo/bookylife.webp"
                   alt="BookyLife Logo"
                   className="w-[100px] sm:w-[100px] md:w-[125px] xl:w-[150px]  object-contain filter rounded-md  "
                 />

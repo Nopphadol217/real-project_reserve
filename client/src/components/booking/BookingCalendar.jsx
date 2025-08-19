@@ -108,10 +108,22 @@ function BookingCalendar() {
   };
 
   useEffect(() => {
-    // เป็นการ setState เข้าไปใน useBookingStore ที่เราตั้งไว้
-    const store = useBookingStore.getState();
+  const store = useBookingStore.getState();
+
+  if (range.from && range.to) {
+    const formatDate = (date) => {
+      return date.toISOString().split("T")[0]; // ได้ YYYY-MM-DD
+    };
+
+    store.setRange({
+      from: formatDate(range.from),
+      to: formatDate(range.to),
+    });
+  } else {
     store.setRange(range);
-  }, [range]);
+  }
+}, [range]);
+
 
   return (
     <div className="space-y-4">

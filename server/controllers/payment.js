@@ -688,7 +688,7 @@ const getAllBookingsWithPayment = async (req, res) => {
 
     // ถ้าเป็น BUSINESS ให้แสดงเฉพาะการจองของที่พักตัวเอง
     if (userRole === "BUSINESS") {
-      whereCondition.Place = {
+      whereCondition.place = {
         userId: userId,
       };
     } else if (userRole !== "ADMIN") {

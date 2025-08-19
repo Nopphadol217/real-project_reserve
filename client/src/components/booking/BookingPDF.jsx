@@ -18,18 +18,6 @@ Font.register({
 });
 
 // Utility function for date formatting
-const formatDate = (date, locale = "th") => {
-  if (!date) return "-";
-  const d = new Date(date);
-  if (locale === "th") {
-    return d.toLocaleDateString("th-TH", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
-  return d.toLocaleDateString();
-};
 
 // Enhanced PDF styles
 const styles = StyleSheet.create({
@@ -346,10 +334,7 @@ const BookingReceipt = ({ booking }) => {
             <View style={styles.companyInfo}>
               <Text style={styles.companyName}>BOOKYLIFE HOTELS</Text>
               <Text style={styles.companyDetails}>
-                123/45 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย{"\n"}
-                กรุงเทพมหานคร 10110{"\n"}
-                โทร: 02-XXX-XXXX | อีเมล: support@bookylife.com{"\n"}
-                เลขประจำตัวผู้เสียภาษี: 0105XXXXXXXXX
+                9/25 จังหวัดนครสวรรค์ อ.เมือง 60000
               </Text>
             </View>
             <View style={styles.receiptBadge}>

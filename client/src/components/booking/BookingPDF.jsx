@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   section: {
-    marginBottom: 35,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 16,
@@ -269,19 +269,6 @@ const BookingInvoice = ({ booking }) => (
         </View>
       </View>
 
-      {/* Terms and Conditions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>เงื่อนไขและข้อตกลง</Text>
-        <View style={styles.terms}>
-          <Text style={styles.termsTitle}>เงื่อนไขการใช้บริการ:</Text>
-          <Text style={styles.termsList}>
-            • การยกเลิกฟรีภายใน 24 ชั่วโมง{"\n"}• ชำระเงินหลังจากยืนยันการจอง
-            {"\n"}• ราคารวมภาษีและค่าธรรมเนียมแล้ว{"\n"}•
-            โปรดแสดงใบยืนยันนี้เมื่อเช็คอิน{"\n"}• ห้ามสูบบุหรี่ในห้องพัก{"\n"}•
-            เช็คอินหลัง 14:00 น. / เช็คเอาท์ก่อน 12:00 น.
-          </Text>
-        </View>
-      </View>
 
       {/* Footer */}
       <View style={styles.footer}>

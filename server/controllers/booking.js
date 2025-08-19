@@ -1,7 +1,7 @@
 const renderError = require("../utils/renderError");
 const prisma = require("../config/prisma");
 const { calTotal } = require("../utils/booking");
-const { createLocalDate } = require("../utils/timeLocale");
+const { fixCheckInDate } = require("../utils/fixCheckInDate");
 // This is your test secret API key.
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -222,101 +222,70 @@ exports.createBooking = async (req, res, next) => {
 // Create booking for bank transfer payment
 exports.createBooking = async (req, res, next) => {
   try {
-    //step 1 destructoring req.body
     const { userId, placeId, roomId, checkIn, checkOut } = req.body;
 
     console.log("Create booking request body:", req.body);
-    console.log("CheckIn received:", checkIn, typeof checkIn);
-    console.log("CheckOut received:", checkOut, typeof checkOut);
 
-    //step 2 delete Booking
+    // ลบ Booking pending ของ user
     await prisma.booking.deleteMany({
       where: {
-        userId: userId,
+        userId: parseInt(userId),
         status: "pending",
       },
     });
 
-    //step 3 find place หา id place เลือกราคา
+    // หา place
     const place = await prisma.place.findFirst({
-      where: {
-        id: parseInt(placeId),
-      },
-      include: {
-        roomDetails: true,
-      },
+      where: { id: parseInt(placeId) },
+      include: { roomDetails: true },
     });
 
-    if (!place) {
-      return renderError(res, 400, "Place Not Found");
-    }
+    if (!place) return renderError(res, 400, "Place Not Found");
 
     let pricePerNight = place.price;
     let selectedRoom = null;
     let finalRoomId = null;
 
-    // ถ้าเลือกห้องเฉพาะ
     if (roomId) {
-      selectedRoom = place.roomDetails.find(
-        (room) => room.id === parseInt(roomId)
-      );
+      selectedRoom = place.roomDetails.find((room) => room.id === parseInt(roomId));
       if (selectedRoom) {
         pricePerNight = selectedRoom.price;
         finalRoomId = parseInt(roomId);
       }
     } else if (place.roomDetails.length > 0) {
-      // ถ้าไม่ได้เลือกห้อง แต่มีห้องอยู่ ให้เลือกห้องแรก
       selectedRoom = place.roomDetails[0];
       pricePerNight = selectedRoom.price;
       finalRoomId = selectedRoom.id;
     }
 
-    // ตรวจสอบความถูกต้องของวันที่ - ใช้ helper function
-    const checkInDate = createLocalDate(checkIn);
-    const checkOutDate = createLocalDate(checkOut);
-    
+    // แปลงวันที่ใช้ util
+    const checkInDate = fixCheckInDate(checkIn);
+    const checkOutDate = new Date(checkOut);
+
     console.log("CheckIn parsed:", checkInDate);
     console.log("CheckOut parsed:", checkOutDate);
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     if (checkInDate < today) {
-      return res.status(400).json({
-        success: false,
-        message: "ไม่สามารถจองย้อนหลังได้",
-      });
+      return res.status(400).json({ success: false, message: "ไม่สามารถจองย้อนหลังได้" });
     }
 
     if (checkOutDate <= checkInDate) {
-      return res.status(400).json({
-        success: false,
-        message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก",
-      });
+      return res.status(400).json({ success: false, message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก" });
     }
 
-    // ตรวจสอบการจองที่ซ้ำซ้อนสำหรับห้องนี้เฉพาะ (ยกเว้น user นี้)
+    // ตรวจสอบการจองซ้ำ
     const conflictBookings = await prisma.booking.findMany({
       where: {
         roomId: finalRoomId,
-        userId: {
-          not: parseInt(userId), // ไม่รวม user ที่กำลังจอง
-        },
+        userId: { not: parseInt(userId) },
         AND: [
-          {
-            checkIn: {
-              lt: checkOutDate,
-            },
-          },
-          {
-            checkOut: {
-              gt: checkInDate,
-            },
-          },
+          { checkIn: { lt: checkOutDate } },
+          { checkOut: { gt: checkInDate } },
         ],
-        status: {
-          in: ["pending", "confirmed"],
-        },
+        status: { in: ["pending", "confirmed"] },
       },
     });
 
@@ -330,12 +299,12 @@ exports.createBooking = async (req, res, next) => {
           status: b.status,
         })),
       });
-    } 
-    
-    // 4 calculate total destructoring แปลงวันที่ ดึง ราคารวม และวันที่จองทั้งหมด
+    }
+
+    // คำนวณ total
     const { total, totalNight } = calTotal(pricePerNight, checkIn, checkOut);
 
-    // 5 insert to db บันทึกลง DataBase - ใช้ parsed dates
+    // บันทึก booking
     const booking = await prisma.booking.create({
       data: {
         userId: parseInt(userId),
@@ -349,150 +318,7 @@ exports.createBooking = async (req, res, next) => {
     });
 
     console.log("Booking created:", booking);
-    const bookingId = booking.id;
-
-    // 6 send id booking to react
-    res.json({ message: "Booking Successfully", result: bookingId });
-  } catch (error) {
-    console.error("Create booking error:", error);
-    next(error);
-  }
-};
-
-// Create booking for bank transfer payment
-exports.createBooking = async (req, res, next) => {
-  try {
-    //step 1 destructoring req.body
-    const { userId, placeId, roomId, checkIn, checkOut } = req.body;
-
-    console.log("Create booking request body:", req.body);
-    console.log("CheckIn received:", checkIn, typeof checkIn);
-    console.log("CheckOut received:", checkOut, typeof checkOut);
-
-    //step 2 delete Booking
-    await prisma.booking.deleteMany({
-      where: {
-        userId: userId,
-        status: "pending",
-      },
-    });
-
-    //step 3 find place หา id place เลือกราคา
-    const place = await prisma.place.findFirst({
-      where: {
-        id: parseInt(placeId),
-      },
-      include: {
-        roomDetails: true,
-      },
-    });
-
-    if (!place) {
-      return renderError(res, 400, "Place Not Found");
-    }
-
-    let pricePerNight = place.price;
-    let selectedRoom = null;
-    let finalRoomId = null;
-
-    // ถ้าเลือกห้องเฉพาะ
-    if (roomId) {
-      selectedRoom = place.roomDetails.find(
-        (room) => room.id === parseInt(roomId)
-      );
-      if (selectedRoom) {
-        pricePerNight = selectedRoom.price;
-        finalRoomId = parseInt(roomId);
-      }
-    } else if (place.roomDetails.length > 0) {
-      // ถ้าไม่ได้เลือกห้อง แต่มีห้องอยู่ ให้เลือกห้องแรก
-      selectedRoom = place.roomDetails[0];
-      pricePerNight = selectedRoom.price;
-      finalRoomId = selectedRoom.id;
-    }
-
-    // ตรวจสอบความถูกต้องของวันที่ - ใช้ helper function
-    const checkInDate = createLocalDate(checkIn);
-    const checkOutDate = createLocalDate(checkOut);
-    
-    console.log("CheckIn parsed:", checkInDate);
-    console.log("CheckOut parsed:", checkOutDate);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (checkInDate < today) {
-      return res.status(400).json({
-        success: false,
-        message: "ไม่สามารถจองย้อนหลังได้",
-      });
-    }
-
-    if (checkOutDate <= checkInDate) {
-      return res.status(400).json({
-        success: false,
-        message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก",
-      });
-    }
-
-    // ตรวจสอบการจองที่ซ้ำซ้อนสำหรับห้องนี้เฉพาะ (ยกเว้น user นี้)
-    const conflictBookings = await prisma.booking.findMany({
-      where: {
-        roomId: finalRoomId,
-        userId: {
-          not: parseInt(userId), // ไม่รวม user ที่กำลังจอง
-        },
-        AND: [
-          {
-            checkIn: {
-              lt: checkOutDate,
-            },
-          },
-          {
-            checkOut: {
-              gt: checkInDate,
-            },
-          },
-        ],
-        status: {
-          in: ["pending", "confirmed"],
-        },
-      },
-    });
-
-    if (conflictBookings.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "ห้องที่เลือกถูกจองแล้วในช่วงวันที่ดังกล่าว",
-        conflictBookings: conflictBookings.map((b) => ({
-          checkIn: b.checkIn,
-          checkOut: b.checkOut,
-          status: b.status,
-        })),
-      });
-    } 
-    
-    // 4 calculate total destructoring แปลงวันที่ ดึง ราคารวม และวันที่จองทั้งหมด
-    const { total, totalNight } = calTotal(pricePerNight, checkIn, checkOut);
-
-    // 5 insert to db บันทึกลง DataBase - ใช้ parsed dates
-    const booking = await prisma.booking.create({
-      data: {
-        userId: parseInt(userId),
-        placeId: parseInt(placeId),
-        roomId: finalRoomId,
-        checkIn: checkInDate,
-        checkOut: checkOutDate,
-        totalPrice: total,
-        status: "pending",
-      },
-    });
-
-    console.log("Booking created:", booking);
-    const bookingId = booking.id;
-
-    // 6 send id booking to react
-    res.json({ message: "Booking Successfully", result: bookingId });
+    res.json({ message: "Booking Successfully", result: booking.id });
   } catch (error) {
     console.error("Create booking error:", error);
     next(error);
@@ -503,84 +329,45 @@ exports.createBooking = async (req, res, next) => {
 exports.createBankTransferBooking = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { placeId, checkIn, checkOut, totalPrice, roomId, paymentMethod } =
-      req.body;
+    const { placeId, checkIn, checkOut, totalPrice, roomId, paymentMethod } = req.body;
 
-    console.log("Create booking:", req.body);
-    console.log("CheckIn received:", checkIn, typeof checkIn);
-    console.log("CheckOut received:", checkOut, typeof checkOut);
+    console.log("Create bank transfer booking:", req.body);
 
-    // ตรวจสอบว่า place มีอยู่จริง
+    // ตรวจสอบ place
     const place = await prisma.place.findUnique({
       where: { id: parseInt(placeId) },
-      include: {
-        roomDetails: true,
-      },
+      include: { roomDetails: true },
     });
 
     if (!place) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบที่พักที่เลือก",
-      });
+      return res.status(404).json({ success: false, message: "ไม่พบที่พักที่เลือก" });
     }
 
-    // ตรวจสอบความถูกต้องของวันที่ - ใช้ helper function
-    const checkInDate = createLocalDate(checkIn);
-    const checkOutDate = createLocalDate(checkOut);
-    
-    console.log("CheckIn parsed:", checkInDate);
-    console.log("CheckOut parsed:", checkOutDate);
-    
+    // แปลงวันที่
+    const checkInDate = fixCheckInDate(checkIn);
+    const checkOutDate = new Date(checkOut);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     if (checkInDate < today) {
-      return res.status(400).json({
-        success: false,
-        message: "ไม่สามารถจองย้อนหลังได้",
-      });
+      return res.status(400).json({ success: false, message: "ไม่สามารถจองย้อนหลังได้" });
     }
 
     if (checkOutDate <= checkInDate) {
-      return res.status(400).json({
-        success: false,
-        message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก",
-      });
+      return res.status(400).json({ success: false, message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก" });
     }
 
-    // ตรวจสอบการจองที่ซ้ำซ้อนสำหรับห้องนี้เฉพาะ
+    // ตรวจสอบการจองซ้ำ
     const conflictBookings = await prisma.booking.findMany({
       where: {
-        roomId: parseInt(roomId), // ตรวจสอบเฉพาะห้องที่เลือก
+        roomId: parseInt(roomId),
         AND: [
-          {
-            checkIn: {
-              lt: checkOutDate,
-            },
-          },
-          {
-            checkOut: {
-              gt: checkInDate,
-            },
-          },
+          { checkIn: { lt: checkOutDate } },
+          { checkOut: { gt: checkInDate } },
         ],
-        status: {
-          in: ["pending", "confirmed"],
-        },
+        status: { in: ["pending", "confirmed"] },
       },
-    });
-
-    console.log("Conflict bookings found:", conflictBookings.length);
-    console.log("Checking dates:", {
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      conflictBookings: conflictBookings.map((b) => ({
-        id: b.id,
-        checkIn: b.checkIn,
-        checkOut: b.checkOut,
-        status: b.status,
-      })),
     });
 
     if (conflictBookings.length > 0) {
@@ -598,24 +385,17 @@ exports.createBankTransferBooking = async (req, res, next) => {
     // หาห้องที่เหมาะสม
     let finalRoomId = null;
     if (roomId) {
-      const selectedRoom = place.roomDetails.find(
-        (room) => room.id === parseInt(roomId)
-      );
-      if (selectedRoom) {
-        finalRoomId = parseInt(roomId);
-      }
+      const selectedRoom = place.roomDetails.find((room) => room.id === parseInt(roomId));
+      if (selectedRoom) finalRoomId = parseInt(roomId);
     } else if (place.roomDetails.length > 0) {
       finalRoomId = place.roomDetails[0].id;
     }
 
     if (!finalRoomId && place.roomDetails.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "ไม่พบห้องที่เลือก",
-      });
+      return res.status(400).json({ success: false, message: "ไม่พบห้องที่เลือก" });
     }
 
-    // สร้าง booking ใหม่ - ใช้ parsed dates
+    // สร้าง booking
     const booking = await prisma.booking.create({
       data: {
         userId: parseInt(userId),
@@ -626,31 +406,15 @@ exports.createBankTransferBooking = async (req, res, next) => {
         totalPrice: parseInt(totalPrice),
         status: "pending",
         paymentStatus: paymentMethod === "cash" ? "pending" : "unpaid",
-        paymentMethod: paymentMethod,
+        paymentMethod,
       },
       include: {
-        place: {
-          select: {
-            id: true,
-            title: true,
-            secure_url: true,
-          },
-        },
-        Room: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-          },
-        },
+        place: { select: { id: true, title: true, secure_url: true } },
+        Room: { select: { id: true, name: true, price: true } },
       },
     });
 
-    res.json({
-      success: true,
-      message: "สร้างการจองสำเร็จ",
-      data: booking,
-    });
+    res.json({ success: true, message: "สร้างการจองสำเร็จ", data: booking });
   } catch (error) {
     console.error("Create bank transfer booking error:", error);
     next(error);
@@ -734,7 +498,7 @@ exports.checkout = async (req, res, next) => {
       ],
       mode: "payment",
       return_url: `${
-        process.env.CLIENT_URL || "http://demo-hotel.nkstec.ac.th"
+        process.env.CLIENT_URL || "http://localhost:5173"
       }/user/complete/{CHECKOUT_SESSION_ID}`,
     });
 

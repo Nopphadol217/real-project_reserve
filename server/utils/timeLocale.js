@@ -1,20 +1,18 @@
 
 // Helper function สำหรับสร้าง Date โดยไม่มี timezone offset
 const createLocalDate = (dateString) => {
-  if (dateString.includes('T')) {
-    // ถ้าเป็น ISO string แล้ว ให้สร้าง Date ตรงๆ
-    return new Date(dateString);
-  }
+  const utcDate = new Date(dateString);
   
-  // ถ้าเป็น date string format YYYY-MM-DD หรือ MM/DD/YYYY
-  const date = new Date(dateString + 'T00:00:00.000Z');
-  // หรือใช้วิธีนี้เพื่อให้แน่ใจว่าได้ local date
-  const parts = dateString.split('-');
-  if (parts.length === 3) {
-    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-  }
+  // แปลง UTC เป็น local date โดยเพิ่ม timezone offset
+  const localDate = new Date(utcDate.getTime() + (utcDate.getTimezoneOffset() * 60000) + (7 * 60 * 60 * 1000)); // +7 สำหรับไทย
   
-  return new Date(dateString);
+  // หรือใช้วิธีง่ายๆ: ใช้แค่ date part
+  const dateOnly = new Date(utcDate.getFullYear(), utcDate.getMonth(), utcDate.getDate());
+  
+  console.log('Original UTC:', utcDate);
+  console.log('Local date:', dateOnly);
+  
+  return dateOnly;
 };
 
 module.exports = {

@@ -360,6 +360,146 @@ exports.createBooking = async (req, res, next) => {
 };
 
 // Create booking for bank transfer payment
+exports.createBooking = async (req, res, next) => {
+  try {
+    //step 1 destructoring req.body
+    const { userId, placeId, roomId, checkIn, checkOut } = req.body;
+
+    console.log("Create booking request body:", req.body);
+    console.log("CheckIn received:", checkIn, typeof checkIn);
+    console.log("CheckOut received:", checkOut, typeof checkOut);
+
+    //step 2 delete Booking
+    await prisma.booking.deleteMany({
+      where: {
+        userId: userId,
+        status: "pending",
+      },
+    });
+
+    //step 3 find place หา id place เลือกราคา
+    const place = await prisma.place.findFirst({
+      where: {
+        id: parseInt(placeId),
+      },
+      include: {
+        roomDetails: true,
+      },
+    });
+
+    if (!place) {
+      return renderError(res, 400, "Place Not Found");
+    }
+
+    let pricePerNight = place.price;
+    let selectedRoom = null;
+    let finalRoomId = null;
+
+    // ถ้าเลือกห้องเฉพาะ
+    if (roomId) {
+      selectedRoom = place.roomDetails.find(
+        (room) => room.id === parseInt(roomId)
+      );
+      if (selectedRoom) {
+        pricePerNight = selectedRoom.price;
+        finalRoomId = parseInt(roomId);
+      }
+    } else if (place.roomDetails.length > 0) {
+      // ถ้าไม่ได้เลือกห้อง แต่มีห้องอยู่ ให้เลือกห้องแรก
+      selectedRoom = place.roomDetails[0];
+      pricePerNight = selectedRoom.price;
+      finalRoomId = selectedRoom.id;
+    }
+
+    // ตรวจสอบความถูกต้องของวันที่ - ใช้ helper function
+    const checkInDate = createLocalDate(checkIn);
+    const checkOutDate = createLocalDate(checkOut);
+    
+    console.log("CheckIn parsed:", checkInDate);
+    console.log("CheckOut parsed:", checkOutDate);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: "ไม่สามารถจองย้อนหลังได้",
+      });
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return res.status(400).json({
+        success: false,
+        message: "วันที่ออกต้องมากกว่าวันที่เข้าพัก",
+      });
+    }
+
+    // ตรวจสอบการจองที่ซ้ำซ้อนสำหรับห้องนี้เฉพาะ (ยกเว้น user นี้)
+    const conflictBookings = await prisma.booking.findMany({
+      where: {
+        roomId: finalRoomId,
+        userId: {
+          not: parseInt(userId), // ไม่รวม user ที่กำลังจอง
+        },
+        AND: [
+          {
+            checkIn: {
+              lt: checkOutDate,
+            },
+          },
+          {
+            checkOut: {
+              gt: checkInDate,
+            },
+          },
+        ],
+        status: {
+          in: ["pending", "confirmed"],
+        },
+      },
+    });
+
+    if (conflictBookings.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "ห้องที่เลือกถูกจองแล้วในช่วงวันที่ดังกล่าว",
+        conflictBookings: conflictBookings.map((b) => ({
+          checkIn: b.checkIn,
+          checkOut: b.checkOut,
+          status: b.status,
+        })),
+      });
+    } 
+    
+    // 4 calculate total destructoring แปลงวันที่ ดึง ราคารวม และวันที่จองทั้งหมด
+    const { total, totalNight } = calTotal(pricePerNight, checkIn, checkOut);
+
+    // 5 insert to db บันทึกลง DataBase - ใช้ parsed dates
+    const booking = await prisma.booking.create({
+      data: {
+        userId: parseInt(userId),
+        placeId: parseInt(placeId),
+        roomId: finalRoomId,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        totalPrice: total,
+        status: "pending",
+      },
+    });
+
+    console.log("Booking created:", booking);
+    const bookingId = booking.id;
+
+    // 6 send id booking to react
+    res.json({ message: "Booking Successfully", result: bookingId });
+  } catch (error) {
+    console.error("Create booking error:", error);
+    next(error);
+  }
+};
+
+// Create booking for bank transfer payment
 exports.createBankTransferBooking = async (req, res, next) => {
   try {
     const userId = req.user.id;

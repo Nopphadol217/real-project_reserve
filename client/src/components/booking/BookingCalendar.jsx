@@ -98,7 +98,7 @@ function BookingCalendar() {
       const finalRange = {
         from: selectedRange.from,
         to: selectedRange.to,
-        // เพิ่ม formatted dates สำหรับส่งไป server
+        // เพิ่ม formatted dates สำหรับส่งไป server (ใช้ local timezone)
         checkInDate: formatDateForServer(checkIn),
         checkOutDate: formatDateForServer(checkOut),
       };
@@ -121,7 +121,19 @@ function BookingCalendar() {
   useEffect(() => {
     // เป็นการ setState เข้าไปใน useBookingStore ที่เราตั้งไว้
     const store = useBookingStore.getState();
-    store.setRange(range);
+    
+    // ถ้ามี range และมี formatted dates ให้ส่งไปด้วย
+    if (range.from && range.to) {
+      const updatedRange = {
+        ...range,
+        // เพิ่ม string format สำหรับส่งไป server
+        checkInString: formatDateForServer(range.from),
+        checkOutString: formatDateForServer(range.to),
+      };
+      store.setRange(updatedRange);
+    } else {
+      store.setRange(range);
+    }
   }, [range]);
 
   return (

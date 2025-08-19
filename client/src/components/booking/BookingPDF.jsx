@@ -8,7 +8,7 @@ import {
   PDFDownloadLink,
 } from "@react-pdf/renderer";
 import { Font } from "@react-pdf/renderer";
-import { FileText, RotateCw } from "lucide-react";
+import { Download, FileText, RotateCw } from "lucide-react";
 
 // Register Thai font
 

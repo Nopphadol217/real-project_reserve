@@ -343,16 +343,16 @@ const MyOrders = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center space-x-3">
-                              {order.Place?.secure_url && (
+                              {order.place?.secure_url && (
                                 <img
-                                  src={order.Place.secure_url}
-                                  alt={order.Place.title}
+                                  src={order.place.secure_url}
+                                  alt={order.place.title}
                                   className="w-12 h-12 rounded-lg object-cover"
                                 />
                               )}
                               <div>
                                 <p className="font-medium">
-                                  {order.Place?.title || "ไม่ระบุ"}
+                                  {order.place?.title || "ไม่ระบุ"}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                   ห้อง: {order.Room?.name || "ไม่ระบุ"}

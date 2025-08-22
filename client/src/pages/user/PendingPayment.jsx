@@ -106,7 +106,7 @@ const PendingPayment = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg">
-                      {booking.Place.title}
+                      {booking.place.title}
                     </CardTitle>
                     <p className="text-sm text-gray-600">
                       รหัสการจอง: #{booking.id}
@@ -127,8 +127,8 @@ const PendingPayment = () => {
                   {/* Place Image */}
                   <div className="md:col-span-1">
                     <img
-                      src={booking.Place.secure_url}
-                      alt={booking.Place.title}
+                      src={booking.place.secure_url}
+                      alt={booking.place.title}
                       className="w-full h-48 object-cover rounded-lg"
                     />
                   </div>
@@ -231,7 +231,7 @@ const PendingPayment = () => {
 
               <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <h3 className="font-semibold mb-2">
-                  {selectedBooking.Place.title}
+                  {selectedBooking.place.title}
                 </h3>
                 <p className="text-sm text-gray-600">
                   รหัสการจอง: #{selectedBooking.id}
@@ -243,7 +243,7 @@ const PendingPayment = () => {
 
               <PaymentUpload
                 booking={selectedBooking}
-                paymentInfo={selectedBooking.Place.paymentInfo}
+                paymentInfo={selectedBooking.place.paymentInfo}
                 onPaymentUploaded={() => {
                   setShowUploadModal(false);
                   setSelectedBooking(null);
